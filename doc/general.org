@@ -1,0 +1,123 @@
+#+TITLE: 通用设置
+
+* 目标
+这里讨论的配置基本上是适合所有的 buffer。这里的主要目标是 *将 emacs 配置成一个很好用的记事本* 。
+
+* 配置目录规范化
+很多包都会产生一些数据文件或者配置文件，这些文件如果不加设置都会散落在 ~.emacs.d~ 下，会导致配置目录十分散乱。
+
+~no-littering~ 这个包可以解决这个问题，他会自动使得其他包产生的临时文件生成在固定的目录下：
+
+- 数据相关的会存放在 ~.emacs.d/var/~ 中
+- 配置相关的会存放在 ~.emacs.d/etc/~ 中
+
+同时它提供了设置路径的方式，可以方便的将插件产生的数据设置到固定位置（虽然基本上已经自动完成了），其原理是生成一个固定路径。如下所示，可以设置 ~custom-file~ 
+
+#+BEGIN_SRC elisp
+  (setq custom-file (no-littering-expand-etc-file-name "custom.el"))
+#+END_SRC
+
+* 临时文件设置
+emacs 默认总是会产生很多很恼人的临时文件，这个章节我们会讨论 3 种临时文件，为了方便讨论，我们正在编辑的文件的文件名是 ~file~ 。
+
+** 备份文件 backup
+备份文件是在用户保存文件时生成的，其目的是为了储存保存前的文件版本，防止用户在编辑过程中误删除或修改了某些内容并保存，需要恢复到之前的版本。这样的文件形如 =file~= 。
+
+我在配置的时候选择取消了它自动备份的功能，代码如下
+
+#+BEGIN_SRC elisp 
+  (setq-default make-backup-files nil)
+#+END_SRC
+
+这样做是因为这种恢复已经保存了文件的需求并不急迫。如果还开着 buffer，可以用 undo 来实现，如果已经关了 buffer，而且还保存了（emacs 的保存并不好误触），那么就是深思熟虑的结果了，如果还是误触，那么可以考虑利用 git 来恢复。
+
+emacs 的备份功能会备份多个版本且不会自我清理，所以十分浪费空间，关闭了可以节约空间。
+
+** 自动保存文件 auto-save
+自动保存文件并不是一种“自动保存”的功能，而是在对文件进行编辑的时候，会周期性的生成一个 ~#file#~ 文件，用于记录当前 buffer 的内容。当 emacs 发生意外中断的时候，没有保存的编辑操作会丢失，当我们再次进入 emacs 的时候，可以用命令 ~recover-file~ 来将 ~#file#~ 文件写入 ~file~ 达到恢复文件的目的。
+
+我们主要的设置是对于自动保存文件的位置的设置，还有对于远程连接文件与本地文件重名情况的设置，如下所示：
+
+#+BEGIN_SRC elisp
+  (setq-default
+   auto-save-default t ; 开启自动保存功能 
+   auto-save-include-big-deletions t  ; 自动保存较大的删除
+   auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "autosaves/") t)) ; 指定保存位置
+   auto-save-file-name-transforms (list (list "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+                                              (concat auto-save-list-file-prefix "tramp-\\2") t)
+                                        (list ".*" auto-save-list-file-prefix t))) ; 避免 tramp 和 local 的冲突
+  ;; 设置自动恢复数据
+  (advice-add #'after-find-file :around
+              (lambda (fn &rest args) (cl-letf (((symbol-function #'sit-for) #'ignore))
+                                        (apply fn args))))
+#+END_SRC
+
+此外我们还绑定了两个与之相关的功能键
+
+#+BEGIN_SRC elisp
+  ;; 绑定新的复制和剪切函数
+  (global-set-key (kbd "<f5>") 'revert-buffer) ; 撤销所有没有保存的更改
+  (global-set-key (kbd "<f6>") 'recover-file) ; 利用 autosave 完成更新
+#+END_SRC
+
+~revert-buffer~ 可以将 buffer 恢复到上一次保存的状态，绑定在 F5 上（F5 本来就有“刷新”的意思，可以理解为将 buffer 重新刷新成文件内容）； ~recover-file~ 绑定在 F6 上，可以用于恢复没保存的文件。
+
+** 锁文件 lock
+Emacs 会自动在编辑文件时创建锁文件，以确保文件的独占性。通常为 =file~#= 。同样关掉即可。
+
+#+BEGIN_SRC elisp
+  (setq-default create-lockfiles nil)
+#+END_SRC
+
+* 折行
+** fill（填充）
+fill 是指根据指定的宽度将文本分割成多行，使每行的字符数不超过指定的宽度。这通常用于自动调整段落或文本块的行宽，以适应屏幕宽度或者固定的页面宽度。Emacs 提供了 ~fill-paragraph~ 和 ~fill-region~ 等命令来执行填充操作。
+
+** wrap（包裹）：
+wrap 是指在文本超过显示区域（通常是编辑器或终端窗口的宽度）时，将文本自动折行到下一行，以便完全显示。这是默认的文本显示行为，当文本长度超过屏幕宽度时，Emacs 会自动在合适的位置进行折行，而不会水平滚动。这个行为通常是用户友好的，确保文本内容在屏幕上完整显示。
+
+** truncate（截断）：
+truncate 是指在文本超过显示区域时，不进行折行，而是在屏幕边缘处截断文本。截断的文本不会自动换行，而是直接在边缘处终止，超出部分被隐藏。Emacs 提供了 ~truncate-lines~ 和 ~truncate-partial-width-windows~ 等选项，可以用于启用或禁用文本截断。
+
+* 历史信息记录
+所谓的历史信息记录，就是一些在关闭 emacs 后依然保留，并且在下次启动 emacs 时会重新读入的信息。我们用了一些包来时实现这些信息的记录，就不一一赘述了。
+
+* 用户界面基础设置
+用户界面的基础设置没有什么需要强调的。
+
+#+BEGIN_SRC elisp
+  ;;; 用户界面基础设置
+  (setq-default 
+   ;; 没有客户端启动信息
+   server-client-instructions nil
+
+   ;; 禁止双向文本（类似阿拉伯语或者希伯来语）
+   bidi-inhibit-bpa t
+   bidi-paragraph-direction 'left-to-right
+   bidi-display-reordering 'left-to-right
+
+   ;; 关闭响铃
+   ring-bell-function 'ignore
+
+   ;; 缩进设置
+   tabify-regexp "^\t* [ \t]+" ; 将缩进用的空格转变成制表符的命令
+   indent-tabs-mode nil ; 使用空格而不是制表符
+   tab-always-indent t
+   tab-width 4 ; 默认宽度为 4
+
+   ;; 用 y-or-n to 代替 yes-or-no
+   use-short-answers t
+
+   ;; 避免文件重名警告
+   find-file-suppress-same-file-warnings t
+
+   ;; 文件在最后一行之后会自动添加一个换行符，符合 POSIX 规范
+   require-final-newline t
+
+   ;;避免在创建文件时提示不存在文件
+   confirm-nonexistent-file-or-buffer nil
+
+   ;; 如果 buffer 名字相同，则会显示 path/name
+   uniquify-buffer-name-style 'forward
+   )
+#+END_SRC

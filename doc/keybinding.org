@@ -1,0 +1,133 @@
+#+TITLE: 键绑定
+
+* 设计
+** 两种模式
+我想要我的打字模式分成两种：
+
++ 和浏览器或者其他类似软件配合的手势：这种手势的左手以小手指在 Ctrl 上为定位点，右手在鼠标上。需要实现的功能主要是复制、粘贴、撤销等，也就是尽量和 CUA 模式一样。
++ 心流打字手势：这种手势以左手食指在 f 上，右手食指在 j 上为定位点，需要实现专心的文本编辑功能，手腕尽量不发生偏转，能造成手腕偏转的只有 Ctrl 搭配 zxc 或者 Alt 与其他键搭配的情况（不考虑大拇指按 Alt）。
+
+** 难点
++ 考虑到不用 Alt 键，显然只用 Ctrl 键是没有办法在较短键序下完成必要功能的绑定的。
++ emacs 原生的复制粘贴并不是 cua 。 
++ emacs 常用的 C-c, C-x, M-x 都会导致左手手腕的偏移。
++ 原生键位占用了大量的“黄金键位”，也就是右手非小指很容易按压的键位
+
+** 解决方案
+使用了 Linux 的下的[[https://gitlab.com/interception/linux/plugins/caps2esc][改键插件]]。这个可以让我们的大写键在与其他按键一起按的时候被视为 Ctrl，单独按的时候被视为 esc，同时又因为 emacs 中 esc 被视为 M-，那么按 M- 会方便很多。而且这样做可以将大量的键位绑定成 ~M-~ 式的，使得键位富裕。
+
+对于第一种模式有两种方案，第一种是直接硬绑定 Ctrl-xcv，但是受限于 C-c 和 C-x 都是被占用的，硬绑定需要很高的技术水平，而且经过与论坛群友的讨论，我发现直接抹除 emacs 原生的 C-c 和 C-x 前缀是一个很不理智的做法，所以最后没有采用这种方案。
+
+另一种是启用 cua-mode，这是 emacs 内置的一种功能，我使用了很久，不得不说这是一个很棒的方法，因为它解决了 C-c 前缀和复制功能的冲突（以一种我自己绝对实现不了的方式），但是这种功能似乎是无法被加强的，我指的“加强”是“当没有区域选择时，复制或者剪切当前的一行”，所以最终我没有采用。最终的方式是利用 ~C-S-c~ 这种键位来完成任务。
+
+关于 C-c 和 C-x 很难按的问题，我使用如下命令将 ~C-x, M-x, C-c~ 用 ~C-j, C-k, C-o~ 来代替
+
+#+BEGIN_SRC elisp
+(define-key key-translation-map (kbd "C-j") (kbd "C-x"))
+(define-key key-translation-map (kbd "C-o") (kbd "C-c"))
+(global-set-key (kbd "C-k") 'execute-extended-command)
+#+END_SRC
+
+使用 ~key-translation-map~ 这种方法并不优雅，因为这会导致在任何地方 C-j 都表示 C-x，C-o 都表示 C-c，相当于在本就不富裕的键位上永久性减少两个键位。但是好处是他的撤销是容易的，因为这种绑定是直接映射，所以只需要将其注释掉就可以完成撤销，不会造成过多的“绑定沉没成本”。
+
+后来发现 C-c 还是可以按得很舒服的，所以就取消了 C-o 到 C-c 的映射。
+
+** 经验教训
+我大部分折腾 emacs 的时间都花在了折腾键位设置上，我每天都在想如何将我需要的“工作台”的各个功能都绑定在既符合逻辑，又符合人体工学的快捷键上。这其中有两个拦路虎，一个是 emacs 的原生键位，另一个是键绑定技术。对于键绑定技术，我通过读文档可以解决大部分问题，并且这些文档让我理解了 mode, hook, keymap 等多个概念，是有益的学习。
+
+但是对于原生键位，我受到了很大且没有必要的阻碍。总有一些原生键位是难以改掉的，而且就算改掉，许多模块的开发都是建立在这些*原生键位约定*上的，所以改键位就像是在与 emacs 整个生态对抗一样。所以最后我选择理解这种原生键位约定，并减少修改程度。
+
+关于*原生键位约定*，由如下直观认识：
+
++ ~C-x~ ：绑定与模式无关的功能，比如 file, buffer, window, motion, mark, edit 等。 
++ ~C-c~ ：为 major mode 或者用户保留：
+  + ~C-c <letter>~ ：为用户保留。
+  + ~C-c C-<letter>~ ：为 major mode 保留。
++ ~C-<letter>, M-<letter>~ ：一般当 letter 相同时，以 Ctrl 和 Alt 为修饰的功能都具有对应性。
++ 有些键位没法改，比如说 ~C-i~ 和 ~TAB~ 本来就是一个键，~S-<letter>~ 没法被监听。
+
+也如下图所示：
+
+[[./img/key_conv.png][原生键位约定]]
+
+所以其实可以修改，应该只有完全键，对于前缀键，还是要遵守规范的，最好不要改动。
+
+* 键绑定技术 
+** keymap
+keymap 是 emacs 实现键绑定机制的基础，keymap 是一个 map，可以根据 input event（也就是输入的键）去查询，有两种查询可能，一种是 command 那么就会执行这个 command，另一个记录着下一个 input event，这应该是将某个键映射到另一个键的情况。此外似乎在后面的介绍中，还说明了一种查询可能，就是对应了一个 keymap，这就像一个树形结构一样，那么对应这种 value 的结构就会被称为前缀键（prefix key），对于非前缀键，我们称其为完全键（complete key）。
+
+同时会存在多个 keymap，在所有 buffer 中生效的是 ~global keymaps~, 与特定的 major mode 绑定的是 ~local keymap~, 在特定 minor mode 绑定的是 ~minor mode keymap~, 有如下优先级：
+
+#+begin_src
+  minor-mode-keymap > local-keymap > global-keymap
+#+end_src
+
+改键位的时候需要注意这个。
+
+** 如何改键位
+*** kbd
+=(kbd string)= 的本质是将不太规范的 =string= 转成很规范的 key sequence 结构，方便 emacs 识别。比如说这样
+
+#+begin_src elisp
+  (kbd "C-x") => "\C-x"
+#+end_src
+
+*** minor-mode-map
+从上面关于优先级的讨论中可以看出，minor-mode-map 是优先级最高的键绑定,我们可以用如下命令来在某个 minor-mode-map 下绑定按键
+
+#+begin_src elisp
+  (define-key [minor-mode-map] (kbd "[your-key]") '[your-command])
+#+end_src
+
+用如下命令去注销一个快捷键
+
+#+begin_src elisp
+  (define-key [minor-mode-map] (kbd "[your-key]") nil)
+#+end_src
+
+这种方式的注销是比较常用的，因为往往插件的 minor-mode-map 会定义一些键绑定在它的 minor-mode-map 中，而这些绑定的优先级是很高的，很容易覆盖我们原先的习惯键绑定，我们就可以用注销的方式解决，比如说 undo-tree 会在 ~C-/~ 上绑定一个撤销 command，但是我平时会在 global-map 的 ~C-/~ 绑定一个注释操作，所以只要启动了 undo-tree-mode，注释操作就会被覆盖成撤销操作，我们可以这样解决：
+
+#+begin_src elisp
+  (define-key undo-tree-map (kbd "C-/") nil)
+#+end_src
+
+只要注销了这个操作，就可以让 global-map 中的键绑定显露出来。
+
+*** local-map
+local-map 指的是在当前 buffer 中生效的键绑定，也可以理解为与当前 buffer 的 major mode 对应的键绑定。我们可以用如下命令执行绑定操作
+
+#+begin_src elisp
+  (local-set-key  (kbd "[your-key]") '[your-command])
+#+end_src
+
+如果需要撤销绑定，那么应当使用如下命令
+
+#+begin_src elisp
+  (local-unset-key (kbd "[your-key]"))
+#+end_src
+
+因为 local-set-key 绑定在当前 buffer 对应的 major mode 上，所以它并不能直接写在配置文件中，而是需要挂载到对应主模式的 hook 上（不知道可不可以用上面 minor map 的方式），所以写法如下
+
+#+begin_src elisp
+  (add-hook '[major-mode-hook] '(lambda () (local-set-key  (kbd "[your-key]") '[your-command])))
+#+end_src
+
+org-mode 自带对于 "C-j" 的绑定，我希望取消掉这个绑定，因为它会覆盖掉我的 global 绑定，我可以如下实现
+#+begin_src elisp
+  (add-hook 'org-mode-hook #'(lambda () (local-unset-key (kbd "C-j"))))
+#+end_src
+
+*** global-map
+global-map 适用于所有的 buffer，如果我们希望进行通用的键绑定，就可以使用如下命令
+
+#+begin_src elisp
+  (global-set-key  (kbd "[your-key]") '[your-command])
+#+end_src
+
+如果需要撤销绑定，那么应当使用如下命令
+
+#+begin_src elisp
+  (global-unset-key (kbd "[your-key]"))
+#+end_src
+
+* TODO 键绑定介绍

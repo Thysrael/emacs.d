@@ -1,0 +1,185 @@
+#+TITLE: 包的管理与配置
+
+* 包管理器
+** 概论
+包管理器就是一个下载和管理包的工具。我之前并没有详细研究过这个东西，不过仔细想来，无论是 manjaro 的 pacman 或者前端的 npm, yarn 或者是 vscode 的插件市场，它们都发挥着一定的作用，并在一定意义上影响了他们的产品和用户。如果仅仅将包管理器视为一个“特化的下载器”，显然是不客观的。
+
+我觉的包管理器应当有这样的功能：
+- 能够从源上稳定的下载尽可能多的包。
+- 可以控制包的版本。
+- 可以处理包之间的依赖和冲突。
+
+在某种意义上，包管理器的不同（或者说源的不同）决定了产品的审美。
+
+** package.el 
+package.el 是 emacs 自带的包管理器，我们可以给它用如下代码添加他的源
+
+#+BEGIN_SRC elisp
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+#+END_SRC
+
+其实还可以添加很多个源，这里就不一一赘述了。
+
+** straight.el 
+straight.el 是 emacs 新一代的包管理器，至于它哪里信了，其实可以看它的 [[https://github.com/radian-software/straight.el#comparison-to-other-package-managers][README]]。我个人是觉得可以从不同源处下载不同分支不同版本的包很酷，而且按照作者的描述，这个包管理器比较激进，我很想尝试一下。
+
+此外我个人觉得可能即使不太行了，跑路 package.el 并不是一件难事，我设置了
+
+#+BEGIN_SRC elisp
+(setq straight-use-package-by-default t) ; use-package 默认使用 straight
+#+END_SRC
+
+使得 use-package 和 straight 集合的很好，如果希望换掉包管理器，也可以直接从 use-package 入手。
+
+* 包配置管理器
+** 定义
+对于下载的包，我们需要对其进行个性化的配置。但是配置信息又很容易散乱。包配置管理器以一个包为基本单位，将与之相关的配置都集中到一起，大大提高了配置文件的整洁度和秩序性。
+
+除了集中配置的优势外，emacs 的包管理器还提供了更加人性化的配置手段，使得用户以一种统一且简单的方式进行配置。常用的包配置管理器有 use-package 和 leaf。
+
+这里需要强调，“包”是一个比“插件”更为宏大的概念，我个人理解包指的是一个模块化的程序块，而“插件”则是外来的程序块。在 emacs 中甚至可以有这样的写法：
+
+#+BEGIN_SRC elisp 
+(use-package emacs
+  :init
+  (setq sentence-end-double-space nil))
+#+END_SRC
+
+我使用 use-package。接下来会介绍 use-package 的一些宏（这么神奇的东西应该是宏吧），以及这些宏设计的知识，基本上这一节可以看做如何使用 use-package 进行配置的一个总结。
+
+** defer, demand 和 command
+这里似乎涉及了 emacs 的延迟加载机制，但是这个机制本身的实现具体是怎样的，我并不太清楚。我只知道当一个包延迟加载的时候，他的启动性能会提高。
+
+~:defer t~ 表示可以延迟加载，~:demand t~ 表示这个包需要立刻加载。~:commands ~ 指定了导致包加载的“触发器”，不过我们似乎一般并不需要。
+
+在加载的时候我们通常对于 use-package 进行如下配置，让其有注释中的效果：
+
+#+BEGIN_SRC elisp 
+(setq use-package-always-demand (daemonp) ; 当 Emacs 是以守护进程方式运行时，立即加载所需的包
+      use-package-always-defer (not (daemonp)) ; 当 Emacs 不是以守护进程方式运行时，延迟加载所需的包
+      use-package-expand-minimally t) ; 在展开配置时尽可能地精简，以减少额外的加载和计算
+#+END_SRC
+
+** init 和 config
+这两个都可以对于包进行一些“接入式”的配置，本质是配置 emacs 来适应包（与 custom 形成对比）。但是 init 是在延迟加载前进行的设置，config 是在延迟加载后进行的设置。
+
+虽然 init 在延迟加载前进行，但是有些变量依然可以设置了，这是 elisp 动态类型语言的特点。不过其实我也分不清到底什么应该在 init 中设置，什么应该在 config 中设置，所以就不深究了，尽量都放在 config 就不会出错。
+
+** bind 
+bind 用于进行键位绑定。需要强调普通的 bind 指的是在 ~global-map~ 添加普通 commnad 的键位绑定。
+
+当然比较偏的有用于绑定 keymap 而非 command，示例如下：
+
+#+BEGIN_SRC elisp
+:bind-keymap ("C-c p" . projectile-command-map)
+#+END_SRC
+
+也可以绑定到局部 keymap 上，示例如下：
+
+#+BEGIN_SRC elisp 
+:bind (("C-c t" . term)
+      :map term-mode-map
+      ("M-p" . term-send-up)
+      ("M-n" . term-send-down)
+      :map term-raw-map
+      ("M-o" . other-window)
+      ("M-p" . term-send-up)
+      ("M-n" . term-send-do))
+#+END_SRC
+
+上面的指令表示分别在 ~term-mode-map~ 上绑定 ~M-p, M-n~，在 ~term-raw-map~ 上绑定 ~M-o, M-p, M-n~ 。
+
+** hook
+hook 可以将一些包中的函数挂到特定的钩子上，他可以视作 ~add-hook~ 的简化版：
+
+#+BEGIN_SRC elisp
+:hook (prog-mode . company-mode)
+; 上下两种写法等价
+:commands company-mode
+:init
+(add-hook 'prog-mode-hook #'company-mode)
+#+END_SRC
+
+** custom 和 custom-face 
+custom 给我感觉是是一种特殊的“变量”，暴露给用户方便用户设置。这可以看做是一种“内化式”的设置，通过改变包的行为来适应 emacs 。包的开发者像这样定义 custom：
+
+#+BEGIN_SRC elisp 
+(defcustom my-custom-variable "default value" ; 定义变量并设置默认值
+  "This is a custom variable for demonstration purposes." ; custom 注释
+  :type 'string ; 类型
+  :group 'my-custom-group ; custom 组
+  :options '("option1" "option2" "option3") 
+  :safe t ; 指定变量是安全的，可以从外部环境加载或设置
+  :set (lambda (symbol value) ; 指定一个函数，用于设置变量的值
+         (set symbol value)
+         (message "The value of my-custom-variable has been set to %s" value)))
+#+END_SRC
+
+这里提到了 ~group~，这是 custom 的组织方式，配置同一个包或者同一类功能的 custom 会被组织成 custom group，emacs 提供了一个很友好的用户界面来配置 custom 。
+
+face 则是一种特殊对象，我感觉就是面向对象的那个对象，它有多种属性，如下所示：
+
+- :foreground：设置文本的前景色（文字颜色）。
+- :background：设置文本的背景色。
+- :weight：设置文本的粗细（如 "bold" 表示粗体）。
+- :slant：设置文本的倾斜程度（如 "italic" 表示斜体）。
+- :underline：设置文本是否有下划线。
+- :overline：设置文本是否有上划线。
+- :strike-through：设置文本是否有删除线。
+- :box：设置文本周围的方框样式。
+- :height：设置文本的字体高度。
+- :family：设置文本的字体系列。
+- :inherit：指定继承自其他面的属性。
+
+通常我们会这样定义一个 face 
+
+#+BEGIN_SRC elisp 
+(defface example-face
+  '((t (:foreground "LightPink" :background "Black")))
+  "Face for example text.")
+#+END_SRC
+
+这里面的 ~t~ 在 face 的属性列表中使用，表示该属性适用于所有情况。除了 ~t~ 之外，还有其他几种特殊的符号用于表示不同的上下文或条件（充当了选择器的作用）。以下是其中一些常见的符号：
+
+- window：表示属性适用于窗口（window）内的文本。
+- mode-line：表示属性适用于模式行（mode line）上的文本。
+- header-line：表示属性适用于头部行（header line）上的文本。
+- highlight：表示属性适用于被高亮显示的文本。
+- cursor：表示属性适用于光标所在位置的文本。
+- modeline-buffer-id：表示属性适用于模式行中的缓冲区标识。
+- 这些符号用于指定 face 的属性在特定的上下文中生效。通过将属性放置在适当的上下文符号下，可以根据需要为不同的上下文设置不同的外观。
+
+再回顾一下，一个 face 的结构是这样的
+
+#+BEGIN_SRC elisp
+((display-0 . plist) (display-1 . plist))
+#+END_SRC
+
+在上面的 display-x 就是选择器，后面的 plist 是属性列表（property list），其中的元素依次成对出现，每对元素包含一个键和一个值。所以 face 的括号嵌套很复杂。
+
+在 use-package 中，提供了 ~custom, custom-face~ 两个宏方便我们对包进行配置：
+
+~custom~ 可以定义变量的值：
+
+#+BEGIN_SRC elisp 
+:custom
+(comint-buffer-maximum-size 20000 "Increase comint buffer size.") ; comint-buffer-maximum-size = 20000
+(comint-prompt-read-only t "Make the prompt read only.") ; comint-prompt-read-only = true
+#+END_SRC
+
+~custom-face~ 可以定义 face 
+
+#+BEGIN_SRC elisp 
+:custom-face
+(eruby-standard-face ((t (:slant italic))))
+#+END_SRC
+
+** 后话
+我个人觉得 use-package 的目的是为了让配置更加整洁有秩序，但是真的可以办到吗？包作为最小单位我个人觉得是有些尴尬的。因为我个人比较倾向于依照功能去组织配置，那么有些包起始横跨多个功能分区，很难去具体说。
+
+总之配置文件的设计目的一定是为了更好的管理配置，最后介绍一个小 trick，可以用 imeu 去查看 use-package 的配置 
+
+#+BEGIN_SRC elisp
+(setq use-package-enable-imenu-support t)
+#+END_SRC
+

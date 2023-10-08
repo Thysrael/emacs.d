@@ -1,0 +1,73 @@
+#+TITLE: 性能优化
+
+* early-init
+[[file:../early-init.el][early-init.el]] 可以在 [[file:../init.el][init.el]] （也就是正式启动）前执行，可以通过在这个文件中进行一些设置，来提高正式启动的性能。
+
+** 启动时间测算
+为了让每一个优化都能比较直观的看到，这里采用了一个函数来计算并打印启动时间。在 [[file:../init.el][init.el]] 中实现。
+
+#+BEGIN_SRC elisp
+;; 测量启动时间
+(defun efs/display-startup-time ()
+  (message
+   "Emacs loaded in %s with %d garbage collections."
+   (format
+    "%.4f seconds"
+    (float-time
+     (time-subtract after-init-time before-init-time)))
+   gcs-done))
+(add-hook 'emacs-startup-hook #'efs/display-startup-time) ; 加入钩子
+#+END_SRC
+
+** 垃圾回收
+垃圾回收（Garbage Collection，GC）发生的过于频繁，就会影响启动速度。设置的目的是为了减少垃圾回收的次数
+
+#+BEGIN_SRC elisp
+;; 内存垃圾回收优化
+(setq gc-cons-threshold most-positive-fixnum  ; 垃圾回收的上限增大
+      gc-cons-percentage 1.0)   ; 每次垃圾回收时的比例
+#+END_SRC
+
+只有垃圾内存达到 ~gc-cons-threshold~ 才会触发垃圾回收，将其设置变大可以避免频繁发生垃圾回收。
+
+每次进行垃圾回收的时候，会回收 ~gc-cons-percentage~ 比例的垃圾，将其设置为 100%，可以使得每次回收都十分彻底。
+
+** 延迟原生编译
+原生编译（Native Compilation）是一项旨在提高程序性能的编程技术，它将高级编程语言（通常是解释性语言）的源代码编译成底层的机器代码，以便在运行时直接执行，而不需要解释器来解释源代码。
+
+但是原生编译需要更多的存储空间来存储编译后的代码文件，并且在编译过程中可能需要一些额外的时间。当将 ~native-comp-deferred-compilation~ 设置为 ~t~ 时，它告诉 Emacs 在启动时不要立即编译所有的 Lisp 文件，而是将编译工作推迟到后台进行。这可以显著加快 Emacs 的启动速度，因为编译大型 Lisp 文件可能需要一些时间。
+
+** 禁用起始界面
+这种禁止可能是没有意义的。但是在禁止中用到了通过 ~adive-add~ 来覆盖内置函数的特性。这里介绍一下：
+
+Emacs 中的 "advice" 是一种高级编程特性，允许我们在不修改原始函数或命令的情况下，向它们添加自定义的行为或修改它们的行为。这可以在不改变现有代码的情况下，扩展或调整 Emacs 的功能。
+
+其典型用法如下：
+
+增加建议：
+
+#+BEGIN_SRC elisp
+(advice-add 'my-function :before 'my-before-function)       ; 在原始函数之前执行 
+(advice-add 'another-function :after 'my-after-function)    ; 在原始函数之后执行 
+(advice-add 'some-function :override 'my-override-function) ; 完全覆盖原始函数
+#+END_SRC
+
+另一种增加建议的方式：
+
+#+BEGIN_SRC elisp
+(define-advice FUNCTION-SYMBOL (ADVICE-SPEC ADVICE-ARG ADVICE-NAME) BODY) ; 格式
+#+END_SRC
+
+** 禁用包管理器
+通过将 ~package-enable-at-startup~ 设置为 nil 来禁用内置的包管理器 ~package~，这样我们可以用新的包管理器来管理插件包，避免了在启动时的开启。
+
+** 禁用诸多 GUI 元素
+通过禁用工具栏、菜单栏等元素来提高启动速度，效果比较显著。
+
+** 提高文件加载效率
+文件名处理器（file name handler）是 Emacs 中的一个机制，用于处理文件和目录名的特殊操作。这些特殊操作包括但不限于文件名的编码转换、加密、解压缩、远程文件访问等。如果在启动过程中禁用它，就可以提高 ~require, load~ 等操作的效率。但是需要注意在启动后需要恢复。
+~
+还可以通过禁用加载文件的信息输出来提高速度。在实现上使用到了 ~define-advice~ 宏。
+
+* TODO dump
+
