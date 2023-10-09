@@ -1,10 +1,3 @@
-;;; 规范化 emacs.d 的结构
-;; 使得配置集中于 ~/.emacs.d/etc，临时数据集中于 ~/.emacs.d/var
-(use-package no-littering
-  :config
-  (setq custom-file (no-littering-expand-etc-file-name "custom.el")) ; 设置 custom-file 路径
-  )
-
 ;;; 临时文件设置
 (setq-default
  ;; 关闭锁文件，防止生成 file~#

@@ -12,7 +12,8 @@
 (defvar +init-files (list
                       'init-tmp
                       'init-package
-                      'init-general
+                      'init-basic
+                      'init-enhance
                       'init-ui
                      ))
 
