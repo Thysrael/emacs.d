@@ -1,3 +1,5 @@
 todo.txt
 straight/
 var/
+etc/rime/*
+!etc/rime/default.custom.yaml

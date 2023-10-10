@@ -129,7 +129,8 @@
 ;;; 历史信息记录
 ;; save-place-mode 可以保存文件的上次浏览位置，即使 emacs 关闭也可以保存
 (use-package saveplace
-  :hook (after-init . save-place-mode)
+  :hook 
+  (after-init . save-place-mode)
   :config
   ;; HACK: `save-place-alist-to-file' uses `pp' to prettify the contents of its cache, which is expensive and useless.
   ;; replace it with `prin1'
@@ -178,6 +179,8 @@
                                       if (stringp item)
                                       collect (cons reg (substring-no-properties item))
                                       else collect (cons reg item)))))
+  (with-eval-after-load 'vertico
+    (add-to-list 'savehist-additional-variables 'vertico-repeat-history)) ; 记录 vertico repeat 信息
   )
 
 

@@ -1,0 +1,10 @@
+patch:
+  schema_list:
+    - schema: terra_pinyin
+  menu/page_size: 6 # 每页显示 6 个候选字词。
+  switcher:
+    hotkeys:
+      - Shift # 激活RIME选单的快捷键，某些版本的RIME支持<F4>为快捷键，容易与其他软件冲突。patch:
+  switches:
+    - name: simplification
+      reset: 1

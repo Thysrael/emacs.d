@@ -25,10 +25,12 @@
 (advice-add #'display-startup-screen :override #'ignore) ; 将绘制起始画面函数清空
 
 ;; 防止在窗口初始化期间出现屏幕闪烁
-(setq inhibit-redisplay t)    ; 首先禁止屏幕闪烁
+(setq inhibit-redisplay t
+      inhibit-message t)    ; 首先禁止屏幕闪烁
 (add-hook 'window-setup-hook
           (lambda ()
-            (setq inhibit-redisplay nil)
+            (setq inhibit-redisplay nil
+                  inhibit-message nil)
             (redraw-frame)))    ;; 在窗口初始化完成后重新开启这个功能
 
 ;; 禁用 package.el，因为我们会改用更加先进的包管理器
