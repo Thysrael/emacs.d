@@ -10,11 +10,12 @@
    gcs-done))
 
 (defvar +init-files (list
-                      'init-tmp
                       'init-package
+                      'init-tmp
                       'init-basic
                       'init-enhance
                       'init-ui
+                      'init-modeline
                       'init-input
                      ))
 

@@ -24,7 +24,7 @@
   (kill-emacs . rime-lib-finalize) ; hack，修正 rime 的关闭问题
   )
 
-;; 因为输入法
+;; 在 emacs 状态下不使用搜狗输入法，进而使用 emacs 内的 rime 输入法
 (defvar input-toggle nil "Toggle variable for input method, when nil means English, true means Chinese.")
 
 (defun fcitx2en ()
@@ -32,7 +32,8 @@
   (let ((input-status (shell-command-to-string "fcitx-remote"))) 
     (when (= (string-to-number input-status) 1) ; input status == 1 时表示搜狗输入法
       (setq input-toggle nil)
-      (shell-command "fcitx-remote -o"))))
+      (shell-command "fcitx-remote -o")
+      (message ""))))
 
 (defun fcitx2zh ()
   "Change to the Chinese input."

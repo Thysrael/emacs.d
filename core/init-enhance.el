@@ -19,7 +19,7 @@
         vertico-resize nil
         vertico-count 15)
   
-  ; 这是在强化 minibuffer 的多行输入提示符，但是我还没有遇到过 minibuffer 的多行输入
+                                        ; 这是在强化 minibuffer 的多行输入提示符，但是我还没有遇到过 minibuffer 的多行输入
   (advice-add #'completing-read-multiple :filter-args
               (lambda (args)
                 (cons (format "[CRM%s] %s"
@@ -27,7 +27,7 @@
                               (car args))
                       (cdr args))))
 
-  ; 这里说的是 org-refile 只支持基本的补全模式，并不支持 orderless 这样的补全，这个修改可以完善它
+                                        ; 这里说的是 org-refile 只支持基本的补全模式，并不支持 orderless 这样的补全，这个修改可以完善它
   (setq org-refile-use-outline-path 'file
         org-outline-path-complete-in-steps t)
   (advice-add #'org-olpath-completing-read :around
@@ -43,9 +43,9 @@
   :after vertico
   :bind 
   (:map vertico-map
-              ("RET" . vertico-directory-enter)
-              ("DEL" . vertico-directory-delete-char)
-              ("M-DEL" . vertico-directory-delete-word))
+        ("RET" . vertico-directory-enter)
+        ("DEL" . vertico-directory-delete-char)
+        ("M-DEL" . vertico-directory-delete-word))
   :hook 
   (rfn-eshadow-update-overlay . vertico-directory-tidy)
   )
@@ -60,25 +60,25 @@
 (use-package orderless
   :init (require 'orderless)
   :config
-  ; 根据辅助字符来选择不同的补全风格
+                                        ; 根据辅助字符来选择不同的补全风格
   (defun +vertico-orderless-dispatch (pattern _index _total)
     (cond
-     ; 以 $ 结尾的 pattern 会指定结尾
+                                        ; 以 $ 结尾的 pattern 会指定结尾
      ((string-suffix-p "$" pattern) `(orderless-regexp . ,(concat (substring pattern 0 -1) "[\x200000-\x300000]*$")))
-     ; 忽略单个 !，是为下一个匹配做准备
+                                        ; 忽略单个 !，是为下一个匹配做准备
      ((string= "!" pattern) `(orderless-literal . ""))
-     ; 以 ! 开头的 pattern 表示结果都是不匹配 pattern 的（反选）
+                                        ; 以 ! 开头的 pattern 表示结果都是不匹配 pattern 的（反选）
      ((string-prefix-p "!" pattern) `(orderless-without-literal . ,(substring pattern 1)))
-     ; makes the string match ignoring diacritics and similar inflections on characters，似乎是只有俄语那种有音标的语言会需要
+                                        ; makes the string match ignoring diacritics and similar inflections on characters，似乎是只有俄语那种有音标的语言会需要
      ((string-prefix-p "%" pattern) `(char-fold-to-regexp . ,(substring pattern 1)))
      ((string-suffix-p "%" pattern) `(char-fold-to-regexp . ,(substring pattern 0 -1)))
-     ; 首字母匹配
+                                        ; 首字母匹配
      ((string-prefix-p "`" pattern) `(orderless-initialism . ,(substring pattern 1)))
      ((string-suffix-p "`" pattern) `(orderless-initialism . ,(substring pattern 0 -1)))
-     ; 不启动正则匹配，只使用文本匹配
+                                        ; 不启动正则匹配，只使用文本匹配
      ((string-prefix-p "=" pattern) `(orderless-literal . ,(substring pattern 1)))
      ((string-suffix-p "=" pattern) `(orderless-literal . ,(substring pattern 0 -1)))
-     ; flex 风格：字符必须按照给定的顺序出现，但不一定要连续出现
+                                        ; flex 风格：字符必须按照给定的顺序出现，但不一定要连续出现
      ((string-prefix-p "~" pattern) `(orderless-flex . ,(substring pattern 1)))
      ((string-suffix-p "~" pattern) `(orderless-flex . ,(substring pattern 0 -1)))))
 
@@ -141,21 +141,21 @@
 (use-package consult
   :bind 
   (([remap bookmark-jump]                 . consult-bookmark)
-         ([remap list-registers]                . consult-register)
-         ([remap goto-line]                     . consult-goto-line)
-         ([remap imenu]                         . consult-imenu)
-         ("C-c i"                               . consult-imenu)
-         ("C-c I"                               . consult-imenu-multi)
-         ([remap locate]                        . consult-locate)
-         ([remap load-theme]                    . consult-theme)
-         ([remap man]                           . consult-man)
-         ([remap recentf-open-files]            . consult-recent-file)
-         ([remap switch-to-buffer]              . consult-buffer)
-         ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-         ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
-         ([remap yank-pop]                      . consult-yank-pop)
-         ("C-c d r"                             . consult-ripgrep)
-         ("C-c d f"                             . consult-fd))
+   ([remap list-registers]                . consult-register)
+   ([remap goto-line]                     . consult-goto-line)
+   ([remap imenu]                         . consult-imenu)
+   ("C-c i"                               . consult-imenu)
+   ("C-c I"                               . consult-imenu-multi)
+   ([remap locate]                        . consult-locate)
+   ([remap load-theme]                    . consult-theme)
+   ([remap man]                           . consult-man)
+   ([remap recentf-open-files]            . consult-recent-file)
+   ([remap switch-to-buffer]              . consult-buffer)
+   ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+   ([remap switch-to-buffer-other-frame]  . consult-buffer-other-frame)
+   ([remap yank-pop]                      . consult-yank-pop)
+   ("C-c d r"                             . consult-ripgrep)
+   ("C-c d f"                             . consult-fd))
   :config
   (setq consult-narrow-key "<"
         consult-async-min-input 2)
