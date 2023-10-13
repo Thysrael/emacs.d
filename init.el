@@ -17,6 +17,8 @@
                       'init-ui
                       'init-modeline
                       'init-input
+                      'init-edit
+                      'init-project
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))

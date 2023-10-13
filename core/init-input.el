@@ -11,16 +11,16 @@
   (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
   (setq rime-show-candidate 'posframe) ; 设置候选框展示风格
   (setq rime-disable-predicates
-	    '(rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
-        rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
-	      rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
-        rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
-        rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
-	      rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
-	      rime-predicate-after-ascii-char-p ; 任意英文字符后
-        ))
-  :hook 
-  (after-init . toggle-input-method) 
+        '(rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
+          rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
+          rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
+          rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
+          rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
+          rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
+          rime-predicate-after-ascii-char-p ; 任意英文字符后
+          ))
+  :hook
+  (after-init . toggle-input-method)
   (kill-emacs . rime-lib-finalize) ; hack，修正 rime 的关闭问题
   )
 
@@ -29,7 +29,7 @@
 
 (defun fcitx2en ()
   "Change to the English input."
-  (let ((input-status (shell-command-to-string "fcitx-remote"))) 
+  (let ((input-status (shell-command-to-string "fcitx-remote")))
     (when (= (string-to-number input-status) 1) ; input status == 1 时表示搜狗输入法
       (setq input-toggle nil)
       (shell-command "fcitx-remote -o")

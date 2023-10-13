@@ -5,7 +5,7 @@
  ;; 关闭备份文件，防止生成 file~
  make-backup-files nil
  ;; 自动保存功能，#file#
- auto-save-default t ; 开启自动保存功能 
+ auto-save-default t ; 开启自动保存功能
  auto-save-include-big-deletions t  ; 自动保存较大的删除
  auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "autosaves/") t)) ; 指定保存位置
  auto-save-file-name-transforms (list (list "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
@@ -20,7 +20,7 @@
 
 ;;; 过长文本的显示问题
 ;; 折行和截断
-(setq-default 
+(setq-default
  word-wrap t ; 会按照单词进行折行
  word-wrap-by-category t ; 对中文折行的支持
  fill-column 80 ; 设置 fill-column 为 80，这个变量会影响其他变量
@@ -33,11 +33,11 @@
 (use-package visual-line-mode
   :straight nil ; 不要尝试从包管理器中安装 visual-line-mode
   :hook (text-mode . visual-line-mode) ; 将 visual-line-mode 应用于 text 模式
-  ) 
+  )
 
 ;; 用于单行长文件
 (use-package so-long
-  :hook 
+  :hook
   (after-init . global-so-long-mode)
   :config
   (add-to-list 'so-long-variable-overrides '(save-place-alist . nil)) ; saveplace 不会对其使用
@@ -45,7 +45,7 @@
 
 
 ;;; 用户界面基础设置
-(setq-default 
+(setq-default
  ;; 没有客户端启动信息
  server-client-instructions nil
 
@@ -114,7 +114,9 @@
 
 ;; 绑定恢复 buffer 函数
 (global-set-key (kbd "<f5>") 'revert-buffer) ; 撤销所有没有保存的更改
-(global-set-key (kbd "<f6>") 'recover-file) ; 利用 autosave 完成更新
+;; (global-set-key (kbd "<f6>") 'recover-file) ; 利用 autosave 完成更新
+
+(global-set-key (kbd "C-z") 'undo)
 
 ;; window scroll 绑定
 (defvar +scrolling-lines 5)
@@ -129,7 +131,7 @@
 ;;; 历史信息记录
 ;; save-place-mode 可以保存文件的上次浏览位置，即使 emacs 关闭也可以保存
 (use-package saveplace
-  :hook 
+  :hook
   (after-init . save-place-mode)
   :config
   ;; HACK: `save-place-alist-to-file' uses `pp' to prettify the contents of its cache, which is expensive and useless.
@@ -141,9 +143,9 @@
 
 ;; 调用最近的浏览文件记录
 (use-package recentf
-  :bind 
+  :bind
   (("C-x C-r" . recentf-open-files))
-  :hook 
+  :hook
   (after-init . recentf-mode)
   :config
   (setq recentf-auto-cleanup 'never ; 不自动清理
@@ -162,14 +164,14 @@
 
 ;; 用于保存和恢复 Emacs 会话期间的用户交互历史记录，包括命令历史、minibuffer 历史、搜索和替换历史等。
 (use-package savehist
-  :hook 
+  :hook
   (after-init . savehist-mode)
   :config
   (setq savehist-additional-variables '(mark-ring global-mark-ring
                                                   search-ring regexp-search-ring
                                                   kill-ring) ; 要保存的列表
         savehist-autosave-interval 300) ; 每 300s 保存一次
-                                        ; 移除了 kill-ring 中的文本属性，以减小 savehist 缓存的大小  
+                                        ; 移除了 kill-ring 中的文本属性，以减小 savehist 缓存的大小
   (add-hook 'savehist-save-hook
             (lambda () (setq kill-ring
                              (mapcar #'substring-no-properties
@@ -211,10 +213,13 @@
 
 ;; 优化垃圾回收
 (use-package gcmh
-  :hook 
+  :hook
   (emacs-startup . gcmh-mode)
   :config
   (setq gcmh-idle-delay 'auto
         gcmh-auto-idle-delay-factor 10
         gcmh-high-cons-threshold #x64000000)
   )
+
+;; 开启删除所选区域模式
+(add-hook 'after-init-hook 'delete-selection-mode)
