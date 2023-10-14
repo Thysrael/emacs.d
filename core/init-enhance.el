@@ -18,7 +18,7 @@
   (setq vertico-cycle t
         vertico-resize nil
         vertico-count 15)
-  
+
                                         ; 这是在强化 minibuffer 的多行输入提示符，但是我还没有遇到过 minibuffer 的多行输入
   (advice-add #'completing-read-multiple :filter-args
               (lambda (args)
@@ -210,8 +210,8 @@
   (setq avy-background t)) ; 在跳转时背景变黑
 
 ;; 改变光标移动绑定，使其更加方便
-(global-set-key (kbd "C-f") 'forward-word)
-(global-set-key (kbd "C-b") 'backward-word)
+;; (global-set-key (kbd "C-f") 'forward-word)
+;; (global-set-key (kbd "C-b") 'backward-word)
 ;; (global-set-key (kbd "C-l") 'forward-char)
 ;; (global-set-key (kbd "C-h") 'backward-char)
 

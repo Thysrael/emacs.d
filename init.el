@@ -10,17 +10,19 @@
    gcs-done))
 
 (defvar +init-files (list
-                      'init-package
-                      'init-tmp
-                      'init-basic
-                      'init-enhance
-                      'init-ui
-                      'init-modeline
-                      'init-input
-                      'init-edit
-                      'init-project
+                     'init-package
+                     'init-tmp
+                     'init-basic
+                     'init-enhance
+                     'init-ui
+                     'init-modeline
+                     'init-input
+                     'init-edit
+                     'init-completion
+                     'init-prog
+                     'init-project
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))
   (dolist (file +init-files)
-      (load-file (concat init-directory (symbol-name file) ".el"))))
+    (load-file (concat init-directory (symbol-name file) ".el"))))

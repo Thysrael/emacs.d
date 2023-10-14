@@ -17,13 +17,13 @@
   )
 
 ;; 显示错误的空白字符，并没有很好的效果
-(use-package whitespace
-  :hook ((prog-mode conf-mode yaml-mode) . whitespace-mode)
-  :init
-  :config
-  (setq
-   ;; only show bad whitespace
-   whitespace-style '(face trailing empty indentation space-before-tab space-after-tab)))
+;; (use-package whitespace
+;;   :hook ((prog-mode conf-mode yaml-mode) . whitespace-mode)
+;;   :init
+;;   :config
+;;   (setq
+;;    ;; only show bad whitespace
+;;    whitespace-style '(face trailing empty indentation space-before-tab space-after-tab)))
 
 ;; 彩虹扩号
 (use-package rainbow-delimiters
@@ -113,7 +113,8 @@
 
 ;; 注释
 (defun smart-comment (&optional arg)
-  "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line, then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
+  "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line,
+   then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
@@ -201,9 +202,11 @@
 ;; [elec-pair] Automatic parenthesis pairing
 (use-package elec-pair
   :hook
-  ((prog-mode conf-mode yaml-mode org-mode markdown-mode minibuffer-setup) . electric-pair-mode)
+  ((prog-mode) . electric-pair-mode)
   :config
-  (setq electric-pair-inhibit-predicate 'electric-pair-default-inhibit)
+  (add-hook 'org-mode-hook
+          (lambda ()
+            (setq-local electric-pair-mode nil)))
   )
 
 ;; 一口气删掉多个空白格
@@ -214,7 +217,7 @@
   :straight nil
   :hook (((prog-mode minibuffer-setup) . subword-mode)))
 
-;; [hideshow] Code folding
+;; 代码折叠
 (use-package hideshow
   :straight nil
   :hook ((prog-mode conf-mode yaml-mode) . hs-minor-mode)
@@ -366,7 +369,6 @@ begin and end of the block surrounding point."
   ("C-c u" . vundo)
   )
 
-
 ;; [sudo-edit] edit file with su permissions
 (use-package sudo-edit
   :config
@@ -398,6 +400,7 @@ begin and end of the block surrounding point."
       (puni-backward-delete-char)))
   (define-key puni-mode-map (kbd "C-k") nil)
   (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
+  (define-key puni-mode-map (kbd "C-w") nil)
   )
 
 ;; [ispell] spell checker
