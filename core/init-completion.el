@@ -7,33 +7,33 @@
   (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
 
 ;; (use-package tempel
-;;   :bind
-;;   ("M-/" . tempel-expand) ;; Alternative tempel-expand
-;;   ("M-*" . tempel-insert)
-;;   :hook
-;;   ((prog-mode text-mode) . +tempel-setup-capf)
-;;   ((prog-mode text-mode) . tempel-abbrev-mode)
+;;   :straight t
+;;   :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+;;          ("M-*" . tempel-insert))
+;;   :hook (((prog-mode text-mode) . +tempel-setup-capf)
+;;          ((prog-mode text-mode) . tempel-abbrev-mode))
 ;;   :config
 ;;   (defun +tempel-setup-capf ()
 ;;     (setq-local completion-at-point-functions
-;;                 (cons #'tempel-expand
+;;                 (cons #'tempel-complete
 ;;                       completion-at-point-functions)))
 
-;;   (setq tempel-path (no-littering-expand-etc-file-name "tempel-templates"))
+;;   (setq 
+;;         tempel-path (expand-file-name "tempel-templates" user-emacs-directory))
 ;;   )
 
+
 ;; (use-package tempel-collection
+;;   :straight t
 ;;   :after tempel)
 
 
-;; ;; 补全的前端，也就是补全信息的展示
+;; ;; [corfu] compleletion frontend
 ;; (use-package corfu
-;;   :straight
-;;   (:files (:defaults "extensions/*.el"))
-;;   :hook
-;;   ((prog-mode conf-mode yaml-mode shell-mode eshell-mode) . corfu-mode) ; 在这些模式下开启补全
-;;   ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil))) ; 在 eshell 下不自动不全
-;;   (minibuffer-setup . corfu-enable-in-minibuffer)
+;;   :straight (:files (:defaults "extensions/*.el"))
+;;   :hook (((prog-mode conf-mode yaml-mode shell-mode eshell-mode) . corfu-mode)
+;;          ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil)))
+;;          (minibuffer-setup . corfu-enable-in-minibuffer))
 ;;   :bind (:map corfu-map
 ;;               ([tab] . corfu-next)
 ;;               ([backtab] . corfu-previous))
@@ -41,7 +41,8 @@
 ;;   (setq corfu-cycle t                ;; Enable cycling for `corfu-next/previous'
 ;;         corfu-auto t                 ;; Enable auto completion
 ;;         corfu-separator "&"          ;; Orderless field separator
-;;         corfu-auto-prefix 1          ;; minimun prefix to enable completion
+;;         corfu-auto-prefix 2          ;; minimun prefix to enable completion
+;;         corfu-preview-current nil
 ;;         corfu-auto-delay 0.1)
 
 ;;   ;; Transfer completion to the minibuffer
@@ -68,13 +69,14 @@
 ;;     (cl-pushnew 'corfu-history savehist-additional-variables))
 ;;   )
 
-;; ;; 是 corfu 支持终端环境
-;; (use-package corfu-terminal
-;;   :when (not (display-graphic-p))
-;;   :after corfu
-;;   :init (corfu-terminal-mode 1))
+
+;; (use-package corfu-popupinfo
+;;   :straight nil
+;;   :after corfu)
+
 
 ;; (use-package cape
+;;   :straight t
 ;;   :hook ((corfu-mode . +corfu-add-cape-backends)
 ;;          ((TeX-mode LaTeX-mode org-mode markdown-mode) . +corfu-add-cape-tex-backends))
 ;;   :config
@@ -86,15 +88,17 @@
 ;;     (add-to-list 'completion-at-point-functions #'cape-tex :append))
 ;;   )
 
-;; (use-package yasnippet-capf
-;;   :after cape
-;;   :config
-;;   (add-to-list 'completion-at-point-functions #'yasnippet-capf)
-;;   (setq yasnippet-capf-lookup-by 'name)) ;; Prefer the name of the snippet instead
 
 (use-package company
   :init
   (add-hook 'prog-mode-hook 'company-mode)
+  :bind 
+  (
+		 :map company-mode-map
+		 ([remap completion-at-point] . company-complete)
+		 :map company-active-map
+		 ([tab]     . company-complete-common-or-cycle)
+		 ([backtab] . company-select-previous-or-abort))
   :config
   (setq company-minimum-prefix-length 1) ; 只需敲 1 个字母就开始进行自动补全
   (setq company-tooltip-align-annotations t)
