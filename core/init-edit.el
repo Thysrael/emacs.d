@@ -94,12 +94,12 @@
   )
 
 ;; 当进行复制、粘贴和剪切等行为的时候，会高亮这个区域
-(use-package goggles
-  :hook
-  ((prog-mode conf-mode yaml-mode text-mode) . goggles-mode)
-  :config
-  (setq-default goggles-pulse nil)
-  )
+;; (use-package goggles
+;;   :hook
+;;   ((prog-mode conf-mode yaml-mode text-mode) . goggles-mode)
+;;   :config
+;;   (setq-default goggles-pulse nil)
+;;   )
 
 ;; 将需要高亮的符号进行高亮
 (use-package symbol-overlay
