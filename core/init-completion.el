@@ -4,7 +4,9 @@
 ;; 可以使用 M-/ 进行简单的补全
 (use-package dabbrev
   :config
-  (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
+  (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'"))
+  :bind
+  ("M-'" . dabbrev-expand))
 
 ;;; corfu & tempel 方案，缺点是会自动触发 yasnippet
 ;; (use-package tempel
@@ -139,15 +141,20 @@
   ((prog-mode text-mode) . yas-minor-mode-on)
   ((prog-mode text-mode) . +yas-setup-capf) ; 这里的顺序很关键，似乎 yas 必须在 corfu 之前才可以
   :config 
-    (defun +yas-setup-capf ()
+  (defun +yas-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'yasnippet-capf
                       completion-at-point-functions))) ; 在后端登记补全信息
-   :custom 
-   (yas-keymap-disable-hook
-      (lambda () (and (frame-live-p corfu--frame)
-                  (frame-visible-p corfu--frame)))) ; 使得 corfu 的优先级比 yas 高，使 tab 先满足 corfu
+  :custom
+  (yas-keymap-disable-hook
+   (lambda () (and (frame-live-p corfu--frame)
+              (frame-visible-p corfu--frame)))) ; 使得 corfu 的优先级比 yas 高，使 tab 先满足 corfu
   )
+
+;; consult 模式的 yasnippet 检索
+(use-package consult-yasnippet
+  :bind
+  ("C-c y" . consult-yasnippet))
 
 ;; 补全前端
 (use-package corfu
@@ -158,9 +165,9 @@
   ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil))) ; 在 shell 模式取消补全
   :bind 
   (:map corfu-map
-              ([tab] . corfu-insert)
-              ;; ([backtab] . corfu-previous)
-              )
+        ([tab] . corfu-next)
+        ([backtab] . corfu-previous)
+        )
   :config
   (setq corfu-cycle t                ; Enable cycling for `corfu-next/previous'
         corfu-auto t                 ; Enable auto completion
@@ -168,10 +175,11 @@
         corfu-auto-prefix 1          ; minimun prefix to enable completion
         corfu-preview-current t
         corfu-auto-delay 0
-        corfu-on-exact-match nil      ; 解决 dd 自动展开的关键    
+        corfu-on-exact-match nil     ; 解决 dd 自动展开的关键
         corfu-min-width 25
-        corfu-preselect 'prompt)      ; 不知道为啥，这个可以避免自动选择，可以使 tab 更加方便
-        
+        ;; corfu-preselect 'prompt   ; 不知道为啥，这个可以避免自动选择，可以使 tab 更加方便
+        )
+
   )
 
 ;; 使得 corfu 排序为历史频率排序

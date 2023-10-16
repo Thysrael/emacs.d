@@ -9,7 +9,8 @@
   (:map vertico-map
         ("TAB" . minibuffer-complete)
         ("<tab>" . minibuffer-complete) ; 必须有这两条才能使用 tab 补全
-        ("C-r" . vertico-repeat-select)) ; 可以查看有参数的命令历史并进行选择
+        ("C-r" . vertico-repeat-select) ; 可以查看有参数的命令历史并进行选择
+        ("C-<return>" . vertico-exit-input)) ; 强行终止输入
   :hook
   ((after-init . vertico-mode))
   :defines
@@ -146,6 +147,7 @@
   ([remap imenu]                         . consult-imenu)
   ("C-c i"                               . consult-imenu)
   ("C-c I"                               . consult-imenu-multi)
+  ("C-c o"                               . consult-outline)
   ([remap locate]                        . consult-locate)
   ([remap load-theme]                    . consult-theme)
   ([remap man]                           . consult-man)
@@ -210,7 +212,7 @@
   (setq avy-background t)) ; 在跳转时背景变黑
 
 ;; 改变光标移动绑定，使其更加方便
-;; (global-set-key (kbd "C-f") 'forward-word)
+(global-set-key (kbd "C-f") 'forward-word)
 ;; (global-set-key (kbd "C-b") 'backward-word)
 ;; (global-set-key (kbd "C-l") 'forward-char)
 ;; (global-set-key (kbd "C-h") 'backward-char)
@@ -340,7 +342,7 @@
           rustic-cargo-outdated-mode rustic-cargo-test-mode
 
           chatgpt-shell-mode
-	  ))
+	      ))
 
   :config
   ;; mode-line indicator
@@ -362,6 +364,8 @@
         (when (window-live-p window)
           (delete-window window)))))
   (advice-add #'keyboard-quit :before #'+popper-close-window-hack)
+  :custom
+  (popper-window-height 35)
   )
 
 

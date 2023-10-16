@@ -123,6 +123,9 @@
 
 (global-set-key (kbd "C-/") 'smart-comment)
 
+;; comment over empty lines
+(setq comment-empty-lines t)
+
 ;; 搜索替换
 (use-package color-rg
   :straight (color-rg :type git :host github :repo "manateelazycat/color-rg")

@@ -3,3 +3,5 @@ straight/
 var/
 etc/rime/*
 !etc/rime/default.custom.yaml
+.tags/
+elpha/
