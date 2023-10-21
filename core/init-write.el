@@ -34,8 +34,8 @@
 
 ;;; org
 ;; 预览 LaTeX 公式
-(use-package org-fragtog
-  :hook ((org-mode . org-fragtog-mode)))
+;; (use-package org-fragtog
+;;   :hook ((org-mode . org-fragtog-mode)))
 
 ;; org-mode
 (use-package org-mode
@@ -94,7 +94,7 @@
         org-appear-autolinks t)
   )
 
-;; 配置 mark 样式
+;; 配置 mark 样式，主要是漂亮的 org-bold
 (defface org-bold
   '((t :foreground "#d2268b"
      :weight bold
