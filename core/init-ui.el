@@ -196,7 +196,7 @@
 (defun +setup-fonts ()
   "Setup fonts."
   (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
-  (set-fontset-font t 'han (font-spec :family "Sarasa Term SC" :size +font-han-size))
+  (set-fontset-font t 'han (font-spec :family "LXGW WenKai" :size +font-han-size))
   (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
   )
 
@@ -204,7 +204,8 @@
 (add-hook 'server-after-make-frame-hook #'+setup-fonts)
 
 ;; 光标
-(blink-cursor-mode -1)
+;; (blink-cursor-mode -1) ;; 阻止光标闪烁
+(setq-default cursor-type 'bar)
 
 ;; 连体字
 ;; (use-package ligature
@@ -243,4 +244,6 @@
   (doom-themes-org-config)
   )
 
-(load-theme 'doom-ayu-mirage t)
+;; (load-theme 'doom-ayu-mirage t)
+(load-theme 'doom-moonlight t)
+;; (load-theme'doom-nord t)

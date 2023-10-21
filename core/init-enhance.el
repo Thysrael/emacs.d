@@ -158,7 +158,7 @@
   ([remap yank-pop]                      . consult-yank-pop)
   ([remap project-switch-to-buffer]      . consult-project-buffer)
   ("C-c s"                               . consult-ripgrep) ; 全局搜索
-  ("C-c f"                               . consult-fd) ; 全局文件查找
+  ("C-c p"                               . consult-fd) ; 全局文件查找
   ("C-s"                                 . consult-line) ; 局部搜索
   :config
   (setq consult-narrow-key "<"

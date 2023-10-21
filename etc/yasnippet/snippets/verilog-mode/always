@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: always
+# key: always
+# --
+always @($1) begin
+    $0
+end

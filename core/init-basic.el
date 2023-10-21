@@ -23,7 +23,7 @@
 (setq-default
  word-wrap t ; 会按照单词进行折行
  word-wrap-by-category t ; 对中文折行的支持
- fill-column 80 ; 设置 fill-column 为 80，这个变量会影响其他变量
+ fill-column 100 ; 设置 fill-column 为 80，这个变量会影响其他变量
  truncate-lines t ; truncate 会将超出部分的文本截断
  truncate-partial-width-windows nil
  truncate-string-ellipsis "..." ; 文本截断的省略符为 ...
@@ -110,7 +110,8 @@
 
 ;; 将关键命令移动到右手核心区
 (define-key key-translation-map (kbd "C-j") (kbd "C-x"))
-(global-set-key (kbd "C-k") 'execute-extended-command)
+;; (global-set-key (kbd "C-k") 'execute-extended-command)
+(define-key key-translation-map (kbd "C-k") (kbd "M-x"))
 
 ;; 绑定恢复 buffer 函数
 (global-set-key (kbd "<f5>") 'revert-buffer) ; 撤销所有没有保存的更改

@@ -48,16 +48,19 @@ Unix 思想有一个重要的前提是“工具之间极其容易配合”。当
 
 - [[./core/init-package.el][package]]：包管理器配置，包括代理，源，包管理器的选择，配置目录整理等。
 - [[./core/init-basic.el][basic]]：最为基础的配置，其核心目的是将 emacs 改造成一个舒适的记事本（裸 emacs 确实做不到这点）。
-- [[./core/init-enhance.el][enhance]]：emacs 本身功能的增强配置（不会引入新的功能）。
-- [[./core/init-ui.el][ui]]：包括字体、主题、modeline、标签栏等组件配置。
+- [[./core/init-enhance.el][enhance]]：emacs 本身功能的增强配置（不会引入新的功能）。包括 minibuffer、检索、光标移动、窗口管理等。
+- [[./core/init-modeline.el][modeline]]：modeline 配置，因为直接照抄 roife，所以从 ui 中移出。
+- [[./core/init-ui.el][ui]]：包括字体、主题、光标、fringe 等组件配置。
 - [[./core/init-shell.el][shell]]：终端配置。
+- [[./core/init-util.el][util]]：工具类，用于存储方便配置或者自己写的工具函数
 - [[./core/init-tmp.el][tmp]]：临时配置，用于存放尚未归类的配置或者实验性配置。
 
 ** 编辑配置（edit）
 这部分集中于 emacs 编辑源码的能力，可以说是 vim 之前负责的部分：
 
-- [[./core/init-edit.el][edit]]：通用编辑配置，包括补全、高亮、静态检验等。
-- [[./core/init-prog.el][prog]]：不同源码文件，启用不同的配置。
+- [[./core/init-edit.el][edit]]：通用编辑配置，包括补全、高亮、结构化编辑、撤销、搜索替换等。
+- [[./core/init-prog.el][prog]]：源码分析与交叉引用，包括基于搜索匹配，tags，lsp 多种分析模式。
+- [[./core/init-lang.el][lang]]：不同源码文件，启用不同的配置。
 - [[./core/init-remote.el][remote]]：远端编辑配置。
 
 ** 项目管理配置（project）
@@ -65,7 +68,7 @@ Unix 思想有一个重要的前提是“工具之间极其容易配合”。当
 
 - [[./core/init-project.el][project]]：基础的项目管理配置，包括项目内检索，项目侧边栏等。
 - [[./core/init-dired][dired]]：文件管理器配置。
-- [[./core/init-vsc.el][vsc]]：版本控制配置。
+- [[./core/init-vsc.el][vsc]]：版本控制配置，包括 chunk 和版本控制接口。
 - [[./core/init-agenda.el][agenda]]：日程管理配置。
 - [[./core/init-debug.el][debug]]：项目的编译、运行、调试和部署等方面。
 

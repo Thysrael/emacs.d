@@ -21,7 +21,12 @@
                      'init-edit
                      'init-completion
                      'init-prog
+                     'init-lang
                      'init-project
+                     'init-vsc
+                     'init-debug
+                     'init-write
+                     'init-shell
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))

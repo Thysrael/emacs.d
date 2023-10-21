@@ -23,7 +23,7 @@
     :before '(find-function consult-imenu consult-ripgrep citre-jump)
     (xref-push-marker-stack (point-marker))) ; 这里是一个压栈函数，用于记录光标位置
   :bind
-  ("M-/" . xref-find-references) ; 将搜索按钮放到更合适的地方
+  ("M-/" . xref-find-apropos) ; 将搜索按钮放到更合适的地方
   )
 
 ;; 基于正则匹配的后端
@@ -50,7 +50,7 @@
   ;;   ("C-t h" . citre-ace-peek)
   ;;   ("C-t u" . citre-update-this-tags-file)
   ;;   ("C-t n" . citre-create-tags-file))
-  ("C-t" . hydra-citre/body)
+  ("M-t" . hydra-citre/body)
   :init
   (require 'citre-config)
   :config
@@ -88,42 +88,40 @@
             (funcall citre-fetcher)))))
   (defhydra hydra-citre (:color blue)
     "Citre Commands"
-    ("j" +citre-jump "Jump to Definition")
-    ("k" +citre-jump-back "Jump Back")
     ("p" citre-peek "Peek")
     ("h" citre-ace-peek "Ace Peek")
     ("u" citre-update-this-tags-file "Update Tags File")
     ("n" citre-create-tags-file "Create Tags File"))
   )
 
-;; (use-package eglot
-;;   :bind
-;;   ("C-c l" . hydra-eglot/body)
-;;   :hook
-;;   ((c-mode c++-mode python-mode) . eglot-ensure)
-;;   :config
-;;   (setq eglot-events-buffer-size 0
-;;         eglot-connect-timeout 10
-;;         eglot-autoshutdown t
-;;         ;; use global completion styles
-;;         completion-category-defaults nil)
-;;   (defhydra hydra-eglot (:color blue :columns 3)
-;;     "Eglot Menu"
-;;     ("f" eglot-format "Format selection")
-;;     ("b" eglot-format-buffer "Format buffer")
-;;     ("r" eglot-rename "Rename symbol at point")
-;;     ("d" eglot-find-declaration "Find declaration")
-;;     ("i" eglot-find-implementation "Find implementation")
-;;     ("t" eglot-find-typeDefinition "Find type definition")
-;;     ("s" eglot-shutdown "Shutdown eglot server")
-;;     ("c" consult-eglot-symbols "Consult Eglot Symbols")
-;;     ("q" nil "Quit" :color blue))
-;;   )
-;;
-;; ;; [consult-eglot] Eglot support for consult
-;; ;; C-M-., rember it!
-;; (use-package consult-eglot
-;;   :after consult eglot
-;;   :bind (:map eglot-mode-map
-;;               ([remap xref-find-apropos] . consult-eglot-symbols)
-;;               ("C-c n" . consult-eglot-symbols)))
+(use-package eglot
+  :bind
+  ("C-c l" . hydra-eglot/body)
+  :hook
+  ((c-mode c++-mode python-mode) . eglot-ensure)
+  :config
+  (setq eglot-events-buffer-size 0
+        eglot-connect-timeout 10
+        eglot-autoshutdown t
+        ;; use global completion styles
+        completion-category-defaults nil)
+  (defhydra hydra-eglot (:color blue :columns 3)
+    "Eglot Menu"
+    ("f" eglot-format "Format selection")
+    ("b" eglot-format-buffer "Format buffer")
+    ("r" eglot-rename "Rename symbol at point")
+    ("d" eglot-find-declaration "Find declaration")
+    ("i" eglot-find-implementation "Find implementation")
+    ("t" eglot-find-typeDefinition "Find type definition")
+    ("s" eglot-shutdown "Shutdown eglot server")
+    ("c" consult-eglot-symbols "Consult Eglot Symbols")
+    ("q" nil "Quit" :color blue))
+  )
+
+;; [consult-eglot] Eglot support for consult
+;; C-M-., rember it!
+(use-package consult-eglot
+  :after consult eglot
+  :bind (:map eglot-mode-map
+              ([remap xref-find-apropos] . consult-eglot-symbols)
+              ("C-c n" . consult-eglot-symbols)))

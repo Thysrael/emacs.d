@@ -17,7 +17,7 @@
           rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
           rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
           rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
-          rime-predicate-after-ascii-char-p ; 任意英文字符后
+          ;; rime-predicate-after-ascii-char-p ; 任意英文字符后
           ))
   :hook
   (after-init . toggle-input-method)
