@@ -29,8 +29,19 @@
   (add-to-list 'markdown-code-lang-modes '("verilog" . verilog-mode))
   (add-to-list 'markdown-code-lang-modes '("c" . c-mode))
   :hook
-  (markdown-mode . (lambda () (setq line-spacing 0.2)))
+  (markdown-mode . (lambda () (setq line-spacing 0.25)))
   )
+
+;; 美化 markdown mode
+(custom-set-faces
+ ;; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
+ '(markdown-header-face-1 ((t (:foreground "#c099ff" :weight bold :height 1.4 :family "LXGW WenKai"))))
+ '(markdown-header-face-2 ((t (:inherit outline-1 :extend nil :weight bold :height 1.3 :family "LXGW WenKai"))))
+ '(markdown-header-face-3 ((t (:inherit outline-2 :extend nil :weight bold :height 1.2 :family "LXGW WenKai"))))
+ '(markdown-header-face-4 ((t (:inherit outline-3 :extend nil :weight bold :height 1.1 :family "LXGW WenKai"))))
+ '(markdown-pre-face ((t (:inherit org-block :foreground "#c3e88d"))))
+ '(markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
+ )
 
 ;;; org
 ;; 预览 LaTeX 公式
