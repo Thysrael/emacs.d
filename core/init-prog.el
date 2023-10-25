@@ -97,8 +97,6 @@
 (use-package eglot
   :bind
   ("C-c l" . hydra-eglot/body)
-  :hook
-  ((c-mode c++-mode python-mode) . eglot-ensure)
   :config
   (setq eglot-events-buffer-size 0
         eglot-connect-timeout 10

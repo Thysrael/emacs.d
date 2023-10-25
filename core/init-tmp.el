@@ -33,7 +33,7 @@
     (indent-region (point-min) (point-max) nil)))
 
 (global-set-key (kbd "C-c f") 'format-whole-buffer)
-(global-set-key (kbd "C-c t") 'project-eshell)
+(global-set-key (kbd "C-c t") 'multi-vterm)
 
 (setq initial-frame-alist '((fullscreen . maximized)))
 

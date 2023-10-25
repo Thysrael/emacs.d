@@ -37,3 +37,10 @@
    scala-indent:align-parameters t
    ;; indent block comments to first asterix, not second
    scala-indent:use-javadoc-style t))
+
+(use-package python-mode
+  :straight nil
+  :config
+  (setq python-indent-offset 4))
+
+(use-package cuda-mode)

@@ -28,3 +28,6 @@
 ;;   :config
 ;;   (setq vterm-toggle-cd-auto-create-buffer nil)
 ;;   )
+
+;; 多 vterm 支持的同时不影响 vterm toggle 逻辑
+(use-package multi-vterm)

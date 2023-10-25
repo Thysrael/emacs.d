@@ -8,13 +8,13 @@
 ;;   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
 ;;   )
 
-;; (use-package all-the-icons
-;;   ;; :custom
-;;   ;; The Nerd Font you want to use in GUI
-;;   ;; "Symbols Nerd Font Mono" is the default and is recommended
-;;   ;; but you can use any other Nerd Font if you want
-;;   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
-;;   )
+(use-package all-the-icons
+  ;; :custom
+  ;; The Nerd Font you want to use in GUI
+  ;; "Symbols Nerd Font Mono" is the default and is recommended
+  ;; but you can use any other Nerd Font if you want
+  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  )
 
 ;; (use-package doom-modeline
 ;;   :hook 
@@ -242,6 +242,9 @@
 
   (doom-themes-visual-bell-config)
   (doom-themes-org-config)
+
+  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
+  (doom-themes-treemacs-config)
   )
 
 ;; (load-theme 'doom-ayu-mirage t)

@@ -233,7 +233,11 @@
   :custom-face
   (aw-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 3.0))))
   (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
-  :hook ((window-configuration-change . aw-update)) ;; For modeline
+  :bind
+  ("C-x 9" . ace-delete-window)
+  ("C-x 8" . ace-swap-window)
+  :hook
+  ((window-configuration-change . aw-update)) ;; For modeline
   :config
   (setq aw-scope 'frame
         aw-background nil
