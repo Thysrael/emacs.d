@@ -89,3 +89,12 @@
    '(variable-pitch ((t (:height 0.9)))) ; 缩小默认字体
    )
   )
+
+(use-package treemacs-magit
+  :demand t
+  :after treemacs magit
+  :commands treemacs-magit--schedule-update
+  :hook ((magit-post-commit
+          git-commit-post-finish
+          magit-post-stage
+          magit-post-unstage) . treemacs-magit--schedule-update))

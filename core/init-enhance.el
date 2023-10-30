@@ -326,7 +326,7 @@
           "^\\*terminal.*\\*.*$" term-mode
           "^\\*vterm.*\\*.*$"  vterm-mode
           "^\\*eldoc.*\\*.*$" eldoc-mode
-
+          "^magit.*$" magit-mode
           "\\*Flycheck errors\\*$" " \\*Flycheck checker\\*$"
           "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
           "\\*[Wo]*Man.*\\*$"
