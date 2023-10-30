@@ -10,6 +10,20 @@
   (setq custom-file (no-littering-expand-etc-file-name "custom.el")) ; 设置 custom-file 路径
   )
 
+;; 测量启动时间
+; 比较简朴的方式
+(defun efs/display-startup-time ()
+  (interactive)
+  (message
+   "Emacs loaded in %s with %d garbage collections."
+   (format
+    "%.4f seconds"
+    (float-time
+     (time-subtract after-init-time before-init-time)))
+   gcs-done))
+; 使用 M-x esup 就可以显示关键路径
+(use-package esup)
+
 ;; (use-package benchmark-init
 ;;   :config
 ;;   ;; To disable collection of benchmark data after init is done.
