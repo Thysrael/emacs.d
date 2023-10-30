@@ -1,14 +1,3 @@
-;; 测量启动时间
-(defun efs/display-startup-time ()
-  (interactive)
-  (message
-   "Emacs loaded in %s with %d garbage collections."
-   (format
-    "%.4f seconds"
-    (float-time
-     (time-subtract after-init-time before-init-time)))
-   gcs-done))
-
 (defvar +init-files (list
                      'init-package
                      'init-util
@@ -27,6 +16,7 @@
                      'init-debug
                      'init-write
                      'init-shell
+                     'init-remote
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))

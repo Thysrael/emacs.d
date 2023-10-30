@@ -7,6 +7,8 @@
   :init
   (setq vterm-shell "zsh")
   :config
+  (setq vterm-tramp-shells '(("docker" "/bin/bash")
+                             ("ssh" "/bin/bash"))) ; 指定在 tramp 时使用的 shell
   ;; (setq vterm-always-compile-module t)
   (defun +start-vterm-in-project ()
   "Start vterm in the current project if available, otherwise start a regular vterm."
