@@ -42,8 +42,8 @@
    ([mouse-1]   . treemacs-single-click-expand-action))
   :config
   ;; Bind after load treemacs
-  (bind-keys :package treemacs
-             ("C-x 1"     . treemacs-delete-other-windows))
+  ;; (bind-keys :package treemacs
+  ;;            ("C-x 1"     . treemacs-delete-other-windows))
 
   ;; treemacs-git-mode
   (pcase (cons (not (null (executable-find "git")))
