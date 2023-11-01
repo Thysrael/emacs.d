@@ -458,6 +458,72 @@ begin and end of the block surrounding point."
   (setq imenu-auto-rescan t)
   )
 
+;; 增强注释
+(defun +smart-comment (&optional arg)
+  "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line,
+   then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
+  (interactive "*P")
+  (comment-normalize-vars)
+  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+    (comment-dwim arg)))
+(global-set-key (kbd "C-/") '+smart-comment)
+
+;; comment over empty lines
+(setq comment-empty-lines t)
+
+;; 自动格式化
+(defun +smart-format ()
+  "Indent the active region if selected, otherwise format the buffer using eglot if available."
+  (interactive)
+  (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p)) ; 判断 eglot
+      (if (use-region-p)
+          (eglot-format (region-beginning) (region-end))
+        (eglot-format-buffer))
+    (if (use-region-p)
+        (indent-region (region-beginning) (region-end))
+      (indent-region (point-min) (point-max))))
+  (message "formatting done."))
+(global-set-key (kbd "C-c f") '+smart-format)
+
+(defhydra Cx-r (
+                :hint nil ; 只显示注释字符串，不显示绑定信息
+                :color blue ; 执行完一次后就退出
+                :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
+                )
+  "
+        Bookmark^^        Register^^        Rectangle^^
+  --------------------------------------------------------
+        [_l_] List        [_v_] List        [_M_] Mark
+        [_m_] Mark        [_SPC_] Point     [_N_] Number
+        [_b_] Jump        [_s_] Text        [_t_] String
+        ^ ^               [_r_] Rectangle   [_o_] Space
+        ^ ^               [_w_] Window      [_c_] Clear
+        ^ ^               [_K_] Kmacro      [_k_] Kill
+        [_q_] Quit        ^ ^               [_y_] Yank
+  "
+  ("m" bookmark-set-no-overwrite)
+  ("b" bookmark-jump)
+  ("l" bookmark-bmenu-list)
+
+  ("v" consult-register)
+  ("SPC" point-to-register)
+  ("s" copy-to-register)
+  ("r" copy-rectangle-to-register)
+  ("w" window-configuration-to-register)
+  ("K" kmacro-to-register)
+
+  ("M" rectangle-mark-mode :color red) ; red 执行完后不退出
+  ("N" rectangle-number-lines :color red)
+  ("t" string-rectangle :color red)
+  ("o" open-rectangle :color red)
+  ("c" clear-rectangle :color red)
+  ("k" kill-rectangle :color red)
+  ("y" yank-rectangle :color red)
+
+  ("q" nil))
+(global-set-key (kbd "C-x r") 'Cx-r/body)
+
 ;; (use-package multiple-cursors
 ;;   :after hydra
 ;;   :bind

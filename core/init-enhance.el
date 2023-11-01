@@ -148,6 +148,8 @@
   ("C-c i"                               . consult-imenu)
   ("C-c I"                               . consult-imenu-multi)
   ("C-c o"                               . consult-outline)
+  ("C-c b"                               . consult-bookmark)
+  ("C-c k"                               . consult-kmacro)
   ([remap locate]                        . consult-locate)
   ([remap load-theme]                    . consult-theme)
   ([remap man]                           . consult-man)
@@ -216,6 +218,9 @@
 ;; (global-set-key (kbd "C-b") 'backward-word)
 ;; (global-set-key (kbd "C-l") 'forward-char)
 ;; (global-set-key (kbd "C-h") 'backward-char)
+
+;; 使 f2 为宏计数器
+(global-set-key (kbd "<f2>") 'kmacro-set-counter)
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mosey
@@ -306,7 +311,7 @@
           "\\*Kill Ring\\*"
           "\\*Go-Translate\\*"
 
-          bookmark-bmenu-mode
+          "Bookmark List" bookmark-bmenu-mode
           comint-mode
           compilation-mode
           ibuffer-mode
