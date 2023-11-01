@@ -234,6 +234,9 @@
       '((:eval (or buffer-file-truename "%b"))
         (" · Emacs")))
 
+;; 初始化全屏
+(setq initial-frame-alist '((fullscreen . maximized)))
+
 ;; 主题
 (use-package doom-themes
   :config

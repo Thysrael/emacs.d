@@ -178,20 +178,7 @@
   ;; [consult-xref] Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
-
-  ;; ;; better preview
-  ;; (consult-customize
-  ;;  consult-ripgrep consult-git-grep consult-grep
-  ;;  consult-bookmark consult-recent-file
-  ;;  consult--source-recent-file
-  ;;  consult--source-project-recent-file consult--source-bookmark
-  ;;  consult-fd
-  ;;  :preview-key "M-p")
-  ;; (consult-customize
-  ;;  consult-theme
-  ;;  :preview-key (list "M-p" :debounce 0.6 'any))
   )
-
 
 ;; [consult-dir] Insert path quickly in minibuffer
 (use-package consult-dir
@@ -204,179 +191,120 @@
   (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-local t)
   )
 
-;;; 光标移动增强
-;; 字符跳转
-(use-package avy
-  :bind
-  ("C-h" . avy-goto-char-timer)
-  :config
-  (setq avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
-  (setq avy-background t)) ; 在跳转时背景变黑
+;;; misc 
+;; 地址跳转设置
+(use-package goto-addr
+  :straight nil
+  :hook ((text-mode . goto-address-mode)
+         (prog-mode . goto-address-prog-mode)))
 
-;; 改变光标移动绑定，使其更加方便
-(global-set-key (kbd "C-f") 'forward-word)
-;; (global-set-key (kbd "C-b") 'backward-word)
-;; (global-set-key (kbd "C-l") 'forward-char)
-;; (global-set-key (kbd "C-h") 'backward-char)
+;; [ediff] Diff & patch
+(use-package ediff
+  :straight nil
+  :hook
+  ((ediff-before-setup . +ediff-save-window-config)
+         ((ediff-quit ediff-suspend) . +ediff-restore-window-config))
+  :functions (outline-show-all)
+  :config
+
+  ;; unfold outlines when using ediff
+  (with-eval-after-load 'outline
+    (add-hook 'ediff-prepare-buffer-hook #'outline-show-all))
+
+  ;; Restore window config after quitting ediff
+  (defvar +ediff-saved-window-config nil)
+  (defun +ediff-save-window-config ()
+    (setq +ediff-saved-window-config (current-window-configuration)))
+  (defun +ediff-restore-window-config ()
+    (when (window-configuration-p +ediff-saved-window-config)
+      (set-window-configuration +ediff-saved-window-config)))
+
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain
+        ediff-split-window-function 'split-window-horizontally
+        ediff-merge-split-window-function 'split-window-horizontally
+        ;; turn off whitespace checking
+        ediff-diff-options "-w")
+  )
+
+;; [ispell] spell checker
+(use-package ispell
+  :straight nil
+  :hook ((org-mode . org-skip-region-alist)
+         (markdown-mode . markdown-skip-region-alist))
+  :config
+  ;; Don't spellcheck org blocks
+  (defun org-skip-region-alist ()
+    (make-local-variable 'ispell-skip-region-alist)
+    (dolist (pair '((org-property-drawer-re)
+                    ("~" "~") ("=" "=")
+                    ("^#\\+BEGIN_SRC" "^#\\+END_SRC")
+                    ("\\\\(" "\\\\)") ("\\[" "\\]")
+                    ("^\\\\begin{[^}]+}" "^\\\\end{[^}]+}")))
+      (add-to-list 'ispell-skip-region-alist pair)))
+
+  (defun markdown-skip-region-alist ()
+    (make-local-variable 'ispell-skip-region-alist)
+    (dolist (pair '(("`" "`")
+                    ("^```" "^```")
+                    ("{{" "}}")
+                    ("\\\\(" "\\\\)") ("\\[" "\\]")
+                    ("^\\\\begin{[^}]+}" "^\\\\end{[^}]+}")))
+      (add-to-list 'ispell-skip-region-alist pair)))
+
+  (setq ispell-program-name "aspell"
+        ispell-extra-args '("--sug-mode=ultra" "--run-together")
+        ispell-dictionary "en_US")
+
+  (setq ispell-aspell-dict-dir (ispell-get-aspell-config-value "dict-dir")
+        ispell-aspell-data-dir (ispell-get-aspell-config-value "data-dir")
+        ispell-personal-dictionary (expand-file-name "ispell/.pws" user-emacs-directory))
+  )
+
+;; Bookmark Register Rectangle
+(defhydra Cx-r (
+                :hint nil ; 只显示注释字符串，不显示绑定信息
+                :color blue ; 执行完一次后就退出
+                :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
+                )
+  "
+        Bookmark^^        Register^^        Rectangle^^
+  --------------------------------------------------------
+        [_l_] List        [_v_] List        [_M_] Mark
+        [_m_] Mark        [_SPC_] Point     [_N_] Number
+        [_b_] Jump        [_s_] Text        [_t_] String
+        ^ ^               [_r_] Rectangle   [_o_] Space
+        ^ ^               [_w_] Window      [_c_] Clear
+        ^ ^               [_K_] Kmacro      [_k_] Kill
+        [_q_] Quit        ^ ^               [_y_] Yank
+  "
+  ("m" bookmark-set-no-overwrite)
+  ("b" bookmark-jump)
+  ("l" bookmark-bmenu-list)
+
+  ("v" consult-register)
+  ("SPC" point-to-register)
+  ("s" copy-to-register)
+  ("r" copy-rectangle-to-register)
+  ("w" window-configuration-to-register)
+  ("K" kmacro-to-register)
+
+  ("M" rectangle-mark-mode :color red) ; red 执行完后不退出
+  ("N" rectangle-number-lines :color red)
+  ("t" string-rectangle :color red)
+  ("o" open-rectangle :color red)
+  ("c" clear-rectangle :color red)
+  ("k" kill-rectangle :color red)
+  ("y" yank-rectangle :color red)
+
+  ("q" nil))
+(global-set-key (kbd "C-x r") 'Cx-r/body)
 
 ;; 使 f2 为宏计数器
 (global-set-key (kbd "<f2>") 'kmacro-set-counter)
 
-;; 增强 C-e 使得其可以在关键位置进行循环移动
-(use-package mosey
-  :bind
-  ("C-e" . mosey-forward-cycle))
-
-;; [beginend] Better M-< M-> for programming
-(use-package beginend
-  :hook (after-init . beginend-global-mode))
-
-
-;;; window 增强
-;; 使用 M-n 快速切换窗口
-(use-package ace-window
-  :custom-face
-  (aw-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 3.0))))
-  (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
-  :bind
-  ("C-x 9" . ace-delete-window)
-  ("C-x 8" . ace-swap-window)
-  :hook
-  ((window-configuration-change . aw-update)) ;; For modeline
-  :config
-  (setq aw-scope 'frame
-        aw-background nil
-        aw-ignore-current t)
-
-  ;; Select widnow via `M-1'...`M-9'
-  (defun +aw--select-window (number)
-    "Select the specified window."
-    (let* ((window-list (aw-window-list))
-           (target-window nil))
-      (cl-loop for win in window-list
-               when (and (window-live-p win)
-                         (eq number
-                             (string-to-number
-                              (window-parameter win 'ace-window-path))))
-               do (setq target-window win)
-               finally return target-window)
-
-      ;; Select the target window if found
-      (if target-window
-          (aw-switch-to-window target-window)
-        (message "No specified window: %d" number))))
-
-  (dotimes (n 9)
-    (bind-key (concat "M-" (number-to-string (1+ n)))
-              (lambda ()
-                (interactive)
-                (+aw--select-window (1+ n)))))
-  )
-
-;; 存储原来的窗口布局
-(use-package winner
-  :commands (winner-undo winner-redo)
-  :init
-  (setq winner-dont-bind-my-keys t)
-  :hook (after-init . winner-mode)
-  :config
-  (setq winner-boring-buffers
-        '("*Completions*" "*Compile-Log*" "*inferior-lisp*" "*Fuzzy Completions*"
-          "*Apropos*" "*Help*" "*cvs*" "*Buffer List*" "*Ibuffer*"
-          "*esh command on file*"))
-  )
-
-;; popper 是一种特殊 buffer，所有的 popper 都只会占用同一个 window （出现在底部）
-;; 利用这种机制可以使我们将许多临时的 buffer 都管理在一个窗口下
-(use-package popper
-  :bind
-  ("C-=" . popper-toggle-type) ; 将 popper 转换为普通 buffer
-  ("C--"  . popper-cycle) ; 切换多个 popper, 也可用于 toggle 出 popper window
-  :hook
-  (emacs-startup . popper-mode)
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "\\*color-rg\\*"
-          "Output\\*$" "\\*Pp Eval Output\\*$"
-          "\\*Compile-Log\\*"
-          "\\*Completions\\*"
-          "\\*Warnings\\*"
-          "\\*Async Shell Command\\*"
-          "\\*Apropos\\*"
-          "\\*Backtrace\\*"
-          "\\*Calendar\\*"
-          "\\*Embark Actions\\*"
-          "\\*Finder\\*"
-          "\\*Kill Ring\\*"
-          "\\*Go-Translate\\*"
-
-          "Bookmark List" bookmark-bmenu-mode
-          comint-mode
-          compilation-mode
-          ibuffer-mode
-          help-mode
-          tabulated-list-mode
-          Buffer-menu-mode
-
-          gnus-article-mode devdocs-mode
-          grep-mode occur-mode rg-mode ag-mode pt-mode
-          osx-dictionary-mode
-
-          "^\\*Process List\\*" process-menu-mode
-          list-environment-mode cargo-process-mode
-
-          "^\\*eshell.*\\*.*$" eshell-mode
-          "^\\*shell.*\\*.*$"  shell-mode
-          "^\\*terminal.*\\*.*$" term-mode
-          "^\\*vterm.*\\*.*$"  vterm-mode
-          "^\\*eldoc.*\\*.*$" eldoc-mode
-          "^magit.*$" magit-mode
-          "\\*Flycheck errors\\*$" " \\*Flycheck checker\\*$"
-          "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
-          "\\*[Wo]*Man.*\\*$"
-          "\\*ert\\*$" overseer-buffer-mode
-          "\\*gud-debug\\*$"
-          "\\*lsp-help\\*$" "\\*lsp session\\*$"
-          "\\*quickrun\\*$"
-          "\\*tldr\\*$"
-          "\\*vc-.*\\*$"
-          "^\\*elfeed-entry\\*$"
-          "^\\*macro expansion\\**"
-
-          "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
-          "\\*docker-.+\\*"
-          "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
-          "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
-          rustic-cargo-outdated-mode rustic-cargo-test-mode
-
-          chatgpt-shell-mode
-	      ))
-
-  :config
-  ;; mode-line indicator
-  (with-eval-after-load 'popper
-    (setq popper-mode-line
-          '(:eval `(:propertize " POP |"
-                                face ,(+mode-line-get-window-name-face (+mode-line-window-active-p))))))
-
-  ;; Enable indicator in minibuffer
-  (popper-echo-mode 1)
-
-  ;; HACK: close popper with `C-g'
-  (defun +popper-close-window-hack (&rest _)
-    "Close popper window via `C-g'."
-    (when (and (called-interactively-p 'interactive)
-               (not (region-active-p))
-               popper-open-popup-alist)
-      (let ((window (caar popper-open-popup-alist)))
-        (when (window-live-p window)
-          (delete-window window)))))
-  (advice-add #'keyboard-quit :before #'+popper-close-window-hack)
-  :custom
-  (popper-window-height 35)
-  )
-
-
-;; [zoom] Managing the window sizes automatically
-(use-package zoom)
+;; 映射中文输入
+(cl-loop for prefix in '("C-" "M-" "s-" "H-")
+         do
+         (cl-loop for cpunc in '("，" "。" "？" "！" "；" "：" "、" "（" "）" "【" "】" "《" "》" "—")
+                  for epunc in '("," "." "?" "!" ";" ":" "," "(" ")" "[" "]" "<" ">" "_")
+                  do (define-key key-translation-map (kbd (concat prefix cpunc)) (kbd (concat prefix epunc)))))

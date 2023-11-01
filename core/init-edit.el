@@ -16,15 +16,6 @@
         show-paren-context-when-offscreen t)
   )
 
-;; 显示错误的空白字符，并没有很好的效果
-;; (use-package whitespace
-;;   :hook ((prog-mode conf-mode yaml-mode) . whitespace-mode)
-;;   :init
-;;   :config
-;;   (setq
-;;    ;; only show bad whitespace
-;;    whitespace-style '(face trailing empty indentation space-before-tab space-after-tab)))
-
 ;; 彩虹扩号
 (use-package rainbow-delimiters
   :hook ((prog-mode conf-mode yaml-mode) . rainbow-delimiters-mode)
@@ -32,29 +23,7 @@
   (setq rainbow-delimiters-max-face-count 5)
   )
 
-
-;; 加粗父扩号
-(use-package highlight-parentheses
-  :hook ((minibuffer-setup . highlight-parentheses-minibuffer-setup)
-         (prog-mode . highlight-parentheses-mode))
-  :config
-  (setq highlight-parentheses-colors '("SpringGreen3" "IndianRed1" "IndianRed3" "IndianRed4")
-        highlight-parentheses-attributes '((:underline t :weight bold)
-                                           (:underline t :weight bold)
-                                           (:underline t :weight bold))
-        highlight-parentheses-delay 0.2))
-
-
-;; 展示颜色，用于 CSS 或者 HTML
-(use-package rainbow-mode
-  :functions (rainbow-turn-off rainbow-colorize-match rainbow-x-color-luminance)
-  :bind (:map help-mode-map
-              ("r" . rainbow-mode))
-  :hook ((html-mode css-mode) . rainbow-mode)
-  )
-
-
-;; [hl-todo] Highlight TODO and similar keywords in comments and strings
+;; 高亮 TODO, BUG 等关键词
 (use-package hl-todo
   :custom-face
   (hl-todo ((t (:inherit default :height 0.9 :width condensed :weight bold :inverse-video t))))
@@ -78,7 +47,7 @@
   (advice-add #'enable-theme :after #'+hl-update-keyword-faces)
   )
 
-;; 缩进高亮
+;; 缩进虚线
 (use-package indent-bars
   :straight (indent-bars :type git :host github :repo "jdtsmith/indent-bars")
   :hook (prog-mode . indent-bars-mode)
@@ -94,38 +63,15 @@
   (advice-add #'enable-theme :after #'+indent-bars-auto-set-faces)
   )
 
-;; 当进行复制、粘贴和剪切等行为的时候，会高亮这个区域
-;; (use-package goggles
-;;   :hook
-;;   ((prog-mode conf-mode yaml-mode text-mode) . goggles-mode)
-;;   :config
-;;   (setq-default goggles-pulse nil)
-;;   )
-
-;; 将需要高亮的符号进行高亮
+;;; 重构设置
+;; 将需要高亮的符号进行高亮，当光标在 overlay 区域时，会触发新的快捷键用于操作符号
 (use-package symbol-overlay
   :bind
-  ("<f6>" . symbol-overlay-rename)
   ("<f7>" . symbol-overlay-put)
   ("<f8>" . symbol-overlay-remove-all)
   :hook
   (((prog-mode yaml-mode) . symbol-overlay-mode))
   )
-
-;; 注释
-(defun smart-comment (&optional arg)
-  "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line,
-   then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
-  (interactive "*P")
-  (comment-normalize-vars)
-  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
-      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
-    (comment-dwim arg)))
-
-(global-set-key (kbd "C-/") 'smart-comment)
-
-;; comment over empty lines
-(setq comment-empty-lines t)
 
 ;; 搜索替换
 (use-package color-rg
@@ -150,60 +96,40 @@
         (color-rg-search-input-in-project)
       (message "Not in a project"))))
 
-;; Do not add the duplicates that the same as the last one to kill-ring
-(setq kill-do-not-save-duplicates t)
-
-;; Save clipboard contents into kill-ring before replace them
-(setq save-interprogram-paste-before-kill t)
-
-;; [autorevert] TODO: Add hooks as what doom has done?
-(use-package autorevert
-  :hook
-  (after-init . global-auto-revert-mode)
+;; 撤销历史, 使用 f / b 移动
+(use-package vundo
   :config
-  ; Only prompts for confirmation when buffer is unsaved.
-  (setq revert-without-query (list "."))
+  (setq vundo-compact-display t)
+  :bind
+  ("C-c u" . vundo)
   )
 
-;; [goto-addr] Click to open URL
-(use-package goto-addr
-  :straight nil
-  :hook ((text-mode . goto-address-mode)
-         (prog-mode . goto-address-prog-mode)))
+;; 智能注释
+(defun +smart-comment (&optional arg)
+  (interactive "*P")
+  (comment-normalize-vars)
+  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+    (comment-dwim arg)))
+(global-set-key (kbd "C-/") '+smart-comment)
+(setq comment-empty-lines t) ; comment over empty lines
 
-;; [ws-butler] Remove trailing whitespace with lines touched
-(use-package ws-butler
-  :hook ((prog-mode markdown-mode) . ws-butler-mode))
+;; 自动格式化
+(defun +smart-format ()
+  "Indent the active region if selected, otherwise format the buffer using eglot if available."
+  (interactive)
+  (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p)) ; 判断 eglot
+      (if (use-region-p)
+          (eglot-format (region-beginning) (region-end))
+        (eglot-format-buffer))
+    (if (use-region-p)
+        (indent-region (region-beginning) (region-end))
+      (indent-region (point-min) (point-max))))
+  (message "formatting done."))
+(global-set-key (kbd "C-c f") '+smart-format)
 
-;; [ediff] Diff & patch
-(use-package ediff
-  :straight nil
-  :hook
-  ((ediff-before-setup . +ediff-save-window-config)
-         ((ediff-quit ediff-suspend) . +ediff-restore-window-config))
-  :functions (outline-show-all)
-  :config
-
-  ;; unfold outlines when using ediff
-  (with-eval-after-load 'outline
-    (add-hook 'ediff-prepare-buffer-hook #'outline-show-all))
-
-  ;; Restore window config after quitting ediff
-  (defvar +ediff-saved-window-config nil)
-  (defun +ediff-save-window-config ()
-    (setq +ediff-saved-window-config (current-window-configuration)))
-  (defun +ediff-restore-window-config ()
-    (when (window-configuration-p +ediff-saved-window-config)
-      (set-window-configuration +ediff-saved-window-config)))
-
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain
-        ediff-split-window-function 'split-window-horizontally
-        ediff-merge-split-window-function 'split-window-horizontally
-        ;; turn off whitespace checking
-        ediff-diff-options "-w")
-  )
-
-;; [elec-pair] Automatic parenthesis pairing
+;;; 结构化编辑
+;; 括号平衡
 (use-package elec-pair
   :hook
   ((prog-mode) . electric-pair-mode)
@@ -213,8 +139,10 @@
             (setq-local electric-pair-mode nil)))
   )
 
-;; 一口气删掉多个空白格
-(setq backward-delete-char-untabify-method 'hungry)
+;; 空格处理
+(use-package ws-butler
+  :hook ((prog-mode markdown-mode) . ws-butler-mode)) ; Remove trailing whitespace with lines touched
+(setq backward-delete-char-untabify-method 'hungry) ; 一次删除多个空格
 
 ;; 处理类似驼峰命名法的情况，此时会将一个一个驼峰视为一个单词
 (use-package subword
@@ -227,6 +155,7 @@
   :hook ((prog-mode conf-mode yaml-mode) . hs-minor-mode)
   :bind
   ("C-o" . hs-toggle-hiding)
+  ("C-M-o" . hs-toggle-all)
   :config
   ;; More functions
   ;; @see https://karthinks.com/software/simple-folding-with-hideshow/
@@ -363,16 +292,29 @@ begin and end of the block surrounding point."
 
 ;; 可以快速选择区域
 (use-package expand-region
-  :bind ("C-l" . er/expand-region))
-
-;; [vundo] Undo tree, 使用 f / b 移动
-(use-package vundo
-  :config
-  (setq vundo-compact-display t)
   :bind
-  ("C-c u" . vundo)
+  ("C-l" . er/expand-region)
+  ("C-M-l" . er/contract-region))
+
+;; 用于强化删除功能，可以平衡删除
+(use-package puni
+  :hook
+  ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
+  :config
+  (define-key puni-mode-map (kbd "C-k") nil)
+  (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
+  (define-key puni-mode-map (kbd "C-w") nil)
   )
 
+;; 快速编辑成对出现的标点
+(use-package embrace
+  :bind
+  ("C-." . embrace-commander)
+  :hook
+  (org-mode . embrace-org-mode-hook)
+  )
+
+;;; misc
 ;; [sudo-edit] edit file with su permissions
 (use-package sudo-edit
   :config
@@ -385,173 +327,3 @@ begin and end of the block surrounding point."
   (setq wgrep-auto-save-buffer t)
   )
 
-;; 用于强化删除功能，可以平衡删除
-(use-package puni
-  :hook
-  ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
-  :bind
-  ("DEL" . +puni-hungry-delete)
-  :config
-  (defun +puni-hungry-delete ()
-    (interactive)
-    (if (looking-back "^[[:blank:]]+")
-        (let* ((puni-mode nil)
-               (original-func (key-binding (kbd "DEL"))))
-          ;; original-func is what `DEL' would be if puni-mode were disabled
-          (if (eq original-func 'delete-backward-char)
-              (backward-delete-char-untabify 1)
-            (call-interactively original-func)))
-      (puni-backward-delete-char)))
-  (define-key puni-mode-map (kbd "C-k") nil)
-  (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
-  (define-key puni-mode-map (kbd "C-w") nil)
-  )
-
-;; [ispell] spell checker
-(use-package ispell
-  :straight nil
-  :hook ((org-mode . org-skip-region-alist)
-         (markdown-mode . markdown-skip-region-alist))
-  :config
-  ;; Don't spellcheck org blocks
-  (defun org-skip-region-alist ()
-    (make-local-variable 'ispell-skip-region-alist)
-    (dolist (pair '((org-property-drawer-re)
-                    ("~" "~") ("=" "=")
-                    ("^#\\+BEGIN_SRC" "^#\\+END_SRC")
-                    ("\\\\(" "\\\\)") ("\\[" "\\]")
-                    ("^\\\\begin{[^}]+}" "^\\\\end{[^}]+}")))
-      (add-to-list 'ispell-skip-region-alist pair)))
-
-  (defun markdown-skip-region-alist ()
-    (make-local-variable 'ispell-skip-region-alist)
-    (dolist (pair '(("`" "`")
-                    ("^```" "^```")
-                    ("{{" "}}")
-                    ("\\\\(" "\\\\)") ("\\[" "\\]")
-                    ("^\\\\begin{[^}]+}" "^\\\\end{[^}]+}")))
-      (add-to-list 'ispell-skip-region-alist pair)))
-
-  (setq ispell-program-name "aspell"
-        ispell-extra-args '("--sug-mode=ultra" "--run-together")
-        ispell-dictionary "en_US")
-
-  (setq ispell-aspell-dict-dir (ispell-get-aspell-config-value "dict-dir")
-        ispell-aspell-data-dir (ispell-get-aspell-config-value "data-dir")
-        ispell-personal-dictionary (expand-file-name "ispell/.pws" user-emacs-directory))
-  )
-
-;; [embrace] Add/change/delete pairs of symbol
-(use-package embrace
-  :bind
-  ("C-." . embrace-commander)
-  :hook
-  (org-mode . embrace-org-mode-hook)
-  )
-
-
-;; [imenu] Jump to function definitions
-(use-package imenu
-  :straight nil
-  :hook ((prog-mode conf-mode yaml-mode markdown-mode org-mode) . imenu-add-menubar-index)
-  :config
-  (setq imenu-auto-rescan t)
-  )
-
-;; 增强注释
-(defun +smart-comment (&optional arg)
-  "Replacement for the comment-dwim command. If no region is selected and current line is not blank and we are not at the end of the line,
-   then comment current line. Replaces default behaviour of comment-dwim, when it inserts comment at the end of the line."
-  (interactive "*P")
-  (comment-normalize-vars)
-  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
-      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
-    (comment-dwim arg)))
-(global-set-key (kbd "C-/") '+smart-comment)
-
-;; comment over empty lines
-(setq comment-empty-lines t)
-
-;; 自动格式化
-(defun +smart-format ()
-  "Indent the active region if selected, otherwise format the buffer using eglot if available."
-  (interactive)
-  (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p)) ; 判断 eglot
-      (if (use-region-p)
-          (eglot-format (region-beginning) (region-end))
-        (eglot-format-buffer))
-    (if (use-region-p)
-        (indent-region (region-beginning) (region-end))
-      (indent-region (point-min) (point-max))))
-  (message "formatting done."))
-(global-set-key (kbd "C-c f") '+smart-format)
-
-(defhydra Cx-r (
-                :hint nil ; 只显示注释字符串，不显示绑定信息
-                :color blue ; 执行完一次后就退出
-                :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
-                )
-  "
-        Bookmark^^        Register^^        Rectangle^^
-  --------------------------------------------------------
-        [_l_] List        [_v_] List        [_M_] Mark
-        [_m_] Mark        [_SPC_] Point     [_N_] Number
-        [_b_] Jump        [_s_] Text        [_t_] String
-        ^ ^               [_r_] Rectangle   [_o_] Space
-        ^ ^               [_w_] Window      [_c_] Clear
-        ^ ^               [_K_] Kmacro      [_k_] Kill
-        [_q_] Quit        ^ ^               [_y_] Yank
-  "
-  ("m" bookmark-set-no-overwrite)
-  ("b" bookmark-jump)
-  ("l" bookmark-bmenu-list)
-
-  ("v" consult-register)
-  ("SPC" point-to-register)
-  ("s" copy-to-register)
-  ("r" copy-rectangle-to-register)
-  ("w" window-configuration-to-register)
-  ("K" kmacro-to-register)
-
-  ("M" rectangle-mark-mode :color red) ; red 执行完后不退出
-  ("N" rectangle-number-lines :color red)
-  ("t" string-rectangle :color red)
-  ("o" open-rectangle :color red)
-  ("c" clear-rectangle :color red)
-  ("k" kill-rectangle :color red)
-  ("y" yank-rectangle :color red)
-
-  ("q" nil))
-(global-set-key (kbd "C-x r") 'Cx-r/body)
-
-;; (use-package multiple-cursors
-;;   :after hydra
-;;   :bind
-;;   (("C-c m" . hydra-multiple-cursors/body)
-;;    ("C-S-<mouse-1>" . mc/toggle-cursor-on-click))
-;;   :config
-;;   (defhydra hydra-multiple-cursors (:hint nil)
-;;     "
-;; Up^^             Down^^           Miscellaneous           % 2(mc/num-cursors) cursor%s(if (> (mc/num-cursors) 1) \"s\" \"\")
-;; ------------------------------------------------------------------
-;;  [_p_]   Prev     [_n_]   Next     [_l_] Edit lines  [_0_] Insert numbers
-;;  [_P_]   Skip     [_N_]   Skip     [_a_] Mark all    [_A_] Insert letters
-;;  [_M-p_] Unmark   [_M-n_] Unmark   [_s_] Search      [_q_] Quit
-;;  [_|_] Align with input CHAR       [Click] Cursor at point"
-;; 		  ("l" mc/edit-lines :exit t)
-;; 		  ("a" mc/mark-all-like-this :exit t)
-;; 		  ("n" mc/mark-next-like-this)
-;; 		  ("N" mc/skip-to-next-like-this)
-;; 		  ("M-n" mc/unmark-next-like-this)
-;; 		  ("p" mc/mark-previous-like-this)
-;; 		  ("P" mc/skip-to-previous-like-this)
-;; 		  ("M-p" mc/unmark-previous-like-this)
-;; 		  ("|" mc/vertical-align)
-;; 		  ("s" mc/mark-all-in-region-regexp :exit t)
-;; 		  ("0" mc/insert-numbers :exit t)
-;; 		  ("A" mc/insert-letters :exit t)
-;; 		  ("<mouse-1>" mc/add-cursor-on-click)
-;; 		  ;; Help with click recognition in this hydra
-;; 		  ("<down-mouse-1>" ignore)
-;; 		  ("<drag-mouse-1>" ignore)
-;; 		  ("q" nil)))

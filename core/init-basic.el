@@ -15,7 +15,7 @@
 ;; 设置自动恢复数据
 (advice-add #'after-find-file :around
             (lambda (fn &rest args) (cl-letf (((symbol-function #'sit-for) #'ignore))
-                                      (apply fn args))))
+                                 (apply fn args))))
 
 
 ;;; 过长文本的显示问题
@@ -103,6 +103,10 @@
 (global-set-key (kbd "C-q") 'my-kill-region-or-line)
 (global-set-key (kbd "C-w") 'my-copy-region-or-line)
 
+;; 剪切粘贴行为修正
+(setq kill-do-not-save-duplicates t) ; 不重复增加 kill ring 内容
+(setq save-interprogram-paste-before-kill t) ; 在 replace 将替换内容存入 kill ring
+
 ;; 模仿 CUA 模式
 (global-set-key (kbd "C-S-v") 'yank)
 (global-set-key (kbd "C-S-x") 'my-kill-region-or-line)
@@ -119,16 +123,6 @@
 
 (global-set-key (kbd "C-z") 'undo)
 
-;; window scroll 绑定
-(defvar +scrolling-lines 5)
-(bind-keys*
- ;; 在其他窗口滚动
- ("M-<down>" . (lambda () (interactive) (scroll-other-window +scrolling-lines)))
- ("M-<up>" . (lambda () (interactive) (scroll-other-window (- +scrolling-lines))))
- ;; 在本窗口滚动
- ("C-v" . (lambda () (interactive) (scroll-up +scrolling-lines)))
- ("M-v" . (lambda () (interactive) (scroll-up (- +scrolling-lines)))))
-
 ;;; 历史信息记录
 ;; save-place-mode 可以保存文件的上次浏览位置，即使 emacs 关闭也可以保存
 (use-package saveplace
@@ -139,7 +133,7 @@
   ;; replace it with `prin1'
   (advice-add #'save-place-alist-to-file :around
               (lambda (fn) (cl-letf (((symbol-function #'pp) #'prin1))
-                             (funcall fn))))
+                        (funcall fn))))
   )
 
 ;; 调用最近的浏览文件记录
@@ -175,13 +169,13 @@
                                         ; 移除了 kill-ring 中的文本属性，以减小 savehist 缓存的大小
   (add-hook 'savehist-save-hook
             (lambda () (setq kill-ring
-                             (mapcar #'substring-no-properties
-                                     (cl-remove-if-not #'stringp kill-ring))
-                             register-alist
-                             (cl-loop for (reg . item) in register-alist
-                                      if (stringp item)
-                                      collect (cons reg (substring-no-properties item))
-                                      else collect (cons reg item)))))
+                        (mapcar #'substring-no-properties
+                                (cl-remove-if-not #'stringp kill-ring))
+                        register-alist
+                        (cl-loop for (reg . item) in register-alist
+                                 if (stringp item)
+                                 collect (cons reg (substring-no-properties item))
+                                 else collect (cons reg item)))))
   (with-eval-after-load 'vertico
     (add-to-list 'savehist-additional-variables 'vertico-repeat-history)) ; 记录 vertico repeat 信息
   )
@@ -224,3 +218,10 @@
 
 ;; 开启删除所选区域模式
 (add-hook 'after-init-hook 'delete-selection-mode)
+
+;; 当其他编辑器也更改某个 buffer 时，会自动更新
+(use-package autorevert
+  :hook
+  (after-init . global-auto-revert-mode)
+  :config
+  (setq revert-without-query (list ".")))

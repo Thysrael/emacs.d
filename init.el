@@ -4,6 +4,8 @@
                      'init-tmp
                      'init-basic
                      'init-enhance
+                     'init-window   
+                     'init-navigate
                      'init-ui
                      'init-modeline
                      'init-input

@@ -44,6 +44,6 @@
   (setq python-indent-offset 4)
   (add-to-list 'auto-mode-alist '("SConstruct\\'" . python-mode))
   (add-to-list 'auto-mode-alist '("SConscript\\'" . python-mode))
-  )
+)
 
 (use-package cuda-mode)
