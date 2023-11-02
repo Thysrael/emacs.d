@@ -32,6 +32,9 @@
   :hook ((html-mode css-mode) . rainbow-mode)
   )
 
+;; 快捷键展示
+(use-package which-key)
+
 ;;; 工具宏
 ;; Thanks to DOOM Emacs
 (defmacro add-hook! (hooks &rest rest)
@@ -47,7 +50,7 @@ This macro accepts, in order:
 
 \(fn HOOKS [:append :local [:depth N] :remove :call-immediately] FUNCTIONS-OR-FORMS...)"
   (declare (indent defun))
-  (let* ((hook-forms hooks)
+  (let* ((hook-forms (if (listp hooks) hooks (list hooks)))
          (func-forms ())
          (defn-forms ())
          append-p local-p remove-p call-immediately-p depth)

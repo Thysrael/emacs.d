@@ -8,7 +8,7 @@
  ("M-<up>" . (lambda () (interactive) (scroll-other-window (- +scrolling-lines))))
  ;; 在本窗口滚动
  ("C-v" . (lambda () (interactive) (scroll-up +scrolling-lines)))
- ("M-v" . (lambda () (interactive) (scroll-up (- +scrolling-lines)))))
+ )
 
 ;; 选择窗口
 (use-package ace-window
@@ -157,7 +157,8 @@
 ;; 可以随着所在 window 调整其他 window 的大小
 (use-package zoom
   :hook
-  (after-init . zoom-mode))
+  (window-setup . zoom-mode)
+  )
 
 ;; 不活跃的 window 会变暗
 (use-package auto-dim-other-buffers
@@ -172,7 +173,7 @@
     (set-face-background 'auto-dim-other-buffers-face (face-background 'mode-line)))
   )
 
-;; [beacon] Highlight line at cursor after switching window
+;; Highlight line at cursor after switching window
 (use-package pulse
   :custom-face
   (pulse-highlight-start-face ((t (:inherit region :background unspecified))))
