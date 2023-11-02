@@ -57,7 +57,6 @@
 
 ;; org-mode
 (use-package org-mode
-  :straight nil
   :custom-face
   (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
                                         ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
@@ -67,6 +66,7 @@
   (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :height 1.10 :family "LXGW WenKai"))))
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
+  (org-mode . org-num-mode) ; 添加标题序号
   :init
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
@@ -79,7 +79,7 @@
   (setq org-hide-emphasis-markers t) ; 隐藏格式控制符
   (setq org-link-descriptive t) ; 显示链接的描述而非 URL
   (setq org-special-ctrl-a/e t) ; 在标题处 Ctrl-a 会忽略 *
-  ; 配置 org 行内样式
+  ;; 配置 org 行内样式
   (defface org-bold
     '((t :foreground "#d2268b"
          :weight bold
@@ -96,8 +96,10 @@
           ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
            org-code verbatim)
           ("+" (:strike-through t))))
-  :hook
-  (org-mode . org-num-mode) ; 添加标题序号
+  :bind
+  (:map org-mode-map
+        ("C-c C-w" . org-copy-subtree)
+        ("C-c C-q" . org-cut-subtree))
   )
 
 ;; ;; 现代化图标
@@ -112,12 +114,12 @@
   :custom
   (valign-fancy-bar t)
   :hook
-  (org-mode . valign-mode))
+  (org-mode . valign-mode)
+  (markdown-mode . valign-mode))
 
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
   :after org
-  :straight nil
   :init
   (add-to-list 'load-path "~/.emacs.d/straight/repos/org-appear/")
   ;; (require 'org-appear)
