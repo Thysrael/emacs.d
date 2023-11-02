@@ -40,10 +40,11 @@
 
 (use-package python-mode
   :straight nil
-  :config
-  (setq python-indent-offset 4)
+  :init
+  ; 需要加到 init 里才可以自动触发
   (add-to-list 'auto-mode-alist '("SConstruct\\'" . python-mode))
   (add-to-list 'auto-mode-alist '("SConscript\\'" . python-mode))
+  (setq python-indent-offset 4)
 )
 
 (use-package cuda-mode)
