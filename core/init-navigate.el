@@ -1,7 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 ;; 改变光标移动绑定，使其更加方便
-(global-set-key (kbd "C-f") 'forward-word)
+;; (global-set-key (kbd "C-f") 'forward-char)
 ;; (global-set-key (kbd "C-b") 'backward-word)
 ;; (global-set-key (kbd "C-l") 'forward-char)
 ;; (global-set-key (kbd "C-h") 'backward-char)
@@ -12,7 +12,12 @@
   ("C-h" . avy-goto-char-timer)
   :config
   (setq avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
-  (setq avy-background t)) ; 在跳转时背景变黑
+  (setq avy-background t) ; 在跳转时背景变黑
+  :init
+  (setq avy-single-candidate-jump nil)
+  (advice-add 'avy-action-goto :after (lambda (&rest _args)
+                                      (forward-word)))
+  )
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mosey
