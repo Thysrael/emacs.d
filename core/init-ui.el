@@ -172,5 +172,6 @@
   )
 
 ;; (load-theme 'doom-ayu-mirage t)
-(load-theme 'doom-moonlight t)
+;; (load-theme 'doom-moonlight t)
+(load-theme 'doom-dracula t)
 ;; (load-theme'doom-nord t)

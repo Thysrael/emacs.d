@@ -161,14 +161,15 @@
   :straight 
   (:files (:defaults "extensions/*.el")) ;; 可以减少加载 corfu 的默认配置
   :hook 
-  ((prog-mode conf-mode yaml-mode shell-mode eshell-mode) . corfu-mode)       
+  ((prog-mode text-mode conf-mode yaml-mode shell-mode eshell-mode) . corfu-mode)
   ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil))) ; 在 shell 模式取消补全
-  :bind 
+  :bind
   (:map corfu-map
         ([tab] . corfu-next)
         ([backtab] . corfu-previous)
+        ;; ("RET" . nil)
         )
-  :config
+  :init
   (setq corfu-cycle t                ; Enable cycling for `corfu-next/previous'
         corfu-auto t                 ; Enable auto completion
         corfu-separator "&"          ; Orderless field separator
@@ -177,7 +178,7 @@
         corfu-auto-delay 0
         corfu-on-exact-match nil     ; 解决 dd 自动展开的关键
         corfu-min-width 25
-        ;; corfu-preselect 'prompt   ; 不知道为啥，这个可以避免自动选择，可以使 tab 更加方便
+        ;; corfu-preselect 'directory   ; 不知道为啥，这个可以避免自动选择，可以使 tab 更加方便
         )
 
   )

@@ -42,7 +42,7 @@
       (if target-window
           (aw-switch-to-window target-window)
         (message "No specified window: %d" number))))
-          (dotimes (n 9)
+  (dotimes (n 9)
     (bind-key (concat "M-" (number-to-string (1+ n)))
               (lambda ()
                 (interactive)
@@ -178,8 +178,9 @@
   :custom-face
   (pulse-highlight-start-face ((t (:inherit region :background unspecified))))
   (pulse-highlight-face ((t (:inherit region :background unspecified :extend t))))
-  :hook (((dumb-jump-after-jump imenu-after-jump) . +recenter-and-pulse)
-         ((bookmark-after-jump magit-diff-visit-file next-error) . +recenter-and-pulse-line))
+  :hook
+  (((dumb-jump-after-jump imenu-after-jump) . +recenter-and-pulse)
+   ((bookmark-after-jump magit-diff-visit-file next-error) . +recenter-and-pulse-line))
   :init
   (defun +pulse-momentary-line (&rest _)
     "Pulse the current line."

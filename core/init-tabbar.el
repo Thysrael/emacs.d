@@ -9,6 +9,8 @@
   ("<f10>"  . tab-next)
   ("s-<right>" . tab-next)
   ("s-<left>" . tab-previous)
+  ("s-l" . tab-next)
+  ("s-h" . tab-previous)
   ;; Turn on tab-bar-mode in early-init to speed-up
   :hook (window-setup . tab-bar-mode)
   :config
@@ -77,103 +79,103 @@
           (+tab-bar-update-persp-indicator))))
 
   ;; cache for telega indicator
-  (with-eval-after-load 'telega
-    (defvar +tab-bar-telega-indicator-cache nil)
-
-    (add-hook! (telega-connection-state-hook telega-kill-hook telega-online-status-hook)
-      (defun +tab-bar-telega-icon-update (&rest rest)
-        (when (buffer-live-p telega-server--buffer)
-          (let* ((me-user (telega-user-me 'locally))
-                 (online-p (and me-user (telega-user-online-p me-user)))
-                 ;; reactions
-                 (reactions-chats (telega-filter-chats telega--ordered-chats '(and is-known unread-reactions)))
-                 (reactions-count (apply '+ (mapcar (telega--tl-prop :unread_reaction_count) reactions-chats)))
-                 ;; mentioned
-                 (mentioned-chats (telega-filter-chats telega--ordered-chats '(mention)))
-                 (mentioned-count (apply '+ (mapcar (telega--tl-prop :unread_mention_count) mentioned-chats)))
-                 ;; unread
-                 (unmuted-count (or (plist-get telega--unread-chat-count :unread_unmuted_count) 0))
-                 (mentioned-unmuted-chats (telega-filter-chats telega--ordered-chats '(and mention unmuted)))
-                 (true-unmuted-count (- unmuted-count (length mentioned-unmuted-chats)))
-                 (text (propertize (concat " " telega-symbol-telegram " "
-                                           (when (> true-unmuted-count 0)
-                                             (concat "●" (number-to-string true-unmuted-count) " "))
-                                           (when (> mentioned-count 0)
-                                             (concat "@" (number-to-string mentioned-count) " "))
-                                           (when (> reactions-count 0)
-                                             (concat "❤" (number-to-string reactions-count) " ")))
-                                   'face `(:inherit font-lock-keyword-face :inverse-video ,online-p)))
-                 (first-name (plist-get me-user :first_name))
-                 (last-name (plist-get me-user :last_name))
-                 (help-echo (concat "Current User: " first-name " " last-name "\n"
-                                    "Status: " (if online-p "online" "offline"))))
-            (setq +tab-bar-telega-indicator-cache
-                  `((tab-bar-persp menu-item
-                                   ,text
-                                   ignore
-                                   :help ,help-echo))))
-          (force-mode-line-update t)
-          +tab-bar-telega-indicator-cache)
-        ))
-
-  (advice-add 'telega--on-updateUserStatus :after #'+tab-bar-telega-icon-update)
-  (advice-add 'telega--on-updateUnreadChatCount :after #'+tab-bar-telega-icon-update)
-  (advice-add 'telega--on-updateChatUnreadMentionCount :after #'+tab-bar-telega-icon-update)
-  (advice-add 'telega--on-updateChatUnreadReactionCount :after #'+tab-bar-telega-icon-update))
-
-(defun +tab-bar-telega-icon ()
-  (when (and (fboundp 'telega-server-live-p)
-             (telega-server-live-p))
-    (or +tab-bar-telega-indicator-cache
-        (+tab-bar-telega-icon-update))))
-
-(defun +tab-bar-copilot-icon ()
-  (when (bound-and-true-p copilot-mode)
-    (propertize " α " 'face '(:inherit font-lock-doc-face :inverse-video t))))
+;;   (with-eval-after-load 'telega
+;;     (defvar +tab-bar-telega-indicator-cache nil)
+;;
+;;     (add-hook! (telega-connection-state-hook telega-kill-hook telega-online-status-hook)
+;;       (defun +tab-bar-telega-icon-update (&rest rest)
+;;         (when (buffer-live-p telega-server--buffer)
+;;           (let* ((me-user (telega-user-me 'locally))
+;;                  (online-p (and me-user (telega-user-online-p me-user)))
+;;                  ;; reactions
+;;                  (reactions-chats (telega-filter-chats telega--ordered-chats '(and is-known unread-reactions)))
+;;                  (reactions-count (apply '+ (mapcar (telega--tl-prop :unread_reaction_count) reactions-chats)))
+;;                  ;; mentioned
+;;                  (mentioned-chats (telega-filter-chats telega--ordered-chats '(mention)))
+;;                  (mentioned-count (apply '+ (mapcar (telega--tl-prop :unread_mention_count) mentioned-chats)))
+;;                  ;; unread
+;;                  (unmuted-count (or (plist-get telega--unread-chat-count :unread_unmuted_count) 0))
+;;                  (mentioned-unmuted-chats (telega-filter-chats telega--ordered-chats '(and mention unmuted)))
+;;                  (true-unmuted-count (- unmuted-count (length mentioned-unmuted-chats)))
+;;                  (text (propertize (concat " " telega-symbol-telegram " "
+;;                                            (when (> true-unmuted-count 0)
+;;                                              (concat "●" (number-to-string true-unmuted-count) " "))
+;;                                            (when (> mentioned-count 0)
+;;                                              (concat "@" (number-to-string mentioned-count) " "))
+;;                                            (when (> reactions-count 0)
+;;                                              (concat "❤" (number-to-string reactions-count) " ")))
+;;                                    'face `(:inherit font-lock-keyword-face :inverse-video ,online-p)))
+;;                  (first-name (plist-get me-user :first_name))
+;;                  (last-name (plist-get me-user :last_name))
+;;                  (help-echo (concat "Current User: " first-name " " last-name "\n"
+;;                                     "Status: " (if online-p "online" "offline"))))
+;;             (setq +tab-bar-telega-indicator-cache
+;;                   `((tab-bar-persp menu-item
+;;                                    ,text
+;;                                    ignore
+;;                                    :help ,help-echo))))
+;;           (force-mode-line-update t)
+;;           +tab-bar-telega-indicator-cache)
+;;         ))
+;;
+;;   (advice-add 'telega--on-updateUserStatus :after #'+tab-bar-telega-icon-update)
+;;   (advice-add 'telega--on-updateUnreadChatCount :after #'+tab-bar-telega-icon-update)
+;;   (advice-add 'telega--on-updateChatUnreadMentionCount :after #'+tab-bar-telega-icon-update)
+;;   (advice-add 'telega--on-updateChatUnreadReactionCount :after #'+tab-bar-telega-icon-update))
+;;
+;; (defun +tab-bar-telega-icon ()
+;;   (when (and (fboundp 'telega-server-live-p)
+;;              (telega-server-live-p))
+;;     (or +tab-bar-telega-indicator-cache
+;;         (+tab-bar-telega-icon-update))))
+;;
+;; (defun +tab-bar-copilot-icon ()
+;;   (when (bound-and-true-p copilot-mode)
+;;     (propertize " α " 'face '(:inherit font-lock-doc-face :inverse-video t))))
 
 ;; cache for org-pomodoro
-(with-eval-after-load 'org-pomodoro
-  (defvar +tab-bar-org-pomodoro-indicator-cache nil)
-
-  (add-hook! (org-pomodoro-started-hook org-pomodoro-finished-hook org-pomodoro-overtime-hook
-                                        org-pomodoro-killed-hook org-pomodoro-break-finished-hook
-                                        org-pomodoro-long-break-finished-hook org-pomodoro-killed-hook)
-    (defun +tab-bar-org-pomodoro-indicator-update (&rest _)
-      (setq +tab-bar-org-pomodoro-indicator-cache
-            (cl-case org-pomodoro-state
-              (:none
-               (propertize " Stop " 'face '(:inherit font-lock-comment-face :inverse-video t)))
-              (:pomodoro
-               (propertize " Pomo " 'face '(:inherit org-pomodoro-mode-line :inverse-video t)))
-              (:overtime
-               (propertize " Over " 'face '(:inherit org-pomodoro-mode-line-overtime :inverse-video t)))
-              (:short-break
-               (propertize " Short break " 'face '(:inherit org-pomodoro-mode-line-break :inverse-video t)))
-              (:long-break
-               (propertize " Long break " 'face '(:inherit org-pomodoro-mode-line-break :inverse-video t))))))
-    ))
-
-(defun +tab-bar-org-pomodoro-indicator ()
-  (when (fboundp 'org-pomodoro-active-p)
-    (or +tab-bar-org-pomodoro-indicator-cache
-        (+tab-bar-org-pomodoro-indicator-update))))
+;; (with-eval-after-load 'org-pomodoro
+;;   (defvar +tab-bar-org-pomodoro-indicator-cache nil)
+;;
+;;   (add-hook! (org-pomodoro-started-hook org-pomodoro-finished-hook org-pomodoro-overtime-hook
+;;                                         org-pomodoro-killed-hook org-pomodoro-break-finished-hook
+;;                                         org-pomodoro-long-break-finished-hook org-pomodoro-killed-hook)
+;;     (defun +tab-bar-org-pomodoro-indicator-update (&rest _)
+;;       (setq +tab-bar-org-pomodoro-indicator-cache
+;;             (cl-case org-pomodoro-state
+;;               (:none
+;;                (propertize " Stop " 'face '(:inherit font-lock-comment-face :inverse-video t)))
+;;               (:pomodoro
+;;                (propertize " Pomo " 'face '(:inherit org-pomodoro-mode-line :inverse-video t)))
+;;               (:overtime
+;;                (propertize " Over " 'face '(:inherit org-pomodoro-mode-line-overtime :inverse-video t)))
+;;               (:short-break
+;;                (propertize " Short break " 'face '(:inherit org-pomodoro-mode-line-break :inverse-video t)))
+;;               (:long-break
+;;                (propertize " Long break " 'face '(:inherit org-pomodoro-mode-line-break :inverse-video t))))))
+;;     ))
+;;
+;; (defun +tab-bar-org-pomodoro-indicator ()
+;;   (when (fboundp 'org-pomodoro-active-p)
+;;     (or +tab-bar-org-pomodoro-indicator-cache
+;;         (+tab-bar-org-pomodoro-indicator-update))))
 
 ;; ime
-(defvar +tab-bar-rime-active-hint (propertize " ⭘ " 'face '(:inherit rime-indicator-face :inverse-video t)))
-(defvar +tab-bar-rime-inactive-hint (propertize " ● " 'face '(:inherit rime-indicator-face :inverse-video t)))
-(defvar +tab-bar-no-ime-hint (propertize " ⭘ " 'face '(:inherit rime-indicator-dim-face :inverse-video t)))
-(defun +tab-bar-rime-indicator ()
-  (let ((text-help (if (and (equal current-input-method "rime")
-                            (bound-and-true-p rime-mode))
-                       (if (and (rime--should-enable-p)
-                                (not (rime--should-inline-ascii-p)))
-                           (cons +tab-bar-rime-active-hint "Rime Enabled")
-                         (cons +tab-bar-rime-inactive-hint "Rime Disabled"))
-                     (cons +tab-bar-no-ime-hint "No IME"))))
-    `((tab-bar-rime menu-item
-                    ,(car text-help)
-                    ignore
-                    :help ,(cdr text-help)))))
+;; (defvar +tab-bar-rime-active-hint (propertize " ⭘ " 'face '(:inherit rime-indicator-face :inverse-video t)))
+;; (defvar +tab-bar-rime-inactive-hint (propertize " ● " 'face '(:inherit rime-indicator-face :inverse-video t)))
+;; (defvar +tab-bar-no-ime-hint (propertize " ⭘ " 'face '(:inherit rime-indicator-dim-face :inverse-video t)))
+;; (defun +tab-bar-rime-indicator ()
+;;   (let ((text-help (if (and (equal current-input-method "rime")
+;;                             (bound-and-true-p rime-mode))
+;;                        (if (and (rime--should-enable-p)
+;;                                 (not (rime--should-inline-ascii-p)))
+;;                            (cons +tab-bar-rime-active-hint "Rime Enabled")
+;;                          (cons +tab-bar-rime-inactive-hint "Rime Disabled"))
+;;                      (cons +tab-bar-no-ime-hint "No IME"))))
+;;     `((tab-bar-rime menu-item
+;;                     ,(car text-help)
+;;                     ignore
+;;                     :help ,(cdr text-help)))))
 
 
 (defun +hide-tab-bar ()
@@ -184,12 +186,13 @@
   (interactive)
   (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator
                                              tab-bar-format-align-right
-                                             +tab-bar-org-pomodoro-indicator
-                                             +tab-bar-copilot-icon
-                                             +tab-bar-telega-icon
+                                             ;; +tab-bar-org-pomodoro-indicator
+                                             ;; +tab-bar-copilot-icon
+                                             ;; +tab-bar-telega-icon
                                              +tab-bar-persp-indicator
-                                             meow-indicator
-                                             +tab-bar-rime-indicator))
+                                             ;; meow-indicator
+                                             ;; +tab-bar-rime-indicator
+                                             ))
   (tab-bar--update-tab-bar-lines))
 
 ;; WORKAROUND: fresh tab-bar for daemon

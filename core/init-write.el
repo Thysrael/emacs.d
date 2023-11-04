@@ -119,6 +119,7 @@
 
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
+  :straight nil
   :after org
   :init
   (add-to-list 'load-path "~/.emacs.d/straight/repos/org-appear/")

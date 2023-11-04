@@ -44,7 +44,8 @@
   ; 需要加到 init 里才可以自动触发
   (add-to-list 'auto-mode-alist '("SConstruct\\'" . python-mode))
   (add-to-list 'auto-mode-alist '("SConscript\\'" . python-mode))
+  (add-to-list 'auto-mode-alist '("SConsopts\\'" . python-mode))
   (setq python-indent-offset 4)
-)
+  )
 
 (use-package cuda-mode)

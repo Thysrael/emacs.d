@@ -297,14 +297,14 @@ begin and end of the block surrounding point."
   ("C-M-l" . er/contract-region))
 
 ;; 用于强化删除功能，可以平衡删除
-(use-package puni
-  :hook
-  ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
-  :config
-  (define-key puni-mode-map (kbd "C-k") nil)
-  (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
-  (define-key puni-mode-map (kbd "C-w") nil)
-  )
+;; (use-package puni
+;;   :hook
+;;   ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
+;;   :config
+;;   (define-key puni-mode-map (kbd "C-k") nil)
+;;   (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
+;;   (define-key puni-mode-map (kbd "C-w") nil)
+;;   )
 
 ;; 快速编辑成对出现的标点
 (use-package embrace
