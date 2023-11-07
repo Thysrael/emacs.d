@@ -22,6 +22,16 @@
   (defadvice! +xref--push-marker-stack-a (&rest rest)
     :before '(find-function consult-imenu consult-ripgrep citre-jump)
     (xref-push-marker-stack (point-marker))) ; 这里是一个压栈函数，用于记录光标位置
+
+  ;; (defadvice! +xref--push-marker-stack-a (&rest rest)
+  ;;   :before '(find-function consult-imenu consult-ripgrep citre-jump find-definition-with-lsp-bridge)
+  ;;   (xref-push-marker-stack (point-marker))) ; 这里是一个压栈函数，用于记录光标位置
+  ;;
+  ;; (defun find-definitions-with-lsp-bridge ()
+  ;;   (interactive)
+  ;;   (if lsp-bridge-mode (lsp-bridge-find-def)
+  ;;     (call-interactively 'xref-find-definitions))) ; 和 lsp-bridge-mode 结合
+  ;; (global-set-key (kbd "M-.") #'find-definitions-with-lsp-bridge)
   :bind
   ("M-/" . xref-find-apropos) ; 将搜索按钮放到更合适的地方
   )
@@ -123,3 +133,10 @@
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)
               ("C-c n" . consult-eglot-symbols)))
+
+(use-package eldoc
+  :config
+  (setq eldoc-echo-area-display-truncation-message t
+        eldoc-echo-area-prefer-doc-buffer t
+        eldoc-echo-area-use-multiline-p nil
+        eglot-extend-to-xref t))

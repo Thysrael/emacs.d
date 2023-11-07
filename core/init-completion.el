@@ -140,7 +140,7 @@
   :hook
   ((prog-mode text-mode) . yas-minor-mode-on)
   ((prog-mode text-mode) . +yas-setup-capf) ; 这里的顺序很关键，似乎 yas 必须在 corfu 之前才可以
-  :config 
+  :config
   (defun +yas-setup-capf ()
     (setq-local completion-at-point-functions
                 (cons #'yasnippet-capf
@@ -158,9 +158,9 @@
 
 ;; 补全前端
 (use-package corfu
-  :straight 
+  :straight
   (:files (:defaults "extensions/*.el")) ;; 可以减少加载 corfu 的默认配置
-  :hook 
+  :hook
   ((prog-mode text-mode conf-mode yaml-mode shell-mode eshell-mode) . corfu-mode)
   ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil))) ; 在 shell 模式取消补全
   :bind
@@ -197,15 +197,17 @@
 ;; 美化 corfu
 (use-package nerd-icons-corfu
   :after corfu
-  :init 
+  :init
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
-;; TODO: 似乎无法显示
+;; ;; TODO: 显示有问题
 ;; (use-package corfu-popupinfo
 ;;   :straight nil
 ;;   :after corfu
-;;   :hook 
-;;   (corfu-mode . corfu-popupinfo-mode))
+;;   :hook
+;;   (corfu-mode . corfu-popupinfo-mode)
+;;   :config
+;;   (setq corfu-popupinfo-delay '(1.0 1.0)))
 
 ;; 补全后端
 (use-package cape
@@ -219,3 +221,22 @@
   (defun +corfu-add-cape-tex-backends ()
     (add-to-list 'completion-at-point-functions #'cape-tex :append))
   )
+
+
+;;; lsp-bridge & yasnippet 方案
+;; (use-package yasnippet
+;;   :hook
+;;   ((prog-mode text-mode) . yas-minor-mode-on)
+;;   )
+;;
+;; (use-package lsp-bridge
+;;   :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+;;             :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+;;             :build (:not compile))
+;;   :config
+;;   (setq acm-enable-citre t)
+;;   (setq acm-enable-preview t)
+;;   (setq lsp-bridge-enable-diagnostics nil)
+;;   :hook
+;;   ((prog-mode text-mode) . lsp-bridge-mode)
+;;   )
