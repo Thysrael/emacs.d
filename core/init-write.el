@@ -220,9 +220,9 @@
 
           ;; Keywords
           ("TODO" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                            :face 'org-todo :margin 0 :radius 5))))
+                                                 :face 'org-todo :margin 0 :radius 5))))
           ("WORK" . ((lambda (tag) (svg-tag-make tag :height 0.8
-                                            :face 'org-todo :margin 0 :radius 5))))
+                                                 :face 'org-todo :margin 0 :radius 5))))
           ("DONE" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
                                             :face 'org-done :margin 0 :radius 5))))
 
@@ -236,15 +236,55 @@
 
 ;; 方便得插入图片
 (use-package org-download
+  ;; :after (:any org markdown-mode)
   :after org
   :bind
   (:map org-mode-map
-        ("C-c m" . org-download-clipboard)
-        ("C-c M" . org-download-yank))
+        ("C-c m" . hydra-org-download/body))
+  ;; (:map markdown-mode-map
+  ;;       ("C-c m" . hydra-md-download/body))
   :config
   (advice-add 'org-download--dir-1 :override
               (lambda ()
-                (or org-download-image-dir (file-name-sans-extension (file-name-nondirectory buffer-file-name)))))
+                (or org-download-image-dir
+                    (file-name-sans-extension
+                     (file-name-nondirectory buffer-file-name))))) ; 将默认行为修改为修改文件夹
+
+  (defun +org-download--fullname (link &optional ext)
+    (let* ((default-filename (when (boundp 'org-download-file-format-function)
+                               (funcall org-download-file-format-function
+                                        (file-name-nondirectory
+                                         (car (url-path-and-query
+                                               (url-generic-parse-url link)))))))
+           (filename (read-string (format "Enter file name [%s] : " default-filename)
+                                  nil nil default-filename)) ; 修改此处可以使得插入图片前询问名字
+           (dir (org-download--dir)))
+      (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
+        (setq filename (replace-match "" nil nil filename 1)))
+      (when ext
+        (setq filename (concat filename "." ext)))
+      (abbreviate-file-name
+       (expand-file-name filename dir))))
+  (advice-add 'org-download--fullname :override '+org-download--fullname)
+  ;; 失败的 markdown 尝试，但是应该是可以完成的
+  ;; (setq org-download-annotate-function (lambda (link) ""))
+  ;; (advice-add 'org-download-org-mode-p (lambda () (or (eq major-mode 'org-mode) (when (derived-mode-p 'org-mode) t) (eq major-mode 'markdown-mode))))
+  (defhydra hydra-org-download (:color blue)
+    "Org-download: "
+    ("c" org-download-clipboard "Clipboard")
+    ("y" org-download-yank "Yank")
+    ("r" org-download-rename-at-point "Rename")
+    ("s" org-download-screenshot "Screenshot")
+    ("d" org-download-delete "Delete")
+    ("l" org-download-image "Download")
+    ("e" org-download-edit "Edit"))
+
+  ;; (defhydra hydra-md-download (:color blue)
+  ;;   "Md-download: "
+  ;;   ("c" org-download-clipboard "Clipboard")
+  ;;   ("y" org-download-yank "Yank")
+  ;;   ("s" org-download-screenshot "Screenshot"))
+
   :custom
   (org-download-screenshot-method "flameshot gui --raw > %s")
   (org-download-image-dir "./img") ; 将存在指定文件夹下
