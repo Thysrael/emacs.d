@@ -175,12 +175,12 @@
                  :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
                  )
   "
-        Load/Save^^        Manage^^        Move^^         Tab^^          Winner^^
-  -------------------------------------------------------------------------------------
-        [_A_] Load All    [_l_] List       [_n_] Next     [_s_] Switch   [_u_] Undo
-        [_S_] Save        [_k_] Kill       [_p_] Prev     [_0_] Close    [_U_] Redo
-        [_L_] Load        [_r_] Rename     [_b_] Buffer   [_2_] New
-        [_q_] quit        [_c_] Create     ^ ^            [_R_] Rename 
+        Load/Save^^        Manage^^        Move^^         Tab^^          Winner^^        Resize
+  --------------------------------------------------------------------------------------------------
+        [_A_] Load All    [_l_] List       [_n_] Next     [_s_] Switch   [_u_] Undo      [_=_] Enlarge
+        [_S_] Save        [_k_] Kill       [_p_] Prev     [_0_] Close    [_U_] Redo      [_-_] Shrink
+        [_L_] Load        [_r_] Rename     [_b_] Buffer   [_2_] New      ^ ^             [_+_] EnlargeV
+        [_q_] quit        [_c_] Create     ^ ^            [_R_] Rename   ^ ^             [___] ShrinkV
   "
   ("A" +load-last-persp)
   ("S" persp-save-state-to-file)
@@ -202,6 +202,11 @@
 
   ("u" winner-undo :color red)
   ("U" winner-redo :color red)
+
+  ("=" enlarge-window :color red)
+  ("-" shrink-window :color red)
+  ("+" enlarge-window-horizontally :color red)
+  ("_" shrink-window-horizontally :color red)
 
   ("q" nil))
 
