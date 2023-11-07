@@ -65,6 +65,7 @@
    ;; Don't display parent/related refs in commit buffers; they are rarely helpful and only add to runtime costs.
    magit-revision-insert-related-refs nil)
 
+  (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) ; magit 全屏
   ;; Exterminate Magit buffers
   (defun +magit-kill-buffers (&rest _)
     "Restore window configuration and kill all Magit buffers."

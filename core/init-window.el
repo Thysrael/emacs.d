@@ -94,7 +94,7 @@
           help-mode
           tabulated-list-mode
           Buffer-menu-mode
-
+          "\\*esup\\*"
           gnus-article-mode devdocs-mode
           grep-mode occur-mode rg-mode ag-mode pt-mode
           osx-dictionary-mode
@@ -107,7 +107,7 @@
           "^\\*terminal.*\\*.*$" term-mode
           "^\\*vterm.*\\*.*$"  vterm-mode
           "^\\*eldoc.*\\*.*$" eldoc-mode
-          "^magit.*$" magit-mode
+          ;; "^magit.*$" magit-mode
           "\\*Flycheck errors\\*$" " \\*Flycheck checker\\*$"
           "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
           "\\*[Wo]*Man.*\\*$"
@@ -156,10 +156,10 @@
 
 
 ;; 可以随着所在 window 调整其他 window 的大小
-(use-package zoom
-  :hook
-  (window-setup . zoom-mode)
-  )
+;; (use-package zoom
+;;   :hook
+;;   (window-setup . zoom-mode)
+;;   )
 
 ;; 不活跃的 window 会变暗
 (use-package auto-dim-other-buffers
@@ -171,7 +171,8 @@
 
   (defadvice! +auto-dim-other-buffers-auto-set-face (&rest _)
     :after #'enable-theme
-    (set-face-background 'auto-dim-other-buffers-face (face-background 'mode-line)))
+    (set-face-background 'auto-dim-other-buffers-face (face-background 'mode-line))
+    )
   )
 
 ;; Highlight line at cursor after switching window
@@ -205,7 +206,7 @@
 
   (dolist (cmd '(recenter-top-bottom
                  other-window switch-to-buffer
-                 aw-select toggle-window-split
+                 aw-select +aw--select-window toggle-window-split
                  windmove-do-window-select
                  pager-page-down pager-page-up
                  treemacs-select-window))
