@@ -167,11 +167,14 @@
   :hook
   (after-init . savehist-mode)
   :config
-  (setq savehist-additional-variables '(mark-ring global-mark-ring
-                                                  search-ring regexp-search-ring
-                                                  kill-ring) ; 要保存的列表
+  (setq savehist-additional-variables '(mark-ring
+                                        global-mark-ring
+                                        search-ring
+                                        regexp-search-ring
+                                        winner-ring
+                                        kill-ring) ; 要保存的列表
         savehist-autosave-interval 300) ; 每 300s 保存一次
-                                        ; 移除了 kill-ring 中的文本属性，以减小 savehist 缓存的大小
+  ;; 移除了 kill-ring 中的文本属性，以减小 savehist 缓存的大小
   (add-hook 'savehist-save-hook
             (lambda () (setq kill-ring
                         (mapcar #'substring-no-properties
@@ -225,8 +228,8 @@
 (add-hook 'after-init-hook 'delete-selection-mode)
 
 ;; 当其他编辑器也更改某个 buffer 时，会自动更新
-(use-package autorevert
-  :hook
-  (after-init . global-auto-revert-mode)
-  :config
-  (setq revert-without-query (list ".")))
+;; (use-package autorevert
+;;   :hook
+;;   (after-init . global-auto-revert-mode)
+;;   :config
+;;   (setq revert-without-query (list ".")))

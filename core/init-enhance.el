@@ -127,11 +127,42 @@
 
 ;; 为 minibuffer 中出现的条目（不至于 minibuffer 条目）
 (use-package embark
-  :bind
-  ("C-;" . embark-act)
+  :straight t
+  :bind (("C-;" . embark-act)
+         ("C-c ; e" . embark-export)
+         ("C-c ; c" . embark-collect)
+         :map minibuffer-local-map
+         ("C-c C-e" . +embark-export-write)
+         :map embark-file-map
+         ("s" . +reopen-file-with-sudo)
+         ("g" . +embark-magit-status))
+  :defines (wgrep-change-to-wgrep-mode)
   :init
   (setq prefix-help-command 'embark-prefix-help-command)
-  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  :config
+  (defun +embark-magit-status (file)
+    "Run `magit-status` on repo containing the embark target."
+    (interactive "GFile: ")
+    (magit-status (locate-dominating-file file ".git")))
+
+  (defun +embark-export-write ()
+    "Export the current vertico results to a writable buffer if possible.
+     Supports exporting consult-grep/consult-ripgrep to wgrep, file to wdeired,
+     and consult-location to occur-edit"
+    (interactive)
+    (require 'embark)
+    (require 'wgrep)
+    (let* ((edit-command
+            (pcase-let ((`(,type . ,candidates)
+                         (run-hook-with-args-until-success 'embark-candidate-collectors)))
+              (pcase type
+                ('consult-grep #'wgrep-change-to-wgrep-mode)
+                ('consult-ripgrep #'wgrep-change-to-wgrep-mode)
+                ('file #'wdired-change-to-wdired-mode)
+                ('consult-location #'occur-edit-mode)
+                (x (user-error "embark category %S doesn't support writable export" x)))))
+           (embark-after-export-hook `(,@embark-after-export-hook ,edit-command)))
+      (embark-export)))
   )
 
 (use-package embark-consult

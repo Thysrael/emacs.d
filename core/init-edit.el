@@ -297,14 +297,14 @@ begin and end of the block surrounding point."
   ("C-M-l" . er/contract-region))
 
 ;; 用于强化删除功能，可以平衡删除
-;; (use-package puni
-;;   :hook
-;;   ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
-;;   :config
-;;   (define-key puni-mode-map (kbd "C-k") nil)
-;;   (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
-;;   (define-key puni-mode-map (kbd "C-w") nil)
-;;   )
+(use-package puni
+  :hook
+  ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
+  :config
+  (define-key puni-mode-map (kbd "C-k") nil)
+  (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
+  (define-key puni-mode-map (kbd "C-w") nil)
+  (define-key puni-mode-map (kbd "<backspace>") nil))
 
 ;; 快速编辑成对出现的标点
 (use-package embrace
@@ -327,3 +327,14 @@ begin and end of the block surrounding point."
   (setq wgrep-auto-save-buffer t)
   )
 
+;; 超酷的截屏软件
+(use-package screenshot
+  :straight
+  (screenshot :type git :host github :repo "tecosaur/screenshot")
+  :bind
+  ("C-c c" . screenshot)
+  :config
+  (setq screenshot-line-numbers-p t)
+  (setq screenshot-max-width 400)
+  (setq screenshot-font-size 9) ; `9` is good, other maybe wrong
+  )

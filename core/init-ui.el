@@ -119,6 +119,8 @@
   (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
   (set-fontset-font t 'han (font-spec :family "LXGW WenKai" :size +font-han-size))
   (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
+  (set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji") nil 'append)
+  ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
   )
 
 (+setup-fonts)
