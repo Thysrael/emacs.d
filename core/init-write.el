@@ -70,7 +70,7 @@
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . org-num-mode) ; 添加标题序号
-  :init
+  :init ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮标题
@@ -220,16 +220,33 @@
 
           ;; Keywords
           ("TODO" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                                 :face 'org-todo :margin 0 :radius 5))))
+                                            :face 'org-todo :margin 0 :radius 5))))
           ("WORK" . ((lambda (tag) (svg-tag-make tag :height 0.8
-                                                 :face 'org-todo :margin 0 :radius 5))))
+                                            :face 'org-todo :margin 0 :radius 5))))
           ("DONE" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                                 :face 'org-done :margin 0 :radius 5))))
+                                            :face 'org-done :margin 0 :radius 5))))
 
           ("FIXME\\b" . ((lambda (tag) (svg-tag-make "FIXME" :face 'org-todo :inverse t :margin 0 :crop-right t))))
 
           ;; beautify pagebreak in orgmode
           ("\\\\pagebreak" . ((lambda (tag) (svg-lib-icon "file-break" nil :collection "bootstrap"
-                                                          :stroke 0 :scale 1 :padding 0))))
+                                                     :stroke 0 :scale 1 :padding 0))))
 
           )))
+
+;; 方便得插入图片
+(use-package org-download
+  :after org
+  :bind
+  (:map org-mode-map
+        ("C-c m" . org-download-clipboard)
+        ("C-c M" . org-download-yank))
+  :config
+  (advice-add 'org-download--dir-1 :override
+              (lambda ()
+                (or org-download-image-dir (file-name-sans-extension (file-name-nondirectory buffer-file-name)))))
+  :custom
+  (org-download-screenshot-method "flameshot gui --raw > %s")
+  (org-download-image-dir "./img") ; 将存在指定文件夹下
+  ;; (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
+  (org-download-heading-lvl nil))
