@@ -4,7 +4,7 @@
 (eval-when-compile (require 'cl-lib))
 
 ;; show encodings for UTF-8:LF
-(defvar +mode-line-show-common-encodings nil)
+(defvar +mode-line-show-common-encodings t)
 ;; show VC tools name for Git
 (defvar +mode-line-show-common-vc-tools-name nil)
 
@@ -255,8 +255,8 @@
   :custom-face
   (breadcrumb-project-base-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
   (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t))))
-  (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t))))
+  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
+  (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
   :straight (:host github :repo "joaotavora/breadcrumb" :files ("*.el"))
   :commands breadcrumb--header-line
   :config
