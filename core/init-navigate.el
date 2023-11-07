@@ -1,8 +1,26 @@
 ;;; -*- lexical-binding: t -*-
 
 ;; 改变光标移动绑定，使其更加方便
-;; (global-set-key (kbd "C-f") 'forward-char)
+(global-set-key (kbd "C-f") '+smart-forward)
+(defun +smart-forward ()
+  "Move cursor based on its position in a word."
+  (interactive)
+  (cond
+   ((looking-at "\\w") (forward-word 1))
+   ((looking-at "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
+   (t (forward-char))))
+
 ;; (global-set-key (kbd "C-b") 'backward-word)
+
+;; (defun +smart-backword ()
+;;   "Move cursor based on its position in a word."
+;;   (interactive)
+;;   (cond
+;;     ((looking-at "\\w") (backward-word)) ; 如果在单词中部，移动到单词头部
+;;     ((looking-back "\\b" 1) (backward-word) (forward-word)) ; 如果在单词头部，移动到前一个单词的尾部
+;;     ((looking-at "\\s-") (backward-word))
+;;     (t (backward-char)))) ; 如果不在单词中，显示消息
+
 ;; (global-set-key (kbd "C-l") 'forward-char)
 ;; (global-set-key (kbd "C-h") 'backward-char)
 
@@ -16,7 +34,7 @@
   :init
   (setq avy-single-candidate-jump nil)
   (advice-add 'avy-action-goto :after (lambda (&rest _args)
-                                      (forward-word)))
+                                        (forward-word)))
   )
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
