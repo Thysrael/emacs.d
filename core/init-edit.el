@@ -132,11 +132,18 @@
 ;; 括号平衡
 (use-package elec-pair
   :hook
-  ((prog-mode) . electric-pair-mode)
-  :config
-  (add-hook 'org-mode-hook
-          (lambda ()
-            (setq-local electric-pair-mode nil)))
+  ((prog-mode text-mode) . electric-pair-mode)
+  ;; 禁用 org-mode 的左尖括号
+  ;; :config
+  ;; (setq electric-pair-inhibit-predicate
+  ;;       `(lambda (c)
+  ;;          (if (char-equal c ?\<) t (,electric-pair-inhibit-predicate c))))
+  ;;
+  ;; (add-hook 'org-mode-hook
+  ;;           (lambda ()
+  ;;             (setq-local electric-pair-inhibit-predicate
+  ;;   		              `(lambda (c)
+  ;;   		                 (if (char-equal c ?\<) t (,electric-pair-inhibit-predicate c))))))
   )
 
 ;; 空格处理
@@ -188,7 +195,7 @@
       ('hs-toggle-all
        (save-excursion (hs-show-all))
        (setq this-command 'hs-global-show))
-        (_ (hs-hide-all))))
+      (_ (hs-hide-all))))
 
   ;; Display line counts
   (defun +hs-display-code-line-counts (ov)
@@ -204,7 +211,7 @@
 
   ;; hide-show by indentation
   (defun +fold--hideshow-empty-line-p (_)
-  (string= "" (string-trim (thing-at-point 'line 'no-props))))
+    (string= "" (string-trim (thing-at-point 'line 'no-props))))
 
   (defun +fold--hideshow-geq-or-empty-p (base-indent)
     (or (+fold--hideshow-empty-line-p base-indent)

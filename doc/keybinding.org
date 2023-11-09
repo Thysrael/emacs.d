@@ -44,7 +44,7 @@
   + ~C-c <letter>~ ：为用户保留。
   + ~C-c C-<letter>~ ：为 major mode 保留。
 + ~C-<letter>, M-<letter>~ ：一般当 letter 相同时，以 Ctrl 和 Alt 为修饰的功能都具有对应性。
-+ 有些键位没法改，比如说 ~C-i~ 和 ~TAB~ 本来就是一个键，~S-<letter>~ 没法被监听。
++ 有些键位没法改，比如说 ~C-i~ 和 ~TAB~ 本来就是一个键， ~S-<letter>~ 没法被监听。
 
 也如下图所示：
 

@@ -49,3 +49,5 @@
   )
 
 (use-package cuda-mode)
+
+(use-package yaml-mode)

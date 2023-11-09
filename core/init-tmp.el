@@ -54,7 +54,7 @@
   :straight t
   :defines (google-translate-translation-directions-alist)
   :bind
-  ("C-c j" . google-translate-smooth-translate) ; 会询问一下是否是要查这个词
+  ("C-c j" . google-translate-at-point) ; 会询问一下是否是要查这个词
   ("C-c J" . google-translate-at-point-reverse)
   :init
   (setq google-translate-translation-directions-alist '(("en" . "zh-CN")))) ; 用于设置 `smooth-translate`

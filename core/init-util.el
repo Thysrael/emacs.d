@@ -115,6 +115,15 @@ PLACE is the function to which to add the advice, like in `advice-add'.
      (dolist (target (list ,@body))
        (advice-add target :around #'+call-fn-with-pp-to-prin1))))
 
+(defmacro +advice-pp-to-prin1! (&rest body)
+  "Define an advice called SYMBOL that map `pp' to `prin1' when called.
+PLACE is the function to which to add the advice, like in `advice-add'.
+
+\(fn SYMBOL &rest [PLACES...]\)"
+  `(progn
+     (dolist (target (list ,@body))
+       (advice-add target :around #'+call-fn-with-pp-to-prin1))))
+
 (defmacro defun-call! (symbol args &rest body)
   "Define a function and optionally apply it with specified arguments.
 

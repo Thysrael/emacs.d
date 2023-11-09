@@ -55,7 +55,7 @@
 ;;   :hook ((org-mode . org-fragtog-mode)))
 
 ;; org-mode
-(use-package org-mode
+(use-package org
   :custom-face
   (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
                                         ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
@@ -66,11 +66,11 @@
   :custom
   (org-image-actual-width '(800))
   (org-startup-with-inline-images t) ; 默认显示图片
-  (org-ellipsis " ⭍") ; 设置折叠提示符
+  (org-ellipsis "…") ; 设置折叠提示符
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . org-num-mode) ; 添加标题序号
-  :init ; 这里其实应该放到 custom 中，但是不能放到 config 中
+  :config ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮标题
@@ -98,6 +98,9 @@
           ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
            org-code verbatim)
           ("+" (:strike-through t))))
+  (setq org-latex-create-formula-image-program 'dvisvgm
+        org-startup-with-latex-preview nil)
+  (plist-put org-format-latex-options :scale 1.2)
   :bind
   (:map org-mode-map
         ("C-c C-w" . org-copy-subtree)
@@ -110,9 +113,15 @@
 ;;   :hook ((org-mode . org-modern-mode)
 ;;          (org-agenda-finalize . org-modern-agenda-mode)))
 
+;; (use-package org-fragtog
+;;   :after (:any org markdown-mode)
+;;   :hook
+;;   ((org-mode . org-fragtog-mode)
+;;    (markdown-mode . org-fragtog-mode)))
+
 ;; 表格对齐
 (use-package valign
-  :after org
+  :after (:any org markdown-mode)
   :custom
   (valign-fancy-bar t)
   :hook
@@ -121,11 +130,7 @@
 
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
-  :straight nil
   :after org
-  :init
-  (add-to-list 'load-path "~/.emacs.d/straight/repos/org-appear/")
-  ;; (require 'org-appear)
   :hook
   (org-mode . org-appear-mode)
   :config
@@ -220,9 +225,9 @@
 
           ;; Keywords
           ("TODO" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                                 :face 'org-todo :margin 0 :radius 5))))
+                                            :face 'org-todo :margin 0 :radius 5))))
           ("WORK" . ((lambda (tag) (svg-tag-make tag :height 0.8
-                                                 :face 'org-todo :margin 0 :radius 5))))
+                                            :face 'org-todo :margin 0 :radius 5))))
           ("DONE" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
                                             :face 'org-done :margin 0 :radius 5))))
 
@@ -290,3 +295,14 @@
   (org-download-image-dir "./img") ; 将存在指定文件夹下
   ;; (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
   (org-download-heading-lvl nil))
+
+;; 字数统计
+;; Ns: 除了空白符以外的字符（字数）
+;; AL: 并不排除空白符以外的字符（字数）
+;; Ln: 行数
+;; An: 意义不明，应该是单词数
+;; Ha: 中文字符数（字数）
+;; Wc: An + Ha
+(use-package advance-words-count
+  :after (:any org markdown-mode)
+  :straight (:type git :host github :repo "LdBeth/advance-words-count.el"))
