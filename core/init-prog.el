@@ -140,3 +140,12 @@
         eldoc-echo-area-prefer-doc-buffer t
         eldoc-echo-area-use-multiline-p nil
         eglot-extend-to-xref t))
+
+;; 新的语法高亮支持
+(use-package treesit-auto
+  :demand t
+  :init
+  (setq treesit-font-lock-level 4)
+  :config
+  (setq treesit-auto-install 'prompt)
+  (global-treesit-auto-mode))
