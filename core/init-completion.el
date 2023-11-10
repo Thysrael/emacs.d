@@ -149,6 +149,11 @@
   (yas-keymap-disable-hook
    (lambda () (and (frame-live-p corfu--frame)
               (frame-visible-p corfu--frame)))) ; 使得 corfu 的优先级比 yas 高，使 tab 先满足 corfu
+  :bind
+  (:map yas-keymap
+        ("<tab>" . nil)
+        ("TAB" . nil)
+        ("RET" . yas-next-field-or-maybe-expand)) ; 修改 <enter> 为下一个键位
   )
 
 ;; consult 模式的 yasnippet 检索
@@ -165,9 +170,9 @@
   ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil))) ; 在 shell 模式取消补全
   :bind
   (:map corfu-map
-        ([tab] . corfu-next)
-        ([backtab] . corfu-previous)
-        ;; ("RET" . nil)
+        ;; ([tab] . corfu-next)
+        ;; ([backtab] . corfu-previous)
+        ("RET" . nil)
         )
   :init
   (setq corfu-cycle t                ; Enable cycling for `corfu-next/previous'
@@ -178,9 +183,8 @@
         corfu-auto-delay 0
         corfu-on-exact-match nil     ; 解决 dd 自动展开的关键
         corfu-min-width 25
-        ;; corfu-preselect 'directory   ; 不知道为啥，这个可以避免自动选择，可以使 tab 更加方便
+        corfu-preselect 'directory   ; 不知道为啥，这个可以避免自动选择，可以使 tab 更加方便
         )
-
   )
 
 ;; 使得 corfu 排序为历史频率排序
