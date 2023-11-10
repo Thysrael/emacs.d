@@ -306,3 +306,15 @@
 (use-package advance-words-count
   :after (:any org markdown-mode)
   :straight (:type git :host github :repo "LdBeth/advance-words-count.el"))
+
+(use-package org-autolist
+  :after org
+  :hook (org-mode . org-autolist-mode))
+
+(use-package org-latex-impatient
+  :after org
+  :hook (org-mode . org-latex-impatient-mode)
+  :init
+  (setq org-latex-impatient-tex2svg-bin
+        ;; location of tex2svg executable
+        (no-littering-expand-var-file-name "org-latex-impatient/node_modules/mathjax-node-cli/bin/tex2svg")))
