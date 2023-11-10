@@ -162,7 +162,7 @@
 
 ;; 主题
 (use-package doom-themes
-  :config
+  :init
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)
 
@@ -175,5 +175,6 @@
 
 ;; (load-theme 'doom-ayu-mirage t)
 ;; (load-theme 'doom-moonlight t)
-(load-theme 'doom-dracula t)
+;; (load-theme 'doom-dracula t)
 ;; (load-theme'doom-nord t)
+(load-theme 'modus-vivendi t)

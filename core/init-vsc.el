@@ -47,6 +47,10 @@
   (advice-add #'ws-butler-after-save :after #'diff-hl-update-once)
   :bind
   ("C-c g" . diff-hl-show-hunk)
+  :custom-face
+  (diff-hl-change ((t (:background "#82aaff" :foreground "#82aaff"))))
+  (diff-hl-delete ((t (:background "#ff757f" :foreground "#ff757f"))))
+  (diff-hl-insert ((t (:background "#77e0c6" :foreground "#77e0c6"))))
   )
 
 ;; [magit] Version control interface
@@ -81,6 +85,8 @@
                     (kill-buffer buf))))
               buffers))))
   (setq magit-bury-buffer-function #'+magit-kill-buffers)
+  :custom-face
+  (treemacs-git-modified-face ((t (:inherit variable-pitch :foreground "#82aaff"))))
   )
 
 (use-package forge
