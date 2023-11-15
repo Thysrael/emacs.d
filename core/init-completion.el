@@ -204,6 +204,11 @@
   :init
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
+(use-package corfu-terminal
+  :when (not (display-graphic-p))
+  :after corfu
+  :init (corfu-terminal-mode 1))
+
 ;; ;; TODO: 显示有问题
 ;; (use-package corfu-popupinfo
 ;;   :straight nil
