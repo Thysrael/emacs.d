@@ -56,13 +56,14 @@
 
 ;; org-mode
 (use-package org
-  :custom-face
-  (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
-                                        ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
-  (org-document-title ((t (:foreground "#c099ff" :weight bold :height 1.3 :family "LXGW WenKai"))))
-  (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :height 1.25 :family "LXGW WenKai"))))
-  (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :height 1.18 :family "LXGW WenKai"))))
-  (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :height 1.10 :family "LXGW WenKai"))))
+  :straight nil
+  ;; :custom-face
+  ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
+  ;;                                       ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
+  ;; (org-document-title ((t (:foreground "#c099ff" :weight bold :height 1.3 :family "LXGW WenKai"))))
+  ;; (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :height 1.25 :family "LXGW WenKai"))))
+  ;; (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :height 1.18 :family "LXGW WenKai"))))
+  ;; (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :height 1.10 :family "LXGW WenKai"))))
   :custom
   (org-image-actual-width '(800))
   (org-startup-with-inline-images t) ; 默认显示图片
@@ -70,6 +71,7 @@
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . org-num-mode) ; 添加标题序号
+  (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
   :config ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
@@ -245,7 +247,8 @@
   :after org
   :bind
   (:map org-mode-map
-        ("C-c m" . hydra-org-download/body))
+        ("C-c M" . hydra-org-download/body)
+        ("C-c m" . org-download-clipboard))
   ;; (:map markdown-mode-map
   ;;       ("C-c m" . hydra-md-download/body))
   :config
