@@ -104,7 +104,6 @@
 
 ;; Show TODOs in magit
 (use-package magit-todos
-  :straight t
   :after magit
   :init
   (let ((inhibit-message t))

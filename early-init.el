@@ -62,4 +62,3 @@
   (load file nil 'nomessage))
 (define-advice startup--load-user-init-file (:after (&rest _) undo-silence)
   (advice-remove #'load-file #'load-file@silence))
-

@@ -64,3 +64,72 @@
   :custom
   (google-translate-default-source-language "en") ; 用于设置 `at-point-reverse`
   (google-translate-default-target-language "zh-CN"))
+
+;; (use-package diredfl
+;;   :straight t
+;;   :hook (dired-mode . diredfl-mode))
+
+;; [dired-git-info] Show git info in dired
+(use-package dired-git-info
+  :straight t
+  :after dired
+  :bind (:map dired-mode-map
+              ("v" . dired-git-info-mode))
+  :config
+  (setq dgi-commit-message-format "%h %cs %s"
+        dgi-auto-hide-details-p nil)
+  )
+
+(use-package nerd-icons-dired
+  :hook
+  (dired-mode . nerd-icons-dired-mode))
+
+(use-package dired-hacks
+  :straight (:files (:defaults "*.el"))
+  :after dired
+  :bind (:map dired-mode-map
+              ("TAB" . dired-subtree-toggle))
+  :init
+  ;; Don't show background, which is ugly in light themes
+  (with-eval-after-load 'dired-subtree
+    (setq dired-subtree-use-backgrounds nil)))
+
+;; [timeout] debounce and throttle
+(use-package timeout
+  :straight (:host github :repo "karthink/timeout" :branch "master"))
+
+;; [zoom] Managing the window sizes automatically
+;; (use-package zoom
+;;   :hook (window-setup . zoom-mode)
+;;   :config
+;;   (timeout-throttle! 'zoom--handler 0.1))
+
+(defun +patch/eglot-pyright-venv-workspace-config (server)
+  `(:python\.analysis
+    (:extraPaths ,(vector "~/learn/sem7/Isolation/gem5/src/python/"))))
+
+(setq-default eglot-workspace-configuration #'+patch/eglot-pyright-venv-workspace-config)
+
+;; (use-package org-project
+;;   :straight (org-project :type git :host github :repo "delehef/org-project")
+;;   :custom
+;;   ;; If invoked outside of a project, prompt for a valid project to capture for
+;;   (org-project-prompt-for-project t)
+;;
+;;   ;; Store all TODOs in a ORG_DIRECTORY/project.org
+;;   (org-project-todos-per-project nil)
+;;   (org-project-todos-file (concat org-directory "/projects.org"))
+;;
+;;   ;; Or use a single file per project, PROJECT_ROOT/todos.org
+;;   ;; (org-project-todos-per-project t)
+;;   ;; (org-project-per-project-file "todos.org")
+;;
+;;   ;; Use custom capture templates
+;;   (org-project-capture-template "* TODO %?\n%t\n") ;; Ask for a TODO and a date
+;;   (org-project-quick-capture-template "* TODO %? %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n") ;; Quick TODOs ae scheduled in two days
+;;
+;;   ;; Add some binding for org-project in project.el map
+;;   :bind (:map project-prefix-map
+;;               ("t" . org-project-quick-capture)
+;;               ("T" . org-project-capture)
+;;               ("o" . org-project-open-todos)))

@@ -219,8 +219,8 @@
                                      (+mode-line-use-region-indicator))
                             face ,panel-face))
                 " "
-                (:propertize "%b" face ,meta-face)
-                ;; (:eval (breadcrumb-project-crumbs))
+                ;; (:propertize "%b" face ,meta-face)
+                (:eval (breadcrumb-project-crumbs))
                 (:propertize +mode-line-remote-host-name
                              face +mode-line-host-name-active-face)
                 ;; (:eval ,(when-let ((imenu (and +mode-line-enough-width-p
@@ -246,23 +246,25 @@
 (setq-default mode-line-format
               '((:eval (+mode-line-compute))))
 
+;; (timeout-throttle! 'breadcrumb-project-crumbs 0.3)
+;; (timeout-throttle! '+mode-line-buffer-position 0.2)
 
 ;;; Header Line
 ;; TODO: The performance of bc is a little bad, so I disable it for now.
 ;;      Maybe I will solve the problem in the future.
 ;; [breadcrumb] Add breadcrumb navigation in header-line
-;; (use-package breadcrumb
-;;   :custom-face
-;;   (breadcrumb-project-base-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-;;   (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-;;   (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-;;   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-;;   :straight (:host github :repo "joaotavora/breadcrumb" :files ("*.el"))
-;;   :commands breadcrumb--header-line
-;;   :config
-;;   (setq breadcrumb-imenu-crumb-separator "▸"
-;;         breadcrumb-project-max-length 0.3
-;;         breadcrumb-imenu-max-length 0.3
-;;         breadcrumb-idle-time 10))
+(use-package breadcrumb
+  :custom-face
+  (breadcrumb-project-base-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
+  (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
+  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
+  (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
+  :straight (:host github :repo "joaotavora/breadcrumb" :files ("*.el"))
+  :commands breadcrumb--header-line
+  :config
+  (setq breadcrumb-imenu-crumb-separator "▸"
+        breadcrumb-project-max-length 0.3
+        breadcrumb-imenu-max-length 0.3
+        breadcrumb-idle-time 10))
 
 (setq-default header-line-format nil)

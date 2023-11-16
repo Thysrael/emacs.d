@@ -166,7 +166,7 @@
   :hook ((after-init . auto-dim-other-buffers-mode)
          (auto-dim-other-buffers-mode . +auto-dim-other-buffers-auto-set-face))
   :config
-  (setq auto-dim-other-buffers-dim-on-focus-out nil
+  (setq auto-dim-other-buffers-dim-on-focus-out t
         auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
 
   (defadvice! +auto-dim-other-buffers-auto-set-face (&rest _)
