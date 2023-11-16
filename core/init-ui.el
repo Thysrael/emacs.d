@@ -1,12 +1,12 @@
 ;; -*- lexical-binding: t; -*-
 
-;; (use-package nerd-icons
-;;   ;; :custom
-;;   ;; The Nerd Font you want to use in GUI
-;;   ;; "Symbols Nerd Font Mono" is the default and is recommended
-;;   ;; but you can use any other Nerd Font if you want
-;;   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
-;;   )
+(use-package nerd-icons
+  ;; :custom
+  ;; The Nerd Font you want to use in GUI
+  ;; "Symbols Nerd Font Mono" is the default and is recommended
+  ;; but you can use any other Nerd Font if you want
+  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+  )
 
 (use-package all-the-icons
   ;; :custom
@@ -116,12 +116,25 @@
 
 (defun +setup-fonts ()
   "Setup fonts."
+  ;; JetBrainsMono 这个字体并不支持一些字符，好像 Sarasa Term SC 支持得更多一些，但是不知道 vscode 为啥可以
   (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
   (set-fontset-font t 'han (font-spec :family "LXGW WenKai" :size +font-han-size))
   (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
   (set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji") nil 'append)
   ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
   )
+
+;; (defun +setup-fonts ()
+;;     "Setup fonts."
+;;     (set-face-attribute 'default nil :font (font-spec :family "Sarasa Term SC" :size +font-en-size))
+;;     (set-face-font 'fixed-pitch "Sarasa Term SC")
+;;     (set-face-font 'fixed-pitch-serif "Sarasa Term Slab SC")
+;;     (set-face-font 'variable-pitch "Sarasa UI SC")
+;;
+;;     (dolist (charset '(han cjk-misc))
+;;       (set-fontset-font t charset (font-spec :family "LXGW WenKai" :size +font-han-size)))
+;;     (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
+;;     )
 
 (+setup-fonts)
 (add-hook 'server-after-make-frame-hook #'+setup-fonts)
@@ -161,6 +174,8 @@
 (setq initial-frame-alist '((fullscreen . maximized)))
 
 ;; 主题
+(setq custom-safe-themes t)
+
 (use-package doom-themes
   :init
   (setq doom-themes-enable-bold t
@@ -173,8 +188,11 @@
   (doom-themes-treemacs-config)
   )
 
+;; (use-package modus-themes)
 ;; (load-theme 'doom-ayu-mirage t)
 ;; (load-theme 'doom-moonlight t)
-;; (load-theme 'doom-dracula t)
+(load-theme 'doom-dracula t)
 ;; (load-theme'doom-nord t)
-(load-theme 'modus-vivendi t)
+;; (load-theme 'modus-vivendi t)
+
+;; (use-package ef-themes)
