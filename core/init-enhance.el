@@ -291,6 +291,11 @@
         ispell-personal-dictionary (expand-file-name "ispell/.pws" user-emacs-directory))
   )
 
+;; burly-bookmark can save window configure
+;; (use-package burly
+;;   :hook
+;;   (tab-bar-mode . burly-tabs-mode))
+
 ;; Bookmark Register Rectangle
 (defhydra Cx-r (
                 :hint nil ; 只显示注释字符串，不显示绑定信息
@@ -304,19 +309,20 @@
         [_m_] Mark        [_SPC_] Point     [_N_] Number
         [_b_] Jump        [_s_] Text        [_t_] String
         ^ ^               [_r_] Rectangle   [_o_] Space
-        ^ ^               [_w_] Window      [_c_] Clear
+        ^ ^               [_W_] Window      [_c_] Clear
         ^ ^               [_K_] Kmacro      [_k_] Kill
         [_q_] Quit        ^ ^               [_y_] Yank
   "
   ("m" bookmark-set-no-overwrite)
   ("b" bookmark-jump)
   ("l" bookmark-bmenu-list)
+  ;; ("w" burly-bookmark-windows)
 
   ("v" consult-register)
   ("SPC" point-to-register)
   ("s" copy-to-register)
   ("r" copy-rectangle-to-register)
-  ("w" window-configuration-to-register)
+  ("W" window-configuration-to-register)
   ("K" kmacro-to-register)
 
   ("M" rectangle-mark-mode :color red) ; red 执行完后不退出

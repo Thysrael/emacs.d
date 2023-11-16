@@ -207,14 +207,14 @@
                  :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
                  )
   "
-     Tab^^          Winner^^        Resize
-  ---------------------------------------------
-     [_s_] Switch   [_u_] Undo      [_=_] Enlarge
-     [_0_] Close    [_U_] Redo      [_-_] Shrink
-     [_2_] New      ^ ^             [_+_] EnlargeV
-     [_R_] Rename   [_q_] quit      [___] ShrinkV
+     Tab^^          Winner^^        Resize^^          Desktop^^
+  -----------------------------------------------------------------------
+     [_c_] Switch   [_u_] Undo      [_=_] Enlarge     [_s_] SaveDefault
+     [_0_] Close    [_U_] Redo      [_-_] Shrink      [_l_] Load
+     [_2_] New      ^ ^             [_+_] EnlargeV    ^ ^
+     [_R_] Rename   ^ ^             [___] ShrinkV     [_q_] Quit
   "
-  ("s" tab-switch)
+  ("c" tab-switch)
   ("0" tab-close :color red)
   ("2" tab-new)
   ("R" tab-rename :color red)
@@ -226,6 +226,9 @@
   ("-" shrink-window :color red)
   ("+" enlarge-window-horizontally :color red)
   ("_" shrink-window-horizontally :color red)
+
+  ("s" desktop-save-in-desktop-dir)
+  ("l" desktop-read)
 
   ("q" nil))
 
