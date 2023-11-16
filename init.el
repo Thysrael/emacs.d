@@ -4,7 +4,7 @@
                      'init-tmp
                      'init-basic
                      'init-enhance
-                     'init-window   
+                     'init-window
                      'init-workspace
                      'init-tabbar
                      'init-navigate
