@@ -109,27 +109,3 @@
     (:extraPaths ,(vector "~/learn/sem7/Isolation/gem5/src/python/"))))
 
 (setq-default eglot-workspace-configuration #'+patch/eglot-pyright-venv-workspace-config)
-
-;; (use-package org-project
-;;   :straight (org-project :type git :host github :repo "delehef/org-project")
-;;   :custom
-;;   ;; If invoked outside of a project, prompt for a valid project to capture for
-;;   (org-project-prompt-for-project t)
-;;
-;;   ;; Store all TODOs in a ORG_DIRECTORY/project.org
-;;   (org-project-todos-per-project nil)
-;;   (org-project-todos-file (concat org-directory "/projects.org"))
-;;
-;;   ;; Or use a single file per project, PROJECT_ROOT/todos.org
-;;   ;; (org-project-todos-per-project t)
-;;   ;; (org-project-per-project-file "todos.org")
-;;
-;;   ;; Use custom capture templates
-;;   (org-project-capture-template "* TODO %?\n%t\n") ;; Ask for a TODO and a date
-;;   (org-project-quick-capture-template "* TODO %? %(org-insert-time-stamp (org-read-date nil t \"+2d\"))\n") ;; Quick TODOs ae scheduled in two days
-;;
-;;   ;; Add some binding for org-project in project.el map
-;;   :bind (:map project-prefix-map
-;;               ("t" . org-project-quick-capture)
-;;               ("T" . org-project-capture)
-;;               ("o" . org-project-open-todos)))

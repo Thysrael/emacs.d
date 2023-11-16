@@ -5,7 +5,7 @@
                      'init-basic
                      'init-enhance
                      'init-window
-                     'init-workspace
+                     ;; 'init-workspace
                      'init-tabbar
                      'init-navigate
                      'init-ui

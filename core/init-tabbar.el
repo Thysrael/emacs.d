@@ -182,7 +182,7 @@
   (interactive)
   (setq tab-bar-format nil))
 
-(defun-call! +show-tab-bar ()
+(defun-call! +show-tab-bbar ()
   (interactive)
   (setq tab-bar-format '(tab-bar-format-tabs tab-bar-separator
                                              tab-bar-format-align-right
@@ -200,3 +200,33 @@
   (add-hook 'after-make-frame-functions
             #'(lambda (&rest _) (force-mode-line-update))))
 )
+
+(defhydra window (
+                 :hint nil ; 只显示注释字符串，不显示绑定信息
+                 :color blue ; 执行完一次后就退出
+                 :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
+                 )
+  "
+     Tab^^          Winner^^        Resize
+  ---------------------------------------------
+     [_s_] Switch   [_u_] Undo      [_=_] Enlarge
+     [_0_] Close    [_U_] Redo      [_-_] Shrink
+     [_2_] New      ^ ^             [_+_] EnlargeV
+     [_R_] Rename   [_q_] quit      [___] ShrinkV
+  "
+  ("s" tab-switch)
+  ("0" tab-close :color red)
+  ("2" tab-new)
+  ("R" tab-rename :color red)
+
+  ("u" winner-undo :color red)
+  ("U" winner-redo :color red)
+
+  ("=" enlarge-window :color red)
+  ("-" shrink-window :color red)
+  ("+" enlarge-window-horizontally :color red)
+  ("_" shrink-window-horizontally :color red)
+
+  ("q" nil))
+
+(global-set-key (kbd "C-x t") 'window/body)
