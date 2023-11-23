@@ -80,6 +80,9 @@
   (setq org-hide-emphasis-markers t) ; 隐藏格式控制符
   (setq org-link-descriptive t) ; 显示链接的描述而非 URL
   (setq org-special-ctrl-a/e t) ; 在标题处 Ctrl-a 会忽略 *
+  (setq org-special-ctrl-k t) ; 在标题处 Ctrl-k 会删除整个标题
+  ;; (setq org-element-use-cache nil)
+  ;; (setq org-element-cache-persistent nil)
   ;; 配置 org 行内样式
   (defface org-bold
     '((t :foreground "#d2268b"
@@ -99,24 +102,25 @@
           ("+" (:strike-through t))))
   (setq org-latex-create-formula-image-program 'dvisvgm
         org-startup-with-latex-preview nil)
-  (plist-put org-format-latex-options :scale 1.2)
+  (plist-put org-format-latex-options :scale 1.0)
   :bind
   (:map org-mode-map
         ("C-c C-w" . org-copy-subtree)
         ("C-c C-q" . org-cut-subtree))
   )
 
+;; 预览 LaTeX 公式
+(use-package org-fragtog
+  :hook
+  ((org-mode . org-fragtog-mode))
+  :custom
+  (org-preview-latex-image-directory "/tmp/ltximg/"))
+
 ;; 现代化图标
 ;; (use-package org-modern
 ;;   :after org
 ;;   :hook ((org-mode . org-modern-mode)
 ;;          (org-agenda-finalize . org-modern-agenda-mode)))
-
-;; (use-package org-fragtog
-;;   :after (:any org markdown-mode)
-;;   :hook
-;;   ((org-mode . org-fragtog-mode)
-;;    (markdown-mode . org-fragtog-mode)))
 
 ;; 表格对齐
 (use-package valign
@@ -135,7 +139,9 @@
   :config
   (setq org-appear-autoemphasis t
         org-appear-autosubmarkers t
-        org-appear-autolinks t)
+        org-appear-autoentities t
+        org-appear-autolinks t
+        org-appear-autokeywords t)
   )
 
 ;;; 让中文行内格式显示 https://emacs-china.org/t/org-mode/22313?u=vagrantjoker
@@ -311,10 +317,10 @@
   :after org
   :hook (org-mode . org-autolist-mode))
 
-(use-package org-latex-impatient
-  :after org
-  :hook (org-mode . org-latex-impatient-mode)
-  :init
-  (setq org-latex-impatient-tex2svg-bin
-        ;; location of tex2svg executable
-        (no-littering-expand-var-file-name "org-latex-impatient/node_modules/mathjax-node-cli/bin/tex2svg")))
+;; (use-package org-latex-impatient
+;;   :after org
+;;   :hook (org-mode . org-latex-impatient-mode)
+;;   :init
+;;   (setq org-latex-impatient-tex2svg-bin
+;;         ;; location of tex2svg executable
+;;         (no-littering-expand-var-file-name "org-latex-impatient/node_modules/mathjax-node-cli/bin/tex2svg")))

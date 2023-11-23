@@ -143,7 +143,7 @@
 
 ;; 光标
 ;; (blink-cursor-mode -1) ;; 阻止光标闪烁
-(setq-default cursor-type 'bar)
+;; (setq-default cursor-type 'bar)
 
 ;; 连体字
 ;; (use-package ligature
