@@ -75,7 +75,7 @@
 
 ;; 搜索替换
 (use-package color-rg
-  :straight (color-rg :type git :host github :repo "manateelazycat/color-rg")
+  :straight (color-rg :type git :host github :repo "Thysrael/color-rg")
   :custom
   (color-rg-search-no-ignore-file nil) ; 进行项目搜索时忽略文件
   :bind
