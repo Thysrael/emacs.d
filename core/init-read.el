@@ -26,7 +26,7 @@
   (add-hook 'eww-after-render-hook #'shrface-mode)
   :config
   (require 'shrface)
-  (setq eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
+  (setq ;; eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
         shr-max-image-proportion 0.5)
   (defun +toggle-eww ()
   "Open eww if not already open, and switch to the *eww* buffer."
@@ -48,6 +48,9 @@
   :bind
   ("C-c w" . +toggle-eww)
   ("C-c W" . eww-list-bookmarks)
+  (:map eww-mode-map
+        ("n" . next-line)
+        ("p" . previous-line))
   )
 
 ;; 将页面渲染成 org-mode
@@ -56,15 +59,19 @@
   (shrface-basic)
   (shrface-trial)
   (shrface-default-keybindings) ; setup default keybindings
-  (setq shrface-href-versatile t
-        ))
+  (setq shrface-href-versatile t)
+  :bind
+  (:map shrface-mode-map
+        ("M-n" . shrface-next-headline)
+        ("M-p" . shrface-previous-headline)))
 
 ;; (use-package imenu-list
+;;   :after imenu
 ;;   :custom
 ;;   (imenu-list-position 'left)
 ;;   (imenu-list-size 0.2)
 ;;   :config
-;;   ;; (setq imenu-list-focus-after-activation t)
+;;   (setq imenu-list-focus-after-activation t)
 ;;   (setq imenu-list-auto-resize t)
 ;;   :bind
 ;;   ("C-c I" . imenu-list-smart-toggle)
