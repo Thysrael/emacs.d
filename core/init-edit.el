@@ -308,8 +308,6 @@ begin and end of the block surrounding point."
   :hook
   ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
   :config
-  (define-key puni-mode-map (kbd "C-k") nil)
-  (define-key puni-mode-map (kbd "C-d") 'puni-kill-line)
   (define-key puni-mode-map (kbd "C-w") nil)
   (define-key puni-mode-map (kbd "<backspace>") nil))
 

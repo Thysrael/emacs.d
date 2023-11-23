@@ -120,7 +120,7 @@
 ;; 将关键命令移动到右手核心区
 (define-key key-translation-map (kbd "C-j") (kbd "C-x"))
 ;; (global-set-key (kbd "C-k") 'execute-extended-command)
-(define-key key-translation-map (kbd "C-k") (kbd "M-x"))
+;; (define-key key-translation-map (kbd "C-k") (kbd "M-x"))
 
 ;; 绑定恢复 buffer 函数
 (global-set-key (kbd "<f5>") 'revert-buffer) ; 撤销所有没有保存的更改
