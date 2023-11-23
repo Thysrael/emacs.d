@@ -8,6 +8,7 @@
  ("M-<up>" . (lambda () (interactive) (scroll-other-window (- +scrolling-lines))))
  ;; 在本窗口滚动
  ("C-v" . (lambda () (interactive) (scroll-up +scrolling-lines)))
+ ("C-M-v" . (lambda () (interactive) (scroll-up (- +scrolling-lines))))
  )
 
 ;; 选择窗口
@@ -220,4 +221,6 @@
   (dolist (cmd '(symbol-overlay-basic-jump
                  compile-goto-error))
     (advice-add cmd :after #'+recenter-and-pulse-line))
+  (setq pulse-delay 0.04
+      pulse-iterations 4)
   )

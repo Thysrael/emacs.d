@@ -23,6 +23,16 @@
   (require 'shrface)
   (setq eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
         shr-max-image-proportion 0.5)
+  (defun +toggle-eww ()
+  "Open eww if not already open, and switch to the *eww* buffer."
+  (interactive)
+  ;; Check if eww is already open
+  (if (get-buffer "*eww*")
+      ;; If *eww* buffer exists, switch to it
+      (switch-to-buffer "*eww*")
+    ;; If *eww* buffer doesn't exist, open eww
+    (let ((url (read-string "Enter URL: ")))
+      (eww url))))
   :hook
   (eww-mode . (lambda () (progn
                       (setq line-spacing 0.15) ; 行间距扩大
@@ -31,7 +41,8 @@
                       )
                 ))
   :bind
-  ("C-c w" . eww)
+  ("C-c w" . +toggle-eww)
+  ("C-c W" . eww-list-bookmarks)
   )
 
 ;; 将页面渲染成 org-mode
