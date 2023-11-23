@@ -27,6 +27,7 @@
   :bind
   ("C-c C-v" . +toggle-markdown-mode)
   :config
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
   (setq markdown-enable-math t
         markdown-enable-wiki-links t
         markdown-italic-underscore t
@@ -42,21 +43,17 @@
   (defun +toggle-markdown-mode ()
     "Toggle between markdown-mode and markdown-view-mode."
     (interactive)
-    (if (eq major-mode 'markdown-mode)
-        (markdown-view-mode)
-      (markdown-mode)))
+    (if (eq major-mode 'gfm-mode)
+        (gfm-view-mode)
+      (gfm-mode)))
   :hook
-  (markdown-mode . (lambda () (setq line-spacing 0.25)))
+  (gfm-mode . (lambda () (setq line-spacing 0.25)))
   )
 
 ;;; org
-;; 预览 LaTeX 公式
-;; (use-package org-fragtog
-;;   :hook ((org-mode . org-fragtog-mode)))
-
 ;; org-mode
 (use-package org
-  :straight nil
+  :straight (:type built-in)
   ;; :custom-face
   ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
   ;;                                       ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
