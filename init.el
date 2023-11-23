@@ -21,6 +21,8 @@
                      'init-write
                      'init-shell
                      'init-remote
+                     'init-read
+                     'init-dired
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))

@@ -3,7 +3,7 @@
 ;;; general
 ;; 让文本居中并限制宽度
 (use-package visual-fill-column
-  :hook ((markdown-mode markdown-view-mode org-mode) . +center-text)
+  :hook ((markdown-mode markdown-view-mode org-mode eww-mode) . +center-text)
   :config
   (defun +center-text ()
     (visual-fill-column-mode)
@@ -81,8 +81,8 @@
   (setq org-link-descriptive t) ; 显示链接的描述而非 URL
   (setq org-special-ctrl-a/e t) ; 在标题处 Ctrl-a 会忽略 *
   (setq org-special-ctrl-k t) ; 在标题处 Ctrl-k 会删除整个标题
-  ;; (setq org-element-use-cache nil)
-  ;; (setq org-element-cache-persistent nil)
+  (setq org-element-use-cache nil)
+  (setq org-element-cache-persistent nil)
   ;; 配置 org 行内样式
   (defface org-bold
     '((t :foreground "#d2268b"

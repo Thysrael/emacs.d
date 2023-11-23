@@ -139,6 +139,10 @@
 ;;     )
 
 (+setup-fonts)
+;; 设置变宽字体和等宽字体，但是不知道为啥不能放到 UI 里
+(custom-set-faces
+ '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
+ '(variable-pitch ((t (:family "JetBrainsMono Nerd Font"))))) ;; SourceHanSerifCN
 (add-hook 'server-after-make-frame-hook #'+setup-fonts)
 
 ;; 光标

@@ -50,49 +50,6 @@
 ;;   ;; sessions
 ;;   (tabspaces-session t))
 
-(use-package google-translate
-  :straight t
-  :defines (google-translate-translation-directions-alist)
-  :bind
-  ("C-c j" . google-translate-at-point) ; 会询问一下是否是要查这个词
-  ("C-c J" . google-translate-at-point-reverse)
-  :init
-  (setq google-translate-translation-directions-alist '(("en" . "zh-CN")))) ; 用于设置 `smooth-translate`
-
-(use-package google-translate-default-ui
-  :straight nil
-  :custom
-  (google-translate-default-source-language "en") ; 用于设置 `at-point-reverse`
-  (google-translate-default-target-language "zh-CN"))
-
-;; (use-package diredfl
-;;   :straight t
-;;   :hook (dired-mode . diredfl-mode))
-
-;; [dired-git-info] Show git info in dired
-(use-package dired-git-info
-  :straight t
-  :after dired
-  :bind (:map dired-mode-map
-              ("v" . dired-git-info-mode))
-  :config
-  (setq dgi-commit-message-format "%h %cs %s"
-        dgi-auto-hide-details-p nil)
-  )
-
-(use-package nerd-icons-dired
-  :hook
-  (dired-mode . nerd-icons-dired-mode))
-
-(use-package dired-hacks
-  :straight (:files (:defaults "*.el"))
-  :after dired
-  :bind (:map dired-mode-map
-              ("TAB" . dired-subtree-toggle))
-  :init
-  ;; Don't show background, which is ugly in light themes
-  (with-eval-after-load 'dired-subtree
-    (setq dired-subtree-use-backgrounds nil)))
 
 ;; [timeout] debounce and throttle
 (use-package timeout
@@ -104,8 +61,8 @@
 ;;   :config
 ;;   (timeout-throttle! 'zoom--handler 0.1))
 
-(defun +patch/eglot-pyright-venv-workspace-config (server)
-  `(:python\.analysis
-    (:extraPaths ,(vector "~/learn/sem7/Isolation/gem5/src/python/"))))
-
-(setq-default eglot-workspace-configuration #'+patch/eglot-pyright-venv-workspace-config)
+;; (defun +patch/eglot-pyright-venv-workspace-config (server)
+;;   `(:python\.analysis
+;;     (:extraPaths ,(vector "~/learn/sem7/Isolation/gem5/src/python/"))))
+;;
+;; (setq-default eglot-workspace-configuration #'+patch/eglot-pyright-venv-workspace-config)
