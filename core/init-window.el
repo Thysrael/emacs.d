@@ -87,6 +87,7 @@
           "\\*Finder\\*"
           "\\*Kill Ring\\*"
           "\\*Go-Translate\\*"
+          "\\*maple-translate\\*"
 
           "Bookmark List" bookmark-bmenu-mode
           comint-mode
