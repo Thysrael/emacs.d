@@ -66,3 +66,23 @@
 ;;     (:extraPaths ,(vector "~/learn/sem7/Isolation/gem5/src/python/"))))
 ;;
 ;; (setq-default eglot-workspace-configuration #'+patch/eglot-pyright-venv-workspace-config)
+
+;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
+
+;; (require 'eaf-browser)
+;; (require 'eaf-pdf-viewer)
+;; (require 'eaf-demo)
+
+(use-package chatgpt-shell
+  :config
+  (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
+  (setq chatgpt-shell-prompt-query-response-style #'shell)
+  (setq chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
+  :bind
+  ("C-c Q" . chatgpt-shell-explain-code)
+  ("C-c q" . chatgpt-shell)
+  ;; M-n/p 可以查询历史
+  (:map chatgpt-shell-mode-map
+        ("<return>" . chatgpt-shell-newline)
+        ("M-<return>" . chatgpt-shell-submit)))
