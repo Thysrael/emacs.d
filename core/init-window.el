@@ -88,6 +88,7 @@
           "\\*Kill Ring\\*"
           "\\*Go-Translate\\*"
           "\\*maple-translate\\*"
+          "\\*eww bookmarks\\*"
 
           "Bookmark List" bookmark-bmenu-mode
           comint-mode

@@ -28,17 +28,17 @@
   :config
   (require 'shrface)
   (setq ;; eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
-        shr-max-image-proportion 0.5)
+   shr-max-image-proportion 0.6)
   (defun +toggle-eww ()
-  "Open eww if not already open, and switch to the *eww* buffer."
-  (interactive)
-  ;; Check if eww is already open
-  (if (get-buffer "*eww*")
-      ;; If *eww* buffer exists, switch to it
-      (switch-to-buffer "*eww*")
-    ;; If *eww* buffer doesn't exist, open eww
-    (let ((url (read-string "Enter URL: ")))
-      (eww url))))
+    "Open eww if not already open, and switch to the *eww* buffer."
+    (interactive)
+    ;; Check if eww is already open
+    (if (get-buffer "*eww*")
+        ;; If *eww* buffer exists, switch to it
+        (switch-to-buffer "*eww*")
+      ;; If *eww* buffer doesn't exist, open eww
+      (let ((url (read-string "Enter URL: ")))
+        (eww url))))
   :hook
   (eww-mode . (lambda () (progn
                       (setq line-spacing 0.15) ; 行间距扩大
@@ -50,8 +50,15 @@
   ("C-c w" . +toggle-eww)
   ("C-c W" . eww-list-bookmarks)
   (:map eww-mode-map
-        ("n" . next-line)
-        ("p" . previous-line))
+        ("j" . next-line)
+        ("k" . previous-line)
+        ("l" . +smart-forward)
+        ("h" . backward-char)
+        ("i" . eww-toggle-images)
+        ("o" . maple-translate)
+        ("m" . set-mark-command)
+        ("," . eww-back-url)
+        ("." . eww-forward-url))
   )
 
 ;; 将页面渲染成 org-mode
@@ -63,8 +70,18 @@
   (setq shrface-href-versatile t)
   :bind
   (:map shrface-mode-map
-        ("M-n" . shrface-next-headline)
-        ("M-p" . shrface-previous-headline)))
+        ("n" . shrface-next-headline)
+        ("p" . shrface-previous-headline)))
+;; 设置代码字体，不知道为什么不能写进去
+(custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono Nerd Font")))))
+
+(use-package shr-tag-pre-highlight
+  :after shr
+  :init
+  (require 'shr-tag-pre-highlight)
+    (add-to-list 'shr-external-rendering-functions
+               '(pre . shr-tag-pre-highlight))
+  )
 
 ;; (use-package imenu-list
 ;;   :after imenu
