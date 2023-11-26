@@ -121,6 +121,15 @@
         orderless-component-separator "[ &]")
   )
 
+;; 支持用中文拼音首字母缩写来搜索中文
+(use-package pinyinlib
+  :after orderless
+  :autoload pinyinlib-build-regexp-string
+  :init
+  (defun completion--regex-pinyin (str)
+    (orderless-regexp (pinyinlib-build-regexp-string str)))
+  (add-to-list 'orderless-matching-styles 'completion--regex-pinyin))
+
 ;; 为 minibuffer 的选项提供更加详细的信息
 (use-package marginalia
   :hook (vertico-mode . marginalia-mode))
