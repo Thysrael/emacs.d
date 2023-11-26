@@ -5,7 +5,7 @@
 (bind-keys*
  ;; 在其他窗口滚动
  ("M-<down>" . (lambda () (interactive) (scroll-other-window +scrolling-lines)))
- ("M-<up>" . (lambda () (interactive) (scroll-other-window (- +scrolling-lines))))
+ ("M-<up>" . (lambda () (interactive) (scroll-other-window-down +scrolling-lines)))
  ;; 在本窗口滚动
  ("C-v" . (lambda () (interactive) (scroll-up +scrolling-lines)))
  ("C-M-v" . (lambda () (interactive) (scroll-up (- +scrolling-lines))))
@@ -89,7 +89,7 @@
           "\\*Go-Translate\\*"
           "\\*maple-translate\\*"
           "\\*eww bookmarks\\*"
-
+          "\\*Outline:.*\\*.*$" PDF-Outline-mode
           "Bookmark List" bookmark-bmenu-mode
           comint-mode
           compilation-mode

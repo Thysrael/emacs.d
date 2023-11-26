@@ -79,9 +79,49 @@
   :after shr
   :init
   (require 'shr-tag-pre-highlight)
-    (add-to-list 'shr-external-rendering-functions
+  (add-to-list 'shr-external-rendering-functions
                '(pre . shr-tag-pre-highlight))
   )
+
+(use-package eaf
+  :straight nil
+  :init
+  (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+  (require 'eaf)
+  (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+  (setq eaf-buffer-title-format "EAF: %s")
+  )
+
+;; (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+;; (require 'eaf)
+;; (use-package eaf-browser
+;;   :straight nil
+;;   :init
+;;   (require 'eaf-browser)
+;;   (setq eaf-browser-dark-mode nil)
+;;   (setq eaf-webengine-default-zoom 1.2)
+;;   (setq eaf-webengine-font-size 20)
+;;   (setq eaf-browser-auto-import-chrome-cookies t))
+
+(use-package eaf-browser
+  :straight nil
+  :init
+  (require 'eaf-browser)
+  (setq eaf-browser-dark-mode nil)
+  (setq eaf-webengine-default-zoom 1.1)
+  (setq eaf-webengine-font-size 20)
+  (setq eaf-webengine-pc-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15")
+  :bind
+  ("C-c Q" . eaf-open-browser-with-history)
+  )
+
+(use-package eaf-pdf-viewer
+  :straight nil
+  :init
+  (require 'eaf-pdf-viewer)
+  (setq eaf-pdf-dark-mode nil)
+  )
+
 
 ;; (use-package imenu-list
 ;;   :after imenu
