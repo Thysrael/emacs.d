@@ -6,3 +6,4 @@ etc/rime/*
 .tags/
 elpha/
 tree-sitter/
+/site-lisp/

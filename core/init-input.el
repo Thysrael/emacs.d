@@ -25,26 +25,26 @@
 ;;   )
 ;;
 ;; 在 emacs 状态下不使用搜狗输入法，进而使用 emacs 内的 rime 输入法
-(defvar input-toggle nil "Toggle variable for input method, when nil means English, true means Chinese.")
-
-(defun fcitx2en ()
-  "Change to the English input."
-  (let ((input-status (process-lines "fcitx-remote")))
-    (when (= (string-to-number (car input-status)) 1) ; input status == 1 时表示搜狗输入法
-      (setq input-toggle nil)
-      (start-process "fcitx-remote-process" nil "fcitx-remote" "-o")
-      (message ""))))
-
-(defun fcitx2zh ()
-  "Change to the Chinese input."
-  (let ((input-status (process-lines "fcitx-remote")))
-    (unless (and (not (= (string-to-number (car input-status)) 1)) input-toggle)
-      (start-process "fcitx-remote-process" nil "fcitx-remote" "-c")
-      (setq input-toggle t))))
-
-(setq focus-in-hook 'fcitx2en)
-(setq focus-out-hook 'fcitx2zh)
-(add-hook 'kill-emacs-hook 'fcitx2zh)
+;; (defvar input-toggle nil "Toggle variable for input method, when nil means English, true means Chinese.")
+;;
+;; (defun fcitx2en ()
+;;   "Change to the English input."
+;;   (let ((input-status (process-lines "fcitx-remote")))
+;;     (when (= (string-to-number (car input-status)) 1) ; input status == 1 时表示搜狗输入法
+;;       (setq input-toggle nil)
+;;       (start-process "fcitx-remote-process" nil "fcitx-remote" "-o")
+;;       (message ""))))
+;;
+;; (defun fcitx2zh ()
+;;   "Change to the Chinese input."
+;;   (let ((input-status (process-lines "fcitx-remote")))
+;;     (unless (and (not (= (string-to-number (car input-status)) 1)) input-toggle)
+;;       (start-process "fcitx-remote-process" nil "fcitx-remote" "-c")
+;;       (setq input-toggle t))))
+;;
+;; (setq focus-in-hook 'fcitx2en)
+;; (setq focus-out-hook 'fcitx2zh)
+;; (add-hook 'kill-emacs-hook 'fcitx2zh)
 
 
 ;; 这个方案比 emacs rime 提供的中英文 inline 方便
@@ -88,7 +88,7 @@
           rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
           rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
           rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
-          ;; rime-predicate-after-ascii-char-p ; 任意英文字符后
+          rime-predicate-after-ascii-char-p ; 任意英文字符后
           ))
 
   (setq rime-show-candidate 'posframe
@@ -100,6 +100,22 @@
     (add-hook! kill-emacs-hook #'rime-lib-finalize))
   )
 
+(use-package key-echo
+  :straight nil
+  :after rime
+  :init
+  (add-to-list 'load-path "~/.emacs.d/site-lisp/key-echo/")
+  (require 'key-echo)
+  (key-echo-enable)
+  (defun key-echo-shift-to-switch-input-method (key)
+    (interactive)
+    (when (string-equal key "Key.shift")
+      (toggle-input-method)
+      ))
+  (setq key-echo-single-key-trigger-func 'key-echo-shift-to-switch-input-method)
+  ;; WORKAROUND: I don't know why I have to add this
+  (key-echo-restart-process)
+  )
 
 ;; [sis] automatically switch input source
 (use-package sis
@@ -109,6 +125,9 @@
   :custom
   (sis-other-cursor-color "#c3e88d")
   :config
+  (add-hook! (+theme-changed-hook server-after-make-frame-hook) :call-immediately
+    (defun +sis-set-other-cursor-color ()
+      (setq sis-other-cursor-color (face-foreground 'error nil t))))
   ;; Use emacs-rime as default
   (sis-ism-lazyman-config nil "rime" 'native)
   ;; enable the /cursor color/ mode
@@ -118,65 +137,4 @@
   ;; enable the /context/ mode for all buffers
   (sis-global-context-mode t)
   ;; enable the /inline english/ mode for all buffers
-  (sis-global-inline-mode t)
-
-  (defun +sis-remove-head-space-after-cc-punc (_)
-    (when (or (memq (char-before) '(?， ?。 ?？ ?！ ?； ?： ?（ ?【 ?「 ?“))
-                                                                (bolp))
-                                        (delete-char 1)))
-              (setq sis-inline-tighten-head-rule #'+sis-remove-head-space-after-cc-punc)
-
-              (defun +sis-remove-tail-space-before-cc-punc (_)
-                (when (eq (char-before) ? )
-                  (backward-delete-char 1)
-                  (when (and (eq (char-before) ? )
-                             (memq (char-after) '(?， ?。 ?？ ?！ ?； ?： ?（ ?【 ?「 ?“)))
-                                                      (backward-delete-char 1))))
-                        (setq sis-inline-tighten-tail-rule #'+sis-remove-tail-space-before-cc-punc)
-
-                        ;; Context mode
-                        (add-hook 'meow-insert-exit-hook #'sis-set-english)
-                        (add-to-list 'sis-context-hooks 'meow-insert-enter-hook)
-
-                        ;; Ignore some mode with context mode
-                        (defadvice! +sis-context-guess-ignore-modes (fn &rest args)
-                          :around #'sis--context-guess
-                          (if (derived-mode-p 'pdf-view-mode)
-                              'english
-                            (apply fn args)))
-
-                        (defun +sis-context-switching-other (back-detect fore-detect)
-                          (when (and meow-insert-mode
-                                     (or (and (derived-mode-p 'org-mode 'markdown-mode 'text-mode)
-                                              (sis--context-other-p back-detect fore-detect))
-                                         (and (derived-mode-p 'telega-chat-mode)
-                                              (or (and (= (point) telega-chatbuf--input-marker) ; beginning of input
-                                                       (eolp))
-                                                  (sis--context-other-p back-detect fore-detect)))))
-                            'other))
-
-                        (add-to-list 'sis-context-detectors #'+sis-context-switching-other)
-
-                        ;; Inline-mode
-                        (defvar-local +sis-inline-english-last-space-pos nil
-                          "The last space position in inline mode.")
-
-                        (add-hook! sis-inline-english-deactivated-hook
-                          (defun +sis-line-set-last-space-pos ()
-                            (when (eq (char-before) ?\s)
-                              (setq +sis-inline-english-last-space-pos (point)))))
-
-                        (add-hook! sis-inline-mode-hook
-                          (defun +sis-inline-add-post-self-insert-hook ()
-                            (add-hook! post-self-insert-hook :local
-                              (defun +sis-inline-remove-redundant-space ()
-                                (when (and (eq +sis-inline-english-last-space-pos (1- (point)))
-                                           (looking-back " [，。？！；：（【「“]"))
-                                  (save-excursion
-                                    (backward-char 2)
-                                    (delete-char 1)
-                                    (setq-local +sis-inline-english-last-space-pos nil)
-                                    ))
-                                ))
-                            ))
-                        )
+  (sis-global-inline-mode t))
