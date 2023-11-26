@@ -307,8 +307,9 @@ begin and end of the block surrounding point."
 (use-package puni
   :hook
   ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
-  :config
+  :init
   (define-key puni-mode-map (kbd "C-w") nil)
+  (define-key puni-mode-map (kbd "C-d") nil)
   (define-key puni-mode-map (kbd "<backspace>") nil))
 
 ;; 快速编辑成对出现的标点
