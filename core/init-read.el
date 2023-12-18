@@ -27,8 +27,8 @@
   (add-hook 'eww-after-render-hook #'shrface-mode)
   :config
   (require 'shrface)
-  (setq ;; eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
-   shr-max-image-proportion 0.6)
+  (setq eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
+        shr-max-image-proportion 0.6)
   (defun +toggle-eww ()
     "Open eww if not already open, and switch to the *eww* buffer."
     (interactive)
@@ -42,7 +42,7 @@
   :hook
   (eww-mode . (lambda () (progn
                       (setq line-spacing 0.15) ; 行间距扩大
-                      (setq fill-column 110) ; 更宽的阅读视界
+                      (setq fill-column 140) ; 更宽的阅读视界
                       (setq truncate-lines nil) ; 自动折行
                       )
                 ))
@@ -68,10 +68,12 @@
   (shrface-trial)
   (shrface-default-keybindings) ; setup default keybindings
   (setq shrface-href-versatile t)
+  (setq shrface-toggle-bullets t)
   :bind
   (:map shrface-mode-map
         ("n" . shrface-next-headline)
-        ("p" . shrface-previous-headline)))
+        ("p" . shrface-previous-headline)
+        ("C-c i" . shrface-headline-consult)))
 ;; 设置代码字体，不知道为什么不能写进去
 (custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono Nerd Font")))))
 
