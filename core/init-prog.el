@@ -33,7 +33,7 @@
   ;;     (call-interactively 'xref-find-definitions))) ; 和 lsp-bridge-mode 结合
   ;; (global-set-key (kbd "M-.") #'find-definitions-with-lsp-bridge)
   :bind
-  ("M-/" . xref-find-apropos) ; 将搜索按钮放到更合适的地方
+  ("M-/" . xref-find-references); 将搜索按钮放到更合适的地方
   )
 
 ;; 基于正则匹配的后端
@@ -105,6 +105,7 @@
   )
 
 (use-package eglot
+  :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
   ("C-c l" . hydra-eglot/body)
   :config
