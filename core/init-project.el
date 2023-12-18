@@ -27,6 +27,8 @@
     ("f" project-find-file "Find File" :color blue)
     ("&" project-async-shell-command "Async Shell Command" :color blue)
     ("!" project-shell-command "Shell Command" :color blue))
+  ;; don't consider the submodules is a part of the parent, which is convenient in search
+  (setq project-vc-merge-submodules nil)
   )
 
 (use-package treemacs
