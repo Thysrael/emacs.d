@@ -86,7 +86,7 @@
           rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
           rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
           rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
-          rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
+          ;; rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
           rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
           rime-predicate-after-ascii-char-p ; 任意英文字符后
           ))
@@ -100,22 +100,22 @@
     (add-hook! kill-emacs-hook #'rime-lib-finalize))
   )
 
-(use-package key-echo
-  :straight nil
-  :after rime
-  :init
-  (add-to-list 'load-path "~/.emacs.d/site-lisp/key-echo/")
-  (require 'key-echo)
-  (key-echo-enable)
-  (defun key-echo-shift-to-switch-input-method (key)
-    (interactive)
-    (when (string-equal key "Key.shift")
-      (toggle-input-method)
-      ))
-  (setq key-echo-single-key-trigger-func 'key-echo-shift-to-switch-input-method)
-  ;; WORKAROUND: I don't know why I have to add this
-  (key-echo-restart-process)
-  )
+;; (use-package key-echo
+;;   :straight nil
+;;   :after rime
+;;   :init
+;;   (add-to-list 'load-path "~/.emacs.d/site-lisp/key-echo/")
+;;   (require 'key-echo)
+;;   (key-echo-enable)
+;;   (defun key-echo-shift-to-switch-input-method (key)
+;;     (interactive)
+;;     (when (string-equal key "Key.shift")
+;;       (toggle-input-method)
+;;       ))
+;;   (setq key-echo-single-key-trigger-func 'key-echo-shift-to-switch-input-method)
+;;   ;; WORKAROUND: I don't know why I have to add this
+;;   (key-echo-restart-process)
+;;   )
 
 ;; [sis] automatically switch input source
 (use-package sis
