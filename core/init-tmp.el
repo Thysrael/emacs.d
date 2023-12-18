@@ -72,11 +72,12 @@
   (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
   (setq chatgpt-shell-prompt-query-response-style #'shell)
   (setq chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
+  (setq chatgpt-shell-model-version 4)
   :bind
   ("C-c q" . chatgpt-shell-explain-code)
   ;; ("C-c q" . chatgpt-shell)
   ("C-d" . chatgpt-shell)
   ;; M-n/p 可以查询历史
   (:map chatgpt-shell-mode-map
-        ("<return>" . chatgpt-shell-newline)
-        ("M-<return>" . chatgpt-shell-submit)))
+        ("M-<return>" . chatgpt-shell-newline)
+        ("<return>" . chatgpt-shell-submit)))
