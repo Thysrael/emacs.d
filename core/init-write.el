@@ -3,14 +3,17 @@
 ;;; general
 ;; 让文本居中并限制宽度
 (use-package visual-fill-column
-  :hook ((markdown-mode markdown-view-mode org-mode eww-mode) . +center-text)
+  :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode) . +center-text)
   :config
   (defun +center-text ()
+    (interactive)
     (visual-fill-column-mode)
     (setq visual-fill-column-center-text t)))
 
 ;; 可以给没有加空格的文本加上空格
-(use-package pangu-spacing)
+(use-package pangu-spacing
+  :hook
+  (eww-mode . pangu-spacing-mode))
 
 ;;; markdown
 ;; markdown-mode
@@ -18,14 +21,17 @@
   :custom-face
   ;; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
   (markdown-code-face ((t (:inherit nil))))
-  (markdown-header-face-1 ((t (:foreground "#c099ff" :weight bold :height 1.4 :family "LXGW WenKai"))))
-  (markdown-header-face-2 ((t (:inherit outline-1 :extend nil :weight bold :height 1.3 :family "LXGW WenKai"))))
-  (markdown-header-face-3 ((t (:inherit outline-2 :extend nil :weight bold :height 1.2 :family "LXGW WenKai"))))
-  (markdown-header-face-4 ((t (:inherit outline-3 :extend nil :weight bold :height 1.1 :family "LXGW WenKai"))))
+  ;; (markdown-header-face-1 ((t (:foreground "#c099ff" :weight bold :height 1.4 :family "LXGW WenKai"))))
+  ;; (markdown-header-face-2 ((t (:inherit outline-1 :extend nil :weight bold :height 1.3 :family "LXGW WenKai"))))
+  ;; (markdown-header-face-3 ((t (:inherit outline-2 :extend nil :weight bold :height 1.2 :family "LXGW WenKai"))))
+  ;; (markdown-header-face-4 ((t (:inherit outline-3 :extend nil :weight bold :height 1.1 :family "LXGW WenKai"))))
   (markdown-pre-face ((t (:inherit org-block :foreground "#c3e88d"))))
   (markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
   :bind
-  ("C-c C-v" . +toggle-markdown-mode)
+  (:map markdown-mode-map
+        ("C-c C-v" . +toggle-markdown-mode)
+        ("C-c C-b" . markdown-insert-bold)
+        )
   :config
   (add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
   (setq markdown-enable-math t
@@ -37,6 +43,8 @@
         markdown-fontify-code-blocks-natively t)
   (add-to-list 'markdown-code-lang-modes '("verilog" . verilog-mode))
   (add-to-list 'markdown-code-lang-modes '("c" . c-mode))
+  (add-to-list 'markdown-code-lang-modes '("c++" . c++-mode))
+  (add-to-list 'markdown-code-lang-modes '("cpp" . c++-mode))
   (add-to-list 'markdown-code-lang-modes '("sh" . shell-script-mode))
   (add-to-list 'markdown-code-lang-modes '("shell" . shell-script-mode))
   (add-to-list 'markdown-code-lang-modes '("bash" . shell-script-mode))
@@ -230,17 +238,17 @@
 
           ;; Keywords
           ("TODO" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                            :face 'org-todo :margin 0 :radius 5))))
+                                                 :face 'org-todo :margin 0 :radius 5))))
           ("WORK" . ((lambda (tag) (svg-tag-make tag :height 0.8
-                                            :face 'org-todo :margin 0 :radius 5))))
+                                                 :face 'org-todo :margin 0 :radius 5))))
           ("DONE" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                            :face 'org-done :margin 0 :radius 5))))
+                                                 :face 'org-done :margin 0 :radius 5))))
 
           ("FIXME\\b" . ((lambda (tag) (svg-tag-make "FIXME" :face 'org-todo :inverse t :margin 0 :crop-right t))))
 
           ;; beautify pagebreak in orgmode
           ("\\\\pagebreak" . ((lambda (tag) (svg-lib-icon "file-break" nil :collection "bootstrap"
-                                                     :stroke 0 :scale 1 :padding 0))))
+                                                          :stroke 0 :scale 1 :padding 0))))
 
           )))
 
@@ -298,8 +306,8 @@
 
   :custom
   (org-download-screenshot-method "flameshot gui --raw > %s")
-  (org-download-image-dir "./img") ; 将存在指定文件夹下
-  ;; (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
+  ;; (org-download-image-dir "./img") ; 将存在指定文件夹下
+  (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
   (org-download-heading-lvl nil))
 
 ;; 字数统计
