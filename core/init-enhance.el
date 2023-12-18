@@ -231,7 +231,7 @@
   (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-local t)
   )
 
-;;; misc 
+;;; misc
 ;; 地址跳转设置
 (use-package goto-addr
   :straight nil
