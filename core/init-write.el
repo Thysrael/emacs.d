@@ -53,7 +53,7 @@
 ;;; org
 ;; org-mode
 (use-package org
-  :straight (:type built-in)
+  ;; :straight (:type built-in)
   ;; :custom-face
   ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
   ;;                                       ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
