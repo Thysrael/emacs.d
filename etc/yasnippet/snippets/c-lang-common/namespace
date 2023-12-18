@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: my namesapce
+# key: nas
+# --
+namespace $1
+{
+$0
+} // namspace $1
