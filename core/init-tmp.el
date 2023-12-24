@@ -81,3 +81,8 @@
   (:map chatgpt-shell-mode-map
         ("M-<return>" . chatgpt-shell-newline)
         ("<return>" . chatgpt-shell-submit)))
+
+;; 因为没法捕获 tags 而失败
+;; (use-package hexo
+;;   :config
+;;   (setq hexo-root-dir "~/blog/"))
