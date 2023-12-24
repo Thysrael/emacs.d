@@ -105,7 +105,7 @@
   )
 
 (use-package eglot
-  :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
+  ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
   ("C-c l" . hydra-eglot/body)
   :config
