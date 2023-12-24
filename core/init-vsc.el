@@ -61,7 +61,7 @@
   :config
   (setq
    ;; word-granularity diff
-   magit-diff-refine-hunk t
+   magit-diff-refine-hunk nil
    ;; dont paint whitespace
    magit-diff-paint-whitespace nil
    ;; Don't autosave repo buffers. This is too magical
