@@ -154,7 +154,7 @@
           (delete-window window)))))
   (advice-add #'keyboard-quit :before #'+popper-close-window-hack)
   :custom
-  (popper-window-height 35)
+  (popper-window-height 18)
   )
 
 
