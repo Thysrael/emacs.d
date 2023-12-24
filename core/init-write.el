@@ -165,96 +165,96 @@
 ;;                         'append)
 
 ;; 超级漂亮 svg 图标
-(use-package svg-tag-mode
-  :after org
-  :hook (org-mode . svg-tag-mode)
-  :config
-  (defun svg-progress-percent (value)
-    (svg-image (svg-lib-concat
-                (svg-lib-progress-bar (/ (string-to-number value) 100.0)
-                                      nil :margin 0 :stroke 2 :radius 3 :padding 2 :width 11)
-                (svg-lib-tag (concat value "%")
-                             nil :stroke 0 :margin 0)) :ascent 'center))
-
-  (defun svg-progress-count (value)
-    (let* ((seq (mapcar #'string-to-number (split-string value "/")))
-           (count (float (car seq)))
-           (total (float (cadr seq))))
-      (svg-image (svg-lib-concat
-                  (svg-lib-progress-bar (/ count total) nil
-                                        :margin 0 :stroke 2 :radius 3 :padding 2 :width 11)
-                  (svg-lib-tag value nil
-                               :stroke 0 :margin 0)) :ascent 'center)))
-
-  (defconst date-re "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}")
-  (defconst time-re "[0-9]\\{2\\}:[0-9]\\{2\\}")
-  (defconst day-re "[A-Za-z]\\{3\\}")
-  (defconst day-time-re (format "\\(%s\\)? ?\\(%s\\)?" day-re time-re))
-
-  (setq svg-tag-action-at-point 'edit)
-
-  (setq svg-lib-icon-collections
-        `(("bootstrap" .
-           "https://icons.getbootstrap.com/assets/icons/%s.svg")
-          ("simple" .
-           "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/%s.svg")
-          ("material" .
-           "https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/%s.svg")
-          ("octicons" .
-           "https://raw.githubusercontent.com/primer/octicons/master/icons/%s-24.svg")
-          ("boxicons" .
-           "https://boxicons.com/static/img/svg/regular/bx-%s.svg")))
-
-  (setq svg-tag-tags
-        `(
-          ;; Task priority
-          ("\\[#[A-Z]\\]" . ( (lambda (tag)
-                                (svg-tag-make tag :face 'org-priority
-                                              :beg 2 :end -1 :margin 0))))
-
-          ;; Progress
-          ("\\(\\[[0-9]\\{1,3\\}%\\]\\)" . ((lambda (tag)
-                                              (svg-progress-percent (substring tag 1 -2)))))
-          ("\\(\\[[0-9]+/[0-9]+\\]\\)" . ((lambda (tag)
-                                            (svg-progress-count (substring tag 1 -1)))))
-
-          ;; Active date (with or without day name, with or without time)
-          (,(format "\\(<%s>\\)" date-re) .
-           ((lambda (tag)
-              (svg-tag-make tag :beg 1 :end -1 :margin 0))))
-          (,(format "\\(<%s \\)%s>" date-re day-time-re) .
-           ((lambda (tag)
-              (svg-tag-make tag :beg 1 :inverse nil :crop-right t :margin 0))))
-          (,(format "<%s \\(%s>\\)" date-re day-time-re) .
-           ((lambda (tag)
-              (svg-tag-make tag :end -1 :inverse t :crop-left t :margin 0))))
-
-          ;; Inactive date  (with or without day name, with or without time)
-          (,(format "\\(\\[%s\\]\\)" date-re) .
-           ((lambda (tag)
-              (svg-tag-make tag :beg 1 :end -1 :margin 0 :face 'org-date))))
-          (,(format "\\(\\[%s \\)%s\\]" date-re day-time-re) .
-           ((lambda (tag)
-              (svg-tag-make tag :beg 1 :inverse nil :crop-right t :margin 0 :face 'org-date))))
-          (,(format "\\[%s \\(%s\\]\\)" date-re day-time-re) .
-           ((lambda (tag)
-              (svg-tag-make tag :end -1 :inverse t :crop-left t :margin 0 :face 'org-date))))
-
-          ;; Keywords
-          ("TODO" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                                 :face 'org-todo :margin 0 :radius 5))))
-          ("WORK" . ((lambda (tag) (svg-tag-make tag :height 0.8
-                                                 :face 'org-todo :margin 0 :radius 5))))
-          ("DONE" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
-                                                 :face 'org-done :margin 0 :radius 5))))
-
-          ("FIXME\\b" . ((lambda (tag) (svg-tag-make "FIXME" :face 'org-todo :inverse t :margin 0 :crop-right t))))
-
-          ;; beautify pagebreak in orgmode
-          ("\\\\pagebreak" . ((lambda (tag) (svg-lib-icon "file-break" nil :collection "bootstrap"
-                                                          :stroke 0 :scale 1 :padding 0))))
-
-          )))
+;; (use-package svg-tag-mode
+;;   :after org
+;;   :hook (org-mode . svg-tag-mode)
+;;   :config
+;;   (defun svg-progress-percent (value)
+;;     (svg-image (svg-lib-concat
+;;                 (svg-lib-progress-bar (/ (string-to-number value) 100.0)
+;;                                       nil :margin 0 :stroke 2 :radius 3 :padding 2 :width 11)
+;;                 (svg-lib-tag (concat value "%")
+;;                              nil :stroke 0 :margin 0)) :ascent 'center))
+;;
+;;   (defun svg-progress-count (value)
+;;     (let* ((seq (mapcar #'string-to-number (split-string value "/")))
+;;            (count (float (car seq)))
+;;            (total (float (cadr seq))))
+;;       (svg-image (svg-lib-concat
+;;                   (svg-lib-progress-bar (/ count total) nil
+;;                                         :margin 0 :stroke 2 :radius 3 :padding 2 :width 11)
+;;                   (svg-lib-tag value nil
+;;                                :stroke 0 :margin 0)) :ascent 'center)))
+;;
+;;   (defconst date-re "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}")
+;;   (defconst time-re "[0-9]\\{2\\}:[0-9]\\{2\\}")
+;;   (defconst day-re "[A-Za-z]\\{3\\}")
+;;   (defconst day-time-re (format "\\(%s\\)? ?\\(%s\\)?" day-re time-re))
+;;
+;;   (setq svg-tag-action-at-point 'edit)
+;;
+;;   (setq svg-lib-icon-collections
+;;         `(("bootstrap" .
+;;            "https://icons.getbootstrap.com/assets/icons/%s.svg")
+;;           ("simple" .
+;;            "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/%s.svg")
+;;           ("material" .
+;;            "https://raw.githubusercontent.com/Templarian/MaterialDesign/master/svg/%s.svg")
+;;           ("octicons" .
+;;            "https://raw.githubusercontent.com/primer/octicons/master/icons/%s-24.svg")
+;;           ("boxicons" .
+;;            "https://boxicons.com/static/img/svg/regular/bx-%s.svg")))
+;;
+;;   (setq svg-tag-tags
+;;         `(
+;;           ;; Task priority
+;;           ("\\[#[A-Z]\\]" . ( (lambda (tag)
+;;                                 (svg-tag-make tag :face 'org-priority
+;;                                               :beg 2 :end -1 :margin 0))))
+;;
+;;           ;; Progress
+;;           ("\\(\\[[0-9]\\{1,3\\}%\\]\\)" . ((lambda (tag)
+;;                                               (svg-progress-percent (substring tag 1 -2)))))
+;;           ("\\(\\[[0-9]+/[0-9]+\\]\\)" . ((lambda (tag)
+;;                                             (svg-progress-count (substring tag 1 -1)))))
+;;
+;;           ;; ;; Active date (with or without day name, with or without time)
+;;           ;; (,(format "\\(<%s>\\)" date-re) .
+;;           ;;  ((lambda (tag)
+;;           ;;     (svg-tag-make tag :beg 1 :end -1 :margin 0))))
+;;           ;; (,(format "\\(<%s \\)%s>" date-re day-time-re) .
+;;           ;;  ((lambda (tag)
+;;           ;;     (svg-tag-make tag :beg 1 :inverse nil :crop-right t :margin 0))))
+;;           ;; (,(format "<%s \\(%s>\\)" date-re day-time-re) .
+;;           ;;  ((lambda (tag)
+;;           ;;     (svg-tag-make tag :end -1 :inverse t :crop-left t :margin 0))))
+;;           ;;
+;;           ;; ;; Inactive date  (with or without day name, with or without time)
+;;           ;; (,(format "\\(\\[%s\\]\\)" date-re) .
+;;           ;;  ((lambda (tag)
+;;           ;;     (svg-tag-make tag :beg 1 :end -1 :margin 0 :face 'org-date))))
+;;           ;; (,(format "\\(\\[%s \\)%s\\]" date-re day-time-re) .
+;;           ;;  ((lambda (tag)
+;;           ;;     (svg-tag-make tag :beg 1 :inverse nil :crop-right t :margin 0 :face 'org-date))))
+;;           ;; (,(format "\\[%s \\(%s\\]\\)" date-re day-time-re) .
+;;           ;;  ((lambda (tag)
+;;           ;;     (svg-tag-make tag :end -1 :inverse t :crop-left t :margin 0 :face 'org-date))))
+;;
+;;           ;; Keywords
+;;           ("TODO" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
+;;                                                  :face 'org-todo :margin 0 :radius 5))))
+;;           ("WORK" . ((lambda (tag) (svg-tag-make tag :height 0.8
+;;                                                  :face 'org-todo :margin 0 :radius 5))))
+;;           ("DONE" . ((lambda (tag) (svg-tag-make tag :height 0.8 :inverse t
+;;                                                  :face 'org-done :margin 0 :radius 5))))
+;;
+;;           ("ABORT" . ((lambda (tag) (svg-tag-make tag :face 'org-todo :inverse t :margin 0 :crop-right t))))
+;;
+;;           ;; beautify pagebreak in orgmode
+;;           ("\\\\pagebreak" . ((lambda (tag) (svg-lib-icon "file-break" nil :collection "bootstrap"
+;;                                                           :stroke 0 :scale 1 :padding 0))))
+;;
+;;           )))
 
 ;; 方便得插入图片
 (use-package org-download
