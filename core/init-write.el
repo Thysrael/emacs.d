@@ -27,6 +27,7 @@
   ;; (markdown-header-face-4 ((t (:inherit outline-3 :extend nil :weight bold :height 1.1 :family "LXGW WenKai"))))
   (markdown-pre-face ((t (:inherit org-block :foreground "#c3e88d"))))
   (markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
+  (markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9)))) ; 标题前的 #
   :bind
   (:map markdown-mode-map
         ("C-c C-v" . +toggle-markdown-mode)
@@ -41,21 +42,53 @@
         markdown-asymmetric-header t
         markdown-nested-imenu-heading-index t
         markdown-fontify-code-blocks-natively t)
-  (add-to-list 'markdown-code-lang-modes '("verilog" . verilog-mode))
-  (add-to-list 'markdown-code-lang-modes '("c" . c-mode))
-  (add-to-list 'markdown-code-lang-modes '("c++" . c++-mode))
-  (add-to-list 'markdown-code-lang-modes '("cpp" . c++-mode))
+  (add-to-list 'markdown-code-lang-modes '("verilog" . verilog-ts-mode))
+  (add-to-list 'markdown-code-lang-modes '("c" . c-ts-mode))
+  (add-to-list 'markdown-code-lang-modes '("c++" . c++-ts-mode))
+  (add-to-list 'markdown-code-lang-modes '("cpp" . c++-ts-mode))
   (add-to-list 'markdown-code-lang-modes '("sh" . shell-script-mode))
   (add-to-list 'markdown-code-lang-modes '("shell" . shell-script-mode))
   (add-to-list 'markdown-code-lang-modes '("bash" . shell-script-mode))
+
   (defun +toggle-markdown-mode ()
     "Toggle between markdown-mode and markdown-view-mode."
     (interactive)
     (if (eq major-mode 'gfm-mode)
         (gfm-view-mode)
       (gfm-mode)))
+    ;; markdown 模式实时渲染，最终没有用，略卡
+  ;; (defvar nb/current-line '(0 . 0)
+  ;;   "(start . end) of current line in current buffer")
+  ;; (make-variable-buffer-local 'nb/current-line)
+  ;;
+  ;; (defun nb/unhide-current-line (limit)
+  ;;   "Font-lock function"
+  ;;   (let ((start (max (point) (car nb/current-line)))
+  ;;         (end (min limit (cdr nb/current-line))))
+  ;;     (when (< start end)
+  ;;       (remove-text-properties start end
+  ;;                               '(invisible t display "" composition ""))
+  ;;       (goto-char limit)
+  ;;       t)))
+  ;;
+  ;; (defun nb/refontify-on-linemove ()
+  ;;   "Post-command-hook"
+  ;;   (let* ((start (line-beginning-position))
+  ;;          (end (line-beginning-position 2))
+  ;;          (needs-update (not (equal start (car nb/current-line)))))
+  ;;     (setq nb/current-line (cons start end))
+  ;;     (when needs-update
+  ;;       (font-lock-fontify-block 3))))
+  ;;
+  ;; (defun nb/markdown-unhighlight ()
+  ;;   "Enable markdown concealling"
+  ;;   (interactive)
+  ;;   (markdown-toggle-markup-hiding 'toggle)
+  ;;   (font-lock-add-keywords nil '((nb/unhide-current-line)) t)
+  ;;   (add-hook 'post-command-hook #'nb/refontify-on-linemove nil t))
   :hook
   (gfm-mode . (lambda () (setq line-spacing 0.25)))
+  ;; (gfm-mode . nb/markdown-unhighlight)
   )
 
 ;;; org
@@ -127,6 +160,14 @@
   ((org-mode . org-fragtog-mode))
   :custom
   (org-preview-latex-image-directory "/tmp/ltximg/"))
+
+;; 给 markdown 提供 latex 预览能力，不过很容易卡死
+;; (use-package texfrag
+;;   :hook
+;;   ;; (gfm-view-mode . texfrag-mode)
+;;   ;; (texfrag-mode . texfrag-document)
+;;   :custom
+;;   (texfrag-subdir "/tmp/texfrag"))
 
 ;; 现代化图标
 ;; (use-package org-modern
