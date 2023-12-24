@@ -62,3 +62,7 @@
   (load file nil 'nomessage))
 (define-advice startup--load-user-init-file (:after (&rest _) undo-silence)
   (advice-remove #'load-file #'load-file@silence))
+
+;; 禁止 org-mode 加载一些模块
+;; https://emacs-china.org/t/org-babel/18699/10
+(setq org-modules-loaded t)

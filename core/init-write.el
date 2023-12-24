@@ -117,6 +117,10 @@
         ("C-c C-q" . org-cut-subtree))
   )
 
+;; 禁用一些 org-modules 的加载
+;; (with-eval-after-load 'org
+;;   (setq org-modules (cl-set-difference org-modules '(ol-gnus ol-eww))))
+
 ;; 预览 LaTeX 公式
 (use-package org-fragtog
   :hook

@@ -23,6 +23,7 @@
                      'init-remote
                      'init-read
                      'init-dired
+                     'init-control
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))
