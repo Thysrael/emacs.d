@@ -201,4 +201,11 @@
   :config
   (setq treesit-auto-install 'prompt)
   (global-treesit-auto-mode)
+  ;; 使得 org src 可以自动映射到 ts 模式
+  (defun +remap-mode (mode)
+    "make org-src-get-lang-mode respect major-mode-remap-alist"
+    (treesit-auto--set-major-remap)
+    (alist-get mode major-mode-remap-alist mode)
+    )
+  (advice-add 'org-src-get-lang-mode :filter-return #'+remap-mode)
   )
