@@ -7,11 +7,11 @@
   (setq c-basic-offset 4)
   (c-set-offset 'case-label '+))
 
-;; (use-package c-ts-mode
-;;   :init
-;;   (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-ts-mode))
-;;   :config
-;;   (setq c-ts-mode-indent-offset 4))
+(use-package c-ts-mode
+  :init
+  (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-ts-mode))
+  :config
+  (setq c-ts-mode-indent-offset 4))
 
 ;; (use-package cmake-mode)
 
