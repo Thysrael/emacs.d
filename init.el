@@ -20,6 +20,7 @@
                      'init-debug
                      'init-write
                      'init-shell
+                     ;; 'init-term
                      'init-remote
                      'init-read
                      'init-dired
