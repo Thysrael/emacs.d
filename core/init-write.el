@@ -377,3 +377,9 @@
 ;;   (setq org-latex-impatient-tex2svg-bin
 ;;         ;; location of tex2svg executable
 ;;         (no-littering-expand-var-file-name "org-latex-impatient/node_modules/mathjax-node-cli/bin/tex2svg")))
+
+(use-package hexo
+  :config
+  (setq hexo-root-dir "~/blog/")
+  :bind
+  ("C-c h" . hexo))
