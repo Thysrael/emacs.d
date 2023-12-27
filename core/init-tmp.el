@@ -82,7 +82,11 @@
         ("M-<return>" . chatgpt-shell-newline)
         ("<return>" . chatgpt-shell-submit)))
 
-;; 因为没法捕获 tags 而失败
-;; (use-package hexo
-;;   :config
-;;   (setq hexo-root-dir "~/blog/"))
+;; 将 eldoc 展示在 box 而非 buffer 中
+;; (use-package eldoc-box
+;;   :hook
+;;   (eglot-managed-mode . eldoc-box-hover-mode))
+
+
+;; (use-package nano-vertico
+;;   :straight (nano-vertico :type git :host github :repo "rougier/nano-vertico"))

@@ -430,3 +430,21 @@
          (cl-loop for cpunc in '("，" "。" "？" "！" "；" "：" "、" "（" "）" "【" "】" "《" "》" "—")
                   for epunc in '("," "." "?" "!" ";" ":" "," "(" ")" "[" "]" "<" ">" "_")
                   do (define-key key-translation-map (kbd (concat prefix cpunc)) (kbd (concat prefix epunc)))))
+
+;; 支持终端 emacs 和外部程序的粘贴
+(setq x-select-enable-clipboard t)
+
+;; use xsel to copy/paste in emacs-nox
+(unless window-system
+  (when (getenv "DISPLAY")
+    (defun xsel-cut-function (text &optional push)
+      (with-temp-buffer
+        (insert text)
+        (call-process-region (point-min) (point-max) "xsel" nil 0 nil "--clipboard" "--input")))
+    (defun xsel-paste-function()
+      (let ((xsel-output (shell-command-to-string "xsel --clipboard --output")))
+        (unless (string= (car kill-ring) xsel-output)
+          xsel-output )))
+    (setq interprogram-cut-function 'xsel-cut-function)
+    (setq interprogram-paste-function 'xsel-paste-function)
+    ))
