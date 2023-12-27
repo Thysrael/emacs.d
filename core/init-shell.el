@@ -3,9 +3,14 @@
   :straight nil
   :functions eshell/alias
   :custom-face
+  ;; 避免路径下划线
   (eshell-syntax-highlighting-file-arg-face ((t (:underline nil))))
-  :bind (("C-t" . eshell)
-         ("C-c t" . +create-eshell)
+  :custom
+  ;; 限制 eshell 全屏弹出
+  (display-comint-buffer-action '(display-buffer-at-bottom
+                                         (inhibit-same-window . nil)))
+  :bind (("C-t" . project-eshell)
+         ("C-c t" . eshell)
          :map eshell-mode-map
          ("C-l" . eshell/clear)
          ("C-c C-h" . consult-history)
@@ -51,13 +56,6 @@
               (set-window-margins nil 1 nil)
               (visual-line-mode +1)
               (set-display-table-slot standard-display-table 0 ?\ )))
-
-  ;; 新建一个 eshell, 我不知道为什么这么写可以
-  ;; 此外可以用 C-u C-t 来新建 eshell 同时可以用 C-u <num> eshell 来访问特定 eshell
-  (defun +create-eshell ()
-    "create a shell"
-    (interactive);; "Prompt\n shell name:")
-    (eshell "*"))
 
   (defun +eshell/define-alias ()
     "Define alias for eshell"
