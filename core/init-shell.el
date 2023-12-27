@@ -1,6 +1,9 @@
+;; 配置 eshell
 (use-package esh-mode
   :straight nil
   :functions eshell/alias
+  :custom-face
+  (eshell-syntax-highlighting-file-arg-face ((t (:underline nil))))
   :bind (("C-t" . eshell)
          ("C-c t" . +create-eshell)
          :map eshell-mode-map
@@ -117,6 +120,11 @@
   (:map capf-autosuggest-active-mode-map
         ("C-e" . capf-autosuggest-accept)
         ("<right>" . capf-autosuggest-accept)))
+
+;; 输入 z 命令后会弹出 minibuffer 选择 path
+(use-package eshell-z
+  :after eshell
+  :commands (eshell/z))
 
 ;; promter 自定义
 (use-package eshell-git-prompt
