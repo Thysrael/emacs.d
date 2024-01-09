@@ -105,6 +105,8 @@
   )
 
 (use-package eglot
+  :custom
+  (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
   ("C-c l" . hydra-eglot/body)
