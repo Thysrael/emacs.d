@@ -216,7 +216,7 @@
      [_R_] Rename   ^ ^             [___] ShrinkV     [_q_] Quit
   "
   ("c" tab-switch)
-  ("0" tab-close :color red)
+  ("0" tab-close)
   ("2" tab-new)
   ("R" tab-rename :color red)
 

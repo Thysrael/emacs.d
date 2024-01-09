@@ -44,6 +44,7 @@
                       (setq line-spacing 0.15) ; 行间距扩大
                       (setq fill-column 140) ; 更宽的阅读视界
                       (setq truncate-lines nil) ; 自动折行
+                      (setq scroll-margin 2) ; 使滚动更平滑
                       )
                 ))
   :bind
