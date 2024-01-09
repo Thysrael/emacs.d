@@ -98,6 +98,8 @@
   (defadvice! +rime-do-finalize-after-loading-module (&rest _)
     :after #'rime--load-dynamic-module
     (add-hook! kill-emacs-hook #'rime-lib-finalize))
+  :bind
+  ("C-M-\\" . rime-force-enable)
   )
 
 ;; (use-package key-echo
