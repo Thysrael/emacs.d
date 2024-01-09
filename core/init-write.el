@@ -91,6 +91,9 @@
   ;; (gfm-mode . nb/markdown-unhighlight)
   )
 
+;; markdown edit inderct
+(use-package edit-indirect)
+
 ;;; org
 ;; org-mode
 (use-package org
