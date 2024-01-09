@@ -127,3 +127,12 @@
           (require 'smerge-mode)
           (smerge-mode 1)))))
   )
+
+;; show blame info in sidebar
+(use-package blamer
+  :straight (:host github :repo "artawower/blamer.el")
+  :bind (("C-c G" . global-blamer-mode))
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 40)
+  (blamer-commit-formatter "* %s"))
