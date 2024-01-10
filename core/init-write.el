@@ -31,6 +31,7 @@
   (markdown-pre-face ((t (:inherit org-block :foreground "#c3e88d"))))
   (markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
   (markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9)))) ; 标题前的 #
+  (markdown-table-face ((t (:inherit org-table))))
   :bind
   (:map markdown-mode-map
         ("C-c C-v" . +toggle-markdown-mode)
@@ -59,7 +60,7 @@
     (if (eq major-mode 'gfm-mode)
         (gfm-view-mode)
       (gfm-mode)))
-    ;; markdown 模式实时渲染，最终没有用，略卡
+  ;; markdown 模式实时渲染，最终没有用，略卡
   ;; (defvar nb/current-line '(0 . 0)
   ;;   "(start . end) of current line in current buffer")
   ;; (make-variable-buffer-local 'nb/current-line)
@@ -103,13 +104,14 @@
 (use-package org
   :straight t
   ;; :straight (:type built-in)
-  ;; :custom-face
+  :custom-face
   ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
   ;;                                       ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
   ;; (org-document-title ((t (:foreground "#c099ff" :weight bold :height 1.3 :family "LXGW WenKai"))))
   ;; (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :height 1.25 :family "LXGW WenKai"))))
   ;; (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :height 1.18 :family "LXGW WenKai"))))
   ;; (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :height 1.10 :family "LXGW WenKai"))))
+  (org-table ((t (:family "Sarasa Mono SC"))))
   :custom
   (org-image-actual-width '(800))
   (org-startup-with-inline-images t) ; 默认显示图片
@@ -185,13 +187,14 @@
 ;;          (org-agenda-finalize . org-modern-agenda-mode)))
 
 ;; 表格对齐
-(use-package valign
-  :after (:any org markdown-mode)
-  :custom
-  (valign-fancy-bar t)
-  :hook
-  (org-mode . valign-mode)
-  (markdown-mode . valign-mode))
+;; (use-package valign
+;;   :straight t
+;;   :after (:any org markdown-mode)
+;;   :custom
+;;   (valign-fancy-bar t)
+;;   :hook
+;;   (org-mode . valign-mode)
+;;   (markdown-mode . valign-mode))
 
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
