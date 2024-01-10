@@ -3,6 +3,7 @@
 ;;; 代码补全
 ;; 可以使用 M-/ 进行简单的补全
 (use-package dabbrev
+  :straight t
   :config
   (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'"))
   :bind
@@ -130,13 +131,16 @@
 
 ;;; corfu & yasnippet 方案
 ;; 提供模板
-(use-package yasnippet-snippets)
+(use-package yasnippet-snippets
+  :straight t)
 
 ;; 提供补全后端
-(use-package yasnippet-capf)
+(use-package yasnippet-capf
+  :straight t)
 
 ;; snippet 功能
 (use-package yasnippet
+  :straight t
   :hook
   ((prog-mode text-mode) . yas-minor-mode-on)
   ((prog-mode text-mode) . +yas-setup-capf) ; 这里的顺序很关键，似乎 yas 必须在 corfu 之前才可以
@@ -158,6 +162,7 @@
 
 ;; consult 模式的 yasnippet 检索
 (use-package consult-yasnippet
+  :straight t
   :bind
   ("C-c y" . consult-yasnippet))
 
@@ -205,6 +210,7 @@
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 (use-package corfu-terminal
+  :straight t
   :when (not (display-graphic-p))
   :after corfu
   :init (corfu-terminal-mode 1))
@@ -220,6 +226,7 @@
 
 ;; 补全后端
 (use-package cape
+  :straight t
   :hook ((corfu-mode . +corfu-add-cape-backends)
          ((TeX-mode LaTeX-mode org-mode markdown-mode) . +corfu-add-cape-tex-backends))
   :config

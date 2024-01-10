@@ -3,12 +3,14 @@
 ;;; 高亮设置
 ;; 高亮当前行
 (use-package hl-line
+  :straight t
   :hook ((prog-mode text-mode
                     yaml-mode conf-mode
                     special-mode org-agenda-mode dired-mode) . hl-line-mode))
 
 ;; 显示配对扩号
 (use-package paren
+  :straight t
   :custom-face (show-paren-match ((t (:underline t))))
   :config
   (setq show-paren-when-point-inside-paren t
@@ -18,6 +20,7 @@
 
 ;; 彩虹扩号
 (use-package rainbow-delimiters
+  :straight t
   :hook ((prog-mode conf-mode yaml-mode) . rainbow-delimiters-mode)
   :config
   (setq rainbow-delimiters-max-face-count 5)
@@ -25,6 +28,7 @@
 
 ;; 高亮 TODO, BUG 等关键词
 (use-package hl-todo
+  :straight t
   :custom-face
   (hl-todo ((t (:inherit default :height 0.9 :width condensed :weight bold :inverse-video t))))
   :hook
@@ -66,6 +70,7 @@
 ;;; 重构设置
 ;; 将需要高亮的符号进行高亮，当光标在 overlay 区域时，会触发新的快捷键用于操作符号
 (use-package symbol-overlay
+  :straight t
   :bind
   ("<f7>" . symbol-overlay-put)
   ("<f8>" . symbol-overlay-remove-all)
@@ -98,6 +103,7 @@
 
 ;; 撤销历史, 使用 f / b 移动
 (use-package vundo
+  :straight t
   :config
   (setq vundo-compact-display t)
   :bind
@@ -131,6 +137,7 @@
 ;;; 结构化编辑
 ;; 括号平衡
 (use-package elec-pair
+  :straight t
   :hook
   ((prog-mode text-mode) . electric-pair-mode)
   ;; 禁用 org-mode 的左尖括号
@@ -148,6 +155,7 @@
 
 ;; 空格处理
 (use-package ws-butler
+  :straight t
   :hook ((prog-mode markdown-mode) . ws-butler-mode)) ; Remove trailing whitespace with lines touched
 (setq backward-delete-char-untabify-method 'hungry) ; 一次删除多个空格
 
@@ -299,12 +307,14 @@ begin and end of the block surrounding point."
 
 ;; 可以快速选择区域
 (use-package expand-region
+  :straight t
   :bind
   ("C-l" . er/expand-region)
   ("C-M-l" . er/contract-region))
 
 ;; 用于强化删除功能，可以平衡删除
 (use-package puni
+  :straight t
   :hook
   ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
   :init
@@ -314,6 +324,7 @@ begin and end of the block surrounding point."
 
 ;; 快速编辑成对出现的标点
 (use-package embrace
+  :straight t
   :bind
   ("C-." . embrace-commander)
   :hook
@@ -323,12 +334,14 @@ begin and end of the block surrounding point."
 ;;; misc
 ;; [sudo-edit] edit file with su permissions
 (use-package sudo-edit
+  :straight t
   :config
   (sudo-edit-indicator-mode t)
   )
 
 ;; [wgrep] Edit a grep buffer and apply changes to the file buffer
 (use-package wgrep
+  :straight t
   :config
   (setq wgrep-auto-save-buffer t)
   )

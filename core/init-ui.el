@@ -1,6 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package nerd-icons
+  :straight t
   :custom
   (nerd-icons-font-family "Sarasa Gothic SC Nerd Font")
   ;; :custom
@@ -11,6 +12,7 @@
   )
 
 (use-package all-the-icons
+  :straight t
   ;; :custom
   ;; The Nerd Font you want to use in GUI
   ;; "Symbols Nerd Font Mono" is the default and is recommended
@@ -183,6 +185,7 @@
 (setq custom-safe-themes t)
 
 (use-package doom-themes
+  :straight t
   :init
   (setq doom-themes-enable-bold t
         doom-themes-enable-italic t)

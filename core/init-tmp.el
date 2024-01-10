@@ -68,6 +68,7 @@
 ;; (setq-default eglot-workspace-configuration #'+patch/eglot-pyright-venv-workspace-config)
 
 (use-package chatgpt-shell
+  :straight t
   :config
   (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
   (setq chatgpt-shell-prompt-query-response-style #'shell)

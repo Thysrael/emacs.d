@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package org
+  :straight t
   :bind
   ("C-c o" . org-capture) ; org-capture
   :config

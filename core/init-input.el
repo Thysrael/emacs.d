@@ -121,6 +121,7 @@
 
 ;; [sis] automatically switch input source
 (use-package sis
+  :straight t
   :hook
   (((text-mode prog-mode) . sis-context-mode)
    ((text-mode prog-mode) . sis-inline-mode))

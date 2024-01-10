@@ -12,6 +12,7 @@
 ;; M-? 进行 grep 搜索，是最没有办法的办法
 ;; 可以用 xref-backend-functions 查看后端函数
 (use-package xref
+  :straight t
   :config
   (setq
    xref-search-program 'ripgrep ; 设置工具为 riggrep
@@ -38,6 +39,7 @@
 
 ;; 基于正则匹配的后端
 (use-package dumb-jump
+  :straight t
   :init
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate) ; 将后端设置为 dumpjump
   :config
@@ -52,6 +54,7 @@
 ;; M-n, M-p 可以在小窗里移动，M-N, M-P 在多个搜索源中移动
 ;; M-p l 具有 chain 式查看功能，可以在小窗里嵌套调用
 (use-package citre
+  :straight t
   :bind
   ;; (:map prog-mode-map
   ;;   ("C-t j" . +citre-jump)
@@ -105,6 +108,7 @@
   )
 
 (use-package eglot
+  :straight t
   :custom
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
@@ -132,12 +136,14 @@
 ;; [consult-eglot] Eglot support for consult
 ;; C-M-., rember it!
 (use-package consult-eglot
+  :straight t
   :after consult eglot
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)
               ("C-c n" . consult-eglot-symbols)))
 
 (use-package eldoc
+  :straight t
   :config
   (setq eldoc-echo-area-display-truncation-message t
         eldoc-echo-area-prefer-doc-buffer t
@@ -148,6 +154,7 @@
 
 ;; 新的语法高亮支持
 (use-package treesit-auto
+  :straight t
   :demand t
   :init
   (setq treesit-font-lock-level 4)

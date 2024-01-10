@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package cc-mode
+  :straight t
   :init
   (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-mode))
   :config
@@ -9,6 +10,7 @@
   )
 
 (use-package c-ts-mode
+  :straight t
   :init
   (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-ts-mode))
   :config
@@ -19,10 +21,12 @@
 ;; (use-package cmake-mode)
 
 (use-package js
+  :straight t
   :config
   (setq js-indent-level 2))
 
 (use-package verilog-mode
+  :straight t
   :config
   (setq verilog-align-ifelse t
         verilog-auto-delete-trailing-whitespace t
@@ -43,6 +47,7 @@
         verilog-tab-to-comment t))
 
 (use-package scala-mode
+  :straight t
   :config
   (setq
    scala-indent:align-parameters t
@@ -59,6 +64,8 @@
   (setq python-indent-offset 4)
   )
 
-(use-package cuda-mode)
+(use-package cuda-mode
+  :straight t)
 
-(use-package yaml-mode)
+(use-package yaml-mode
+  :straight t)

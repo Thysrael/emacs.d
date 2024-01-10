@@ -70,6 +70,7 @@
 
 ;; 图标
 (use-package nerd-icons-dired
+  :straight t
   :hook
   (dired-mode . nerd-icons-dired-mode))
 
@@ -86,4 +87,5 @@
 
 ;; dired more colorful
 (use-package diredfl
+  :straight t
   :hook (dired-mode . diredfl-mode))

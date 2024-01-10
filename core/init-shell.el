@@ -106,11 +106,13 @@
 
 ;; 支持未完成命令和非法命令高亮
 (use-package eshell-syntax-highlighting
+  :straight t
   :after eshell
   :hook (eshell-mode . eshell-syntax-highlighting-mode))
 
 ;; 自动提示
 (use-package capf-autosuggest
+  :straight t
   :after eshell
   :hook
   (eshell-mode . capf-autosuggest-mode)
@@ -121,11 +123,13 @@
 
 ;; 输入 z 命令后会弹出 minibuffer 选择 path
 (use-package eshell-z
+  :straight t
   :after eshell
   :commands (eshell/z))
 
 ;; promter 自定义
 (use-package eshell-git-prompt
+  :straight t
   :after eshell
   :init
   (require 'eshell-git-prompt)

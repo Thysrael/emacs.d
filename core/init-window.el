@@ -13,6 +13,7 @@
 
 ;; 选择窗口
 (use-package ace-window
+  :straight t
   :custom-face
   (aw-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 3.0))))
   (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
@@ -66,6 +67,7 @@
 ;; popper 是一种特殊 buffer，所有的 popper 都只会占用同一个 window （出现在底部）
 ;; 利用这种机制可以使我们将许多临时的 buffer 都管理在一个窗口下
 (use-package popper
+  :straight t
   :bind
   ("C-=" . popper-toggle-type) ; 将 popper 转换为普通 buffer
   ("C--"  . popper-cycle) ; 切换多个 popper, 也可用于 toggle 出 popper window
@@ -166,6 +168,7 @@
 
 ;; 不活跃的 window 会变暗
 (use-package auto-dim-other-buffers
+  :straight t
   :hook ((after-init . auto-dim-other-buffers-mode)
          (auto-dim-other-buffers-mode . +auto-dim-other-buffers-auto-set-face))
   :config

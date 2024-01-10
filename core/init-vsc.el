@@ -2,6 +2,7 @@
 
 ;; git chrunk
 (use-package diff-hl
+  :straight t
   :defines desktop-minor-mode-table
   :hook
   ; 在不同模式下挂在不同的高亮
@@ -104,6 +105,7 @@
 
 ;; Show TODOs in magit
 (use-package magit-todos
+  :straight t
   :after magit
   :init
   (let ((inhibit-message t))
@@ -117,6 +119,7 @@
 
 ;; Highlight all the conflicted regions for git
 (use-package smerge-mode
+  :straight t
   :hook ((find-file . smerge-try-smerge))
   :config
   (defun smerge-try-smerge ()

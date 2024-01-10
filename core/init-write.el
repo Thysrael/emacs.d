@@ -3,6 +3,7 @@
 ;;; general
 ;; 让文本居中并限制宽度
 (use-package visual-fill-column
+  :straight t
   :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode) . +center-text)
   :config
   (defun +center-text ()
@@ -12,12 +13,14 @@
 
 ;; 可以给没有加空格的文本加上空格
 (use-package pangu-spacing
+  :straight t
   :hook
   (eww-mode . pangu-spacing-mode))
 
 ;;; markdown
 ;; markdown-mode
 (use-package markdown-mode
+  :straight t
   :custom-face
   ;; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
   (markdown-code-face ((t (:inherit nil))))
@@ -92,11 +95,13 @@
   )
 
 ;; markdown edit inderct
-(use-package edit-indirect)
+(use-package edit-indirect
+  :straight t)
 
 ;;; org
 ;; org-mode
 (use-package org
+  :straight t
   ;; :straight (:type built-in)
   ;; :custom-face
   ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
@@ -159,6 +164,7 @@
 
 ;; 预览 LaTeX 公式
 (use-package org-fragtog
+  :straight t
   :hook
   ((org-mode . org-fragtog-mode))
   :custom
@@ -189,6 +195,7 @@
 
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
+  :straight t
   :after org
   :hook
   (org-mode . org-appear-mode)
@@ -302,6 +309,7 @@
 
 ;; 方便得插入图片
 (use-package org-download
+  :straight t
   ;; :after (:any org markdown-mode)
   :after org
   :bind
@@ -370,6 +378,7 @@
   :straight (:type git :host github :repo "LdBeth/advance-words-count.el"))
 
 (use-package org-autolist
+  :straight t
   :after org
   :hook (org-mode . org-autolist-mode))
 
@@ -382,6 +391,7 @@
 ;;         (no-littering-expand-var-file-name "org-latex-impatient/node_modules/mathjax-node-cli/bin/tex2svg")))
 
 (use-package hexo
+  :straight t
   :config
   (setq hexo-root-dir "~/blog/")
   :bind

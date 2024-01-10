@@ -5,6 +5,13 @@
                            ("http" . "127.0.0.1:20171")
                            ("https" . "127.0.0.1:20171")))
 
+(setq straight-check-for-modifications nil                   ; skip modification
+      straight-vc-git-default-clone-depth '(1 single-branch) ; shadow clone
+      comp-deferred-compilation-deny-list ()                 ; config native comp
+      warning-suppress-log-types '((comp))                   ; Don't display comp warnings
+      straight-disable-native-compile (not (and (fboundp 'native-comp-available-p)
+                                                (native-comp-available-p))))
+
 ;; 安装 straight.el，我们会使用这个新包管理器，但是需要手动下载
 (defvar bootstrap-version) ; 版本
 (let ((bootstrap-file
@@ -23,6 +30,6 @@
 (setq use-package-always-demand (daemonp) ; 当 Emacs 是以守护进程方式运行时，立即加载所需的包
       use-package-always-defer (not (daemonp)) ; 当 Emacs 不是以守护进程方式运行时，延迟加载所需的包
       use-package-expand-minimally t ; 在展开配置时尽可能地精简，以减少额外的加载和计算
-      straight-use-package-by-default t ; use-package 默认使用 straight
+      ;; straight-use-package-by-default t ; use-package 默认使用 straight
       use-package-enable-imenu-support t ; 使得可以在 buffer 中快速导航到 use-package 定义的位置
       )

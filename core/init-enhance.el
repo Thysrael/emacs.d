@@ -59,6 +59,7 @@
 
 ;; 在 minibuffer 中提供补全支持，有多重风格
 (use-package orderless
+  :straight t
   :init (require 'orderless)
   :config
                                         ; 根据辅助字符来选择不同的补全风格
@@ -123,6 +124,7 @@
 
 ;; 支持用中文拼音首字母缩写来搜索中文
 (use-package pinyinlib
+  :straight t
   :after orderless
   :autoload pinyinlib-build-regexp-string
   :init
@@ -132,6 +134,7 @@
 
 ;; 为 minibuffer 的选项提供更加详细的信息
 (use-package marginalia
+  :straight t
   :hook (vertico-mode . marginalia-mode))
 
 ;; 为 minibuffer 中出现的条目（不至于 minibuffer 条目）
@@ -175,11 +178,13 @@
   )
 
 (use-package embark-consult
+  :straight t
   :after (embark consult)
   :hook (embark-collect-mode . consult-preview-at-point-mode)
   )
 
 (use-package consult
+  :straight t
   :bind
   ([remap bookmark-jump]                 . consult-bookmark)
   ([remap list-registers]                . consult-register)
@@ -222,6 +227,7 @@
 
 ;; [consult-dir] Insert path quickly in minibuffer
 (use-package consult-dir
+  :straight t
   :bind (([remap list-directory] . consult-dir)
          :map minibuffer-local-completion-map
          ("C-x C-d" . consult-dir)
@@ -302,6 +308,7 @@
 
 ;; buffer 管理
 (use-package ibuffer
+  :straight t
   :bind (("C-x C-b" . ibuffer))
   :config
 
@@ -310,6 +317,7 @@
 
 ;; [ibuffer-project] Group ibuffer's list by project root
 (use-package ibuffer-project
+  :straight t
   :hook (ibuffer . +ibuffer-project-activete)
   :config
   ;; HACK: Push temperary buffers in a standalone group
@@ -330,6 +338,9 @@
                            (mode . eww-history-mode)
                            (mode . eww-buffers-mode)
                            (mode . eww-search-annotations-mode)))
+          (eaf-filter '(or (mode . EAF/browser-mode)
+                           (name . "^\\*eaf")
+                           (name . "^\\EAF")))
           (chatgpt-filter '(mode . chatgpt-shell-mode))
           (eshell-pop-filter '(name . "^\\*Eshell-pop\\*$"))
           (telega-filter '(or (mode . telega-chat-mode)
@@ -345,6 +356,7 @@
       (add-to-list 'ibuffer-filter-groups (list "Scratch" scratch-filter))
       (add-to-list 'ibuffer-filter-groups (list "ChatGPT" chatgpt-filter))
       (add-to-list 'ibuffer-filter-groups (list "Eww" eww-filter))
+      (add-to-list 'ibuffer-filter-groups (list "EAF" eaf-filter))
       (add-to-list 'ibuffer-filter-groups (list "Xwidget" xwidget-filter))
       (add-to-list 'ibuffer-filter-groups (list "Ebib" ebib-filter))
       (add-to-list 'ibuffer-filter-groups (list "Elfeed" elfeed-filter))

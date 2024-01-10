@@ -9,6 +9,7 @@
 
 ;; compile 是内置的配合 make 的包
 (use-package compile
+  :straight t
   :config
   (setq compilation-always-kill t       ; kill compilation process before starting another
         compilation-ask-about-save nil  ; save all buffers on `compile'
@@ -26,10 +27,12 @@
 
 ;; 快速编译运行当前 buffer, 刷算法题和写脚本应该很舒服
 (use-package quickrun
+  :straight t
   :bind (("C-c x"  . quickrun)))
 
 ;; 语法检查
 (use-package flymake
+  :straight t
   :hook
   ((prog-mode . flymake-mode))
   :bind

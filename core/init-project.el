@@ -32,6 +32,7 @@
   )
 
 (use-package treemacs
+  :straight t
   :functions
   (treemacs-filewatch-mode treemacs-git-mode treemacs-delete-other-windows)
   :custom-face
@@ -93,6 +94,7 @@
   )
 
 (use-package treemacs-magit
+  :straight t
   :demand t
   :after treemacs magit
   :commands treemacs-magit--schedule-update
@@ -100,10 +102,3 @@
           git-commit-post-finish
           magit-post-stage
           magit-post-unstage) . treemacs-magit--schedule-update))
-
-;; [treemacs-persp] Treemacs integration for persp-mode
-(use-package treemacs-persp
-  :demand t
-  :after treemacs persp-mode
-  :functions treemacs-set-scope-type
-  :config (treemacs-set-scope-type 'Perspectives))
