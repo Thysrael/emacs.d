@@ -83,6 +83,21 @@
         ("M-<return>" . chatgpt-shell-newline)
         ("<return>" . chatgpt-shell-submit)))
 
+;; (use-package org-tree-slide
+;;   :straight t
+;;   :bind
+;;   (:map org-tree-slide-mode-map
+;;         ("<f9>" . org-tree-slide-move-previous-tree)
+;;         ("<f10>" . org-tree-slide-move-next-tree)
+;;         )
+;;   :hook
+;;   (org-tree-slide-mode . (lambda () (setq-local org-num-mode -1)))
+;;   :config
+;;   (setq org-tree-slide-heading-emphasis t
+;;         org-tree-slide-content-margin-top 1
+;;         ))
+
+
 ;; 将 eldoc 展示在 box 而非 buffer 中
 ;; (use-package eldoc-box
 ;;   :hook

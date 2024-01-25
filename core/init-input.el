@@ -82,7 +82,8 @@
   :config
   (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
   (setq rime-disable-predicates
-        '(rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
+        '(
+          rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
           rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
           rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
           rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
