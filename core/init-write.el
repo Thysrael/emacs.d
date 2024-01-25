@@ -102,8 +102,33 @@
 ;;; org
 ;; org-mode
 (use-package org
-  :straight t
+  ;; :straight t
   ;; :straight (:type built-in)
+  ;; org latex preview https://abode.karthinks.com/org-latex-preview/
+  :straight `(org
+              :fork (:host nil
+                           :repo "https://git.tecosaur.net/tec/org-mode.git"
+                           :branch "dev"
+                           :remote "tecosaur")
+              :files (:defaults "etc")
+              :build t
+              :pre-build
+              (with-temp-file "org-version.el"
+                (require 'lisp-mnt)
+                (let ((version
+                       (with-temp-buffer
+                         (insert-file-contents "lisp/org.el")
+                         (lm-header "version")))
+                      (git-version
+                       (string-trim
+                        (with-temp-buffer
+                          (call-process "git" nil t nil "rev-parse" "--short" "HEAD")
+                          (buffer-string)))))
+                  (insert
+                   (format "(defun org-release () \"The release version of Org.\" %S)\n" version)
+                   (format "(defun org-git-version () \"The truncate git commit hash of Org mode.\" %S)\n" git-version)
+                   "(provide 'org-version)\n")))
+              :pin nil)
   :custom-face
   ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
   ;;                                       ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
@@ -111,7 +136,7 @@
   ;; (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :height 1.25 :family "LXGW WenKai"))))
   ;; (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :height 1.18 :family "LXGW WenKai"))))
   ;; (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :height 1.10 :family "LXGW WenKai"))))
-  (org-table ((t (:family "Sarasa Mono SC"))))
+  (org-table ((t (:family "Sarasa Mono SC")))) ; 设置表格为中英等宽字体
   :custom
   (org-image-actual-width '(800))
   (org-startup-with-inline-images t) ; 默认显示图片
@@ -137,6 +162,7 @@
   ;; 配置 org 行内样式
   (defface org-bold
     '((t :foreground "#d2268b"
+         ;; :family "TsangerJinKai05 W05"
          :weight bold
          :underline t
          :overline t))
@@ -151,9 +177,9 @@
           ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
            org-code verbatim)
           ("+" (:strike-through t))))
-  (setq org-latex-create-formula-image-program 'dvisvgm
-        org-startup-with-latex-preview nil)
-  (plist-put org-format-latex-options :scale 1.0)
+;;   (setq org-latex-create-formula-image-program 'dvisvgm
+;;         org-startup-with-latex-preview nil)
+;;   (plist-put org-format-latex-options :scale 1.0)
   :bind
   (:map org-mode-map
         ("C-c C-w" . org-copy-subtree)
@@ -165,12 +191,27 @@
 ;;   (setq org-modules (cl-set-difference org-modules '(ol-gnus ol-eww))))
 
 ;; 预览 LaTeX 公式
-(use-package org-fragtog
-  :straight t
+;; (use-package org-fragtog
+;;   :straight t
+;;   :hook
+;;   ((org-mode . org-fragtog-mode))
+;;   :custom
+;;   (org-preview-latex-image-directory "/tmp/ltximg/"))
+
+(use-package org-latex-preview
+  :after org
+  :config
+  ;; Increase preview width
+  (plist-put org-latex-preview-appearance-options
+             :zoom 1.2)
+  ;; Block C-n and C-p from opening up previews when using auto-mode
+  (add-hook 'org-latex-preview-auto-ignored-commands 'next-line)
+  (add-hook 'org-latex-preview-auto-ignored-commands 'previous-line)
+  ;; Enable consistent equation numbering
+  (setq org-latex-preview-numbered t)
   :hook
-  ((org-mode . org-fragtog-mode))
-  :custom
-  (org-preview-latex-image-directory "/tmp/ltximg/"))
+  (org-mode . org-latex-preview-auto-mode)
+  )
 
 ;; 给 markdown 提供 latex 预览能力，不过很容易卡死
 ;; (use-package texfrag
