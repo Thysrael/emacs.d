@@ -182,7 +182,7 @@
   :init
   (setq corfu-cycle t                ; Enable cycling for `corfu-next/previous'
         corfu-auto t                 ; Enable auto completion
-        corfu-separator "&"          ; Orderless field separator
+        ;; corfu-separator "&"          ; Orderless field separator
         corfu-auto-prefix 1          ; minimun prefix to enable completion
         corfu-preview-current t
         corfu-auto-delay 0
@@ -203,8 +203,18 @@
     (cl-pushnew 'corfu-history savehist-additional-variables))
   )
 
+;; 弹出相关信息
+(use-package corfu-popupinfo
+  :straight nil
+  :after corfu
+  :init
+  (corfu-popupinfo-mode 1)
+  :config
+  (setq corfu-popupinfo-delay '(1.0 . 1.0)))
+
 ;; 美化 corfu
 (use-package nerd-icons-corfu
+  :straight t
   :after corfu
   :init
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
