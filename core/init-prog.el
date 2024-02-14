@@ -142,6 +142,7 @@
               ([remap xref-find-apropos] . consult-eglot-symbols)
               ("C-c n" . consult-eglot-symbols)))
 
+;; 文档信息展示
 (use-package eldoc
   :straight t
   :config
@@ -152,7 +153,24 @@
   :bind
   ("M-;" . eldoc))
 
-;; 新的语法高亮支持
+;; 格式化文档注释自动生成
+(use-package docstr
+  :straight
+  (docstr :type git :host github :repo "thysrael/docstr"
+          :files (:defaults "langs/*.el"))
+  :init
+  (setq docstr-key-support t) ; 设置键入触发
+  :config
+  (docstr-faces-apply) ; 设置高亮
+  :hook
+  (after-init . global-docstr-mode)
+  :custom
+  (docstr-desc-summary "@summary ")
+  (docstr-desc-param " ")
+  (docstr-desc-return " ")
+  )
+
+;; 新的 ts 语法高亮支持
 (use-package treesit-auto
   :straight t
   :demand t
@@ -218,3 +236,20 @@
     )
   (advice-add 'org-src-get-lang-mode :filter-return #'+remap-mode)
   )
+
+;; chatgpt 支持
+(use-package chatgpt-shell
+  :straight t
+  :config
+  (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
+  (setq chatgpt-shell-prompt-query-response-style #'shell)
+  (setq chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
+  (setq chatgpt-shell-model-version 4)
+  :bind
+  ("C-c q" . chatgpt-shell-explain-code)
+  ;; ("C-c q" . chatgpt-shell)
+  ("C-d" . chatgpt-shell)
+  ;; M-n/p 可以查询历史
+  (:map chatgpt-shell-mode-map
+        ("M-<return>" . chatgpt-shell-newline)
+        ("<return>" . chatgpt-shell-submit)))
