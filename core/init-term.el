@@ -6,9 +6,7 @@
    :map vterm-mode-map
    ("C-y" . vterm-yank)
    ("M-y" . vterm-yank-pop)
-   ("C-h" . vterm-copy-mode)
-   :map vterm-copy-mode
-   ("C-h" . vterm-copy-mode))
+   :map vterm-copy-mode)
   :init
   (setq vterm-shell "zsh")
   :config
