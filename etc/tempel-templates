@@ -1,0 +1,9 @@
+c-mode
+c-ts-mode
+c++-ts-mode
+(once "#ifndef " (s defname) n
+      "#define " (s defname) n
+      q
+      "\n#endif")
+(inc "#include <" p ">")
+(incc "#include \"" p "\"")
