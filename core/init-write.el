@@ -434,9 +434,34 @@
 ;;         ;; location of tex2svg executable
 ;;         (no-littering-expand-var-file-name "org-latex-impatient/node_modules/mathjax-node-cli/bin/tex2svg")))
 
-(use-package hexo
-  :straight t
+;; (use-package hexo
+;;   :straight t
+;;   :config
+;;   (setq hexo-root-dir "~/blog/")
+;;   :bind
+;;   ("C-c h" . hexo))
+
+;; [auctex]
+(use-package tex
+  :straight auctex
   :config
-  (setq hexo-root-dir "~/blog/")
-  :bind
-  ("C-c h" . hexo))
+  (setq TeX-parse-self t             ; parse on load
+        TeX-auto-save t              ; parse on save
+        TeX-source-correlate-mode t
+        TeX-source-correlate-method 'synctex
+        ;; Don't start the Emacs server when correlating sources.
+        TeX-source-correlate-start-server nil
+        ;; Automatically insert braces after sub/superscript in `LaTeX-math-mode'.
+        TeX-electric-sub-and-superscript t
+        ;; Just save, don't ask before each compilation.
+        TeX-save-query nil))
+
+
+;; [cdlatex]
+(use-package cdlatex
+  :straight t)
+
+
+;; [reftex]
+(use-package reftex
+  :straight t)
