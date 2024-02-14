@@ -199,7 +199,7 @@
   (add-to-list 'major-mode-remap-alist '(js-json-mode    . json-ts-mode))
   (add-to-list 'major-mode-remap-alist '(makefile-mode   . cmake-ts-mode))
   (add-to-list 'major-mode-remap-alist '(python-mode     . python-ts-mode))
-  (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
+  ;; (add-to-list 'major-mode-remap-alist '(ruby-mode       . ruby-ts-mode))
   (add-to-list 'major-mode-remap-alist '(conf-toml-mode  . toml-ts-mode))
   (add-to-list 'auto-mode-alist '("\\(?:Dockerfile\\(?:\\..*\\)?\\|\\.[Dd]ockerfile\\)\\'" . dockerfile-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
