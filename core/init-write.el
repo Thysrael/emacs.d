@@ -133,9 +133,9 @@
   ;; (org-quote ((t (:inherit org-block-begin-line)))) ; 设置 qoute 的格式
   ;;                                       ; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
   ;; (org-document-title ((t (:foreground "#c099ff" :weight bold :height 1.3 :family "LXGW WenKai"))))
-  ;; (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :height 1.25 :family "LXGW WenKai"))))
-  ;; (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :height 1.18 :family "LXGW WenKai"))))
-  ;; (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :height 1.10 :family "LXGW WenKai"))))
+  (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :family "Sarasa Mono SC"))))
+  (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :family "Sarasa Mono SC"))))
+  (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :family "Sarasa Mono SC"))))
   (org-table ((t (:family "Sarasa Mono SC")))) ; 设置表格为中英等宽字体
   :custom
   (org-image-actual-width '(800))
