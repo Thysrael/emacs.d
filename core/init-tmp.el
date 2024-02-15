@@ -99,7 +99,11 @@
   ;; 通过 log 可以看到错误信息 ! Package minted Error: You must invoke LaTeX with the -shell-escape flag
   )
 
+;; (use-package prism
+;;   :straight (prism :type git :host github :repo "alphapapa/prism.el"))
 
+;; (use-package color-identifiers-mode
+;;   :straight t)
 ;; (use-package meow
 ;;   :straight t
 ;;   :hook (after-init . meow-global-mode)

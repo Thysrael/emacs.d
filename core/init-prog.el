@@ -171,6 +171,14 @@
   (docstr-desc-return " ")
   )
 
+;; 高亮数字
+(use-package highlight-numbers
+  :straight t
+  :hook
+  (prog-mode . highlight-numbers-mode)
+  :custom-face
+  (highlight-numbers-number ((t (:foreground "#8be9fd" :inherit font-lock-constant-face)))))
+
 ;; 新的 ts 语法高亮支持
 ;; (use-package treesit-auto
 ;;   :straight t
