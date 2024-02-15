@@ -9,14 +9,14 @@
   (c-set-offset 'case-label '+)
   )
 
-(use-package c-ts-mode
-  :straight t
-  :init
-  (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-ts-mode))
-  :config
-  (setq c-ts-mode-indent-offset 4)
-  (setq c-ts-mode-indent-style 'gnu)
-  )
+;; (use-package c-ts-mode
+;;   :straight t
+;;   :init
+;;   (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-ts-mode))
+;;   :config
+;;   (setq c-ts-mode-indent-offset 4)
+;;   (setq c-ts-mode-indent-style 'gnu)
+;;   )
 
 ;; (use-package cmake-mode)
 
