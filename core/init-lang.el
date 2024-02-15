@@ -5,6 +5,7 @@
   :init
   (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-mode))
   :config
+  (setq c-default-style "linux")
   (setq c-basic-offset 4)
   (c-set-offset 'case-label '+)
   )
