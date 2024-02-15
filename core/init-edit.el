@@ -164,10 +164,8 @@
   :straight nil
   :hook (((prog-mode minibuffer-setup) . subword-mode)))
 
-;; 代码折叠
 (use-package hideshow
-  :straight nil
-  :hook ((prog-mode conf-mode yaml-mode) . hs-minor-mode)
+  :hook ((prog-mode conf-mode yaml-mode TeX-mode) . hs-minor-mode)
   :bind
   ("C-o" . hs-toggle-hiding)
   ("C-M-o" . hs-toggle-all)
@@ -273,36 +271,39 @@ begin and end of the block surrounding point."
           (end-of-line)))))
 
   ;; support for special modes
-  (setq hs-special-modes-alist
-        (append
-         '((yaml-mode "\\s-*\\_<\\(?:[^:]+\\)\\_>"
-                      ""
-                      "#"
-                      +fold-hideshow-forward-block-by-indent-fn nil)
-           (ruby-mode "class\\|d\\(?:ef\\|o\\)\\|module\\|[[{]"
-                      "end\\|[]}]"
-                      "#\\|=begin"
-                      ruby-forward-sexp)
-           (matlab-mode "if\\|switch\\|case\\|otherwise\\|while\\|for\\|try\\|catch"
-                        "end"
-                        nil (lambda (_arg) (matlab-forward-sexp)))
-           (nxml-mode "<!--\\|<[^/>]*[^/]>"
-                      "-->\\|</[^/>]*[^/]>"
-                      "<!--" sgml-skip-tag-forward nil)
-           (latex-mode
-            ;; LaTeX-find-matching-end needs to be inside the env
-            ("\\\\begin{[a-zA-Z*]+}\\(\\)" 1)
-            "\\\\end{[a-zA-Z*]+}"
-            "%"
-            (lambda (_arg)
-              ;; Don't fold whole document, that's useless
-              (unless (save-excursion
-                        (search-backward "\\begin{document}"
-                                         (line-beginning-position) t))
-                (LaTeX-find-matching-end)))
-            nil))
-         hs-special-modes-alist
-         '((t))))
+  (add-to-list 'hs-special-modes-alist
+               '(LaTeX-mode
+                 ;; LaTeX-find-matching-end needs to be inside the env
+                 ("\\\\begin{[a-zA-Z*]+}\\(\\)" 1)
+                 "\\\\end{[a-zA-Z*]+}"
+                 "%"
+                 (lambda (_arg)
+                   ;; Don't fold whole document, that's useless
+                   (unless (save-excursion
+                             (search-backward "\\begin{document}"
+                                              (line-beginning-position) t))
+                     (LaTeX-find-matching-end)))
+                 nil)
+               )
+  (add-to-list 'hs-special-modes-alist
+               '(ruby-mode
+                 ,(rx (or "def" "class" "module" "do" "{" "[")) ; Block start
+                 ,(rx (or "}" "]" "end"))                       ; Block end
+                 ,(rx (or "#" "=begin"))                        ; Comment start
+                 ruby-forward-sexp nil))
+  (add-to-list 'hs-special-modes-alist
+               '(yaml-mode "\\s-*\\_<\\(?:[^:]+\\)\\_>"
+                           ""
+                           "#"
+                           +fold-hideshow-forward-block-by-indent-fn nil))
+  (add-to-list 'hs-special-modes-alist
+               '(matlab-mode "if\\|switch\\|case\\|otherwise\\|while\\|for\\|try\\|catch"
+                             "end"
+                             nil (lambda (_arg) (matlab-forward-sexp))))
+  (add-to-list 'hs-special-modes-alist
+               '(nxml-mode "<!--\\|<[^/>]*[^/]>"
+                           "-->\\|</[^/>]*[^/]>"
+                           "<!--" sgml-skip-tag-forward nil))
   )
 
 ;; 可以快速选择区域

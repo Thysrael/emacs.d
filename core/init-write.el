@@ -442,7 +442,7 @@
 ;;   ("C-c h" . hexo))
 
 ;; [auctex]
-(use-package tex
+(use-package latex
   :straight auctex
   :config
   (setq TeX-parse-self t             ; parse on load
@@ -455,13 +455,13 @@
         TeX-electric-sub-and-superscript t
         ;; Just save, don't ask before each compilation.
         TeX-save-query nil))
-
-
-;; [cdlatex]
-(use-package cdlatex
-  :straight t)
-
-
-;; [reftex]
-(use-package reftex
-  :straight t)
+;;
+;;
+;; ;; [cdlatex]
+;; (use-package cdlatex
+;;   :straight t)
+;;
+;;
+;; ;; [reftex]
+;; (use-package reftex
+;;   :straight t)
