@@ -46,10 +46,10 @@
         markdown-asymmetric-header t
         markdown-nested-imenu-heading-index t
         markdown-fontify-code-blocks-natively t)
-  (add-to-list 'markdown-code-lang-modes '("verilog" . verilog-ts-mode))
-  (add-to-list 'markdown-code-lang-modes '("c" . c-ts-mode))
-  (add-to-list 'markdown-code-lang-modes '("c++" . c++-ts-mode))
-  (add-to-list 'markdown-code-lang-modes '("cpp" . c++-ts-mode))
+  (add-to-list 'markdown-code-lang-modes '("verilog" . verilog-mode))
+  (add-to-list 'markdown-code-lang-modes '("c" . c-mode))
+  (add-to-list 'markdown-code-lang-modes '("c++" . c++-mode))
+  (add-to-list 'markdown-code-lang-modes '("cpp" . c++-mode))
   (add-to-list 'markdown-code-lang-modes '("sh" . shell-script-mode))
   (add-to-list 'markdown-code-lang-modes '("shell" . shell-script-mode))
   (add-to-list 'markdown-code-lang-modes '("bash" . shell-script-mode))
