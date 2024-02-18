@@ -28,5 +28,5 @@
                  (file+olp "~/learn/org/words.org" "Inbox")
                  "* TODO %^{Word}\n%?"))
   (setq org-todo-keywords
-        '((sequence "TODO(t!)" "PEND(p!)" "|" "DONE(d!)" "ABORT(a@/!)")))
+        '((sequence "TODO(t!)" "PEND(p@/!)" "|" "DONE(d!)" "ABRT(a@/!)")))
   )
