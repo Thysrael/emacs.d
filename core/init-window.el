@@ -11,6 +11,9 @@
  ("C-M-v" . (lambda () (interactive) (scroll-up (- +scrolling-lines))))
  )
 
+;; 弹出窗口时使用左右分屏
+(setq split-width-threshold 1)
+
 ;; 选择窗口
 (use-package ace-window
   :straight t
