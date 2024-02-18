@@ -25,7 +25,8 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 - [[./core/init-tabbar.el][tabbar]]：对于 window 布局组的管理配置，又因为它 frame-local 的特点，许多 frame-local 的指示部分也会放到这里。
 - [[./core/init-modeline.el][modeline]]：modeline 配置，因为直接照抄 roife，所以从 ui 中移出。
 - [[./core/init-ui.el][ui]]：包括字体、主题、光标、fringe 等组件配置。
-- [[./core/init-shell.el][shell]]：终端配置。
+- [[./core/init-shell.el][shell]]： eshell 配置
+- [[./core/init-term.el][term]]: vterm 配置，和 eshell 互斥
 - [[./core/init-util.el][util]]：工具类，用于存储方便配置或者自己写的工具函数
 - [[./core/init-tmp.el][tmp]]：临时配置，用于存放尚未归类的配置或者实验性配置。
 
@@ -34,7 +35,7 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 
 - [[./core/init-edit.el][edit]]：通用编辑配置，包括高亮、结构化编辑、重构等。
 - [[file:core/init-completion.el][completion]]：补全配置，存在多种补全源。
-- [[./core/init-prog.el][prog]]：源码分析与交叉引用，包括基于搜索匹配，tags，lsp 多种分析模式。
+- [[./core/init-prog.el][prog]]：源码分析与交叉引用，包括基于搜索匹配，tags，lsp，treesit 多种分析模式。
 - [[./core/init-lang.el][lang]]：不同源码文件，启用不同的配置。
 - [[./core/init-remote.el][remote]]：远端编辑和 docker 配置。
 
@@ -42,11 +43,12 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 会以项目的方式被组织和管理，同时在时间维度上需要引入版本控制和日程管理：
 
 - [[./core/init-project.el][project]]：基础的项目管理配置，包括项目内检索，项目侧边栏等。
-- [[file:core/init-workspace.el][workspace]]：对于工作空间的配置，一般是一个项目为一个工作空间，每个工作空间里有 1 个 window 布局组。
+- [[file:core/init-workspace.el][workspace]]：对于工作空间的配置，一般是一个项目为一个工作空间，每个工作空间里有 1 个 window 布局组。和 tab-bar 互斥。
 - [[./core/init-dired][dired]]：文件管理器配置。
 - [[./core/init-vsc.el][vsc]]：版本控制配置，包括 chunk 和 magit 。
 - [[./core/init-agenda.el][agenda]]：日程管理配置。
 - [[./core/init-debug.el][debug]]：项目的编译、运行、调试和部署等方面。
+- [[file:core/init-control.el][control]]: 日程管理配置，包括 org-capture
 
 ** 写作配置（writing）
 包括中文适配，文档撰写，博客撰写，论文撰写等（或许还考虑知识管理）：
