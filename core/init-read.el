@@ -92,37 +92,37 @@
     (or (car r) "c++"))
   )
 
-;; (use-package eaf
-;;   :straight nil
-;;   :init
-;;   (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
-;;   (require 'eaf)
-;;   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
-;;   (setq eaf-buffer-title-format "EAF: %s")
-;;   (setq eaf-kill-process-after-last-buffer-closed t)
-;;   )
-;;
-;; ;; 按 F 会有 avy 类似的效果
-;; ;; 按 N 会将其转换为 eww 界面
-;; (use-package eaf-browser
-;;   :straight nil
-;;   :init
-;;   (require 'eaf-browser)
-;;   (setq eaf-browser-dark-mode nil)
-;;   (setq eaf-webengine-default-zoom 1.0)
-;;   (setq eaf-webengine-font-size 24)
-;;   (setq eaf-webengine-fixed-font-size 24)
-;;   (setq eaf-webengine-pc-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15")
-;;   :bind
-;;   ("C-c Q" . eaf-open-browser-with-history)
-;;   )
-;;
-;; (use-package eaf-pdf-viewer
-;;   :straight nil
-;;   :init
-;;   (require 'eaf-pdf-viewer)
-;;   (setq eaf-pdf-dark-mode nil)
-;;   )
+(use-package eaf
+  :straight nil
+  :init
+  (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+  (require 'eaf)
+  (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+  (setq eaf-buffer-title-format "EAF: %s")
+  (setq eaf-kill-process-after-last-buffer-closed t)
+  )
+
+;; 按 F 会有 avy 类似的效果
+;; 按 N 会将其转换为 eww 界面
+(use-package eaf-browser
+  :straight nil
+  :init
+  (require 'eaf-browser)
+  (setq eaf-browser-dark-mode "follow")
+  (setq eaf-webengine-default-zoom 1.0)
+  (setq eaf-webengine-font-size 24)
+  (setq eaf-webengine-fixed-font-size 24)
+  (setq eaf-webengine-pc-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15")
+  :bind
+  ("C-c Q" . eaf-open-browser-with-history)
+  )
+
+(use-package eaf-pdf-viewer
+  :straight nil
+  :init
+  (require 'eaf-pdf-viewer)
+  (setq eaf-pdf-dark-mode "follow")
+  )
 
 ;; (use-package imenu-list
 ;;   :after imenu
@@ -137,3 +137,39 @@
 ;;   ("<tab>" . hs-toggle-hiding)
 ;;   ("TAB" . hs-toggle-hiding)
 ;;   )
+
+;; ;; 需要执行 `yay -S emacs-pdf-tools-git` 才可以正常使用
+;; (use-package pdf-tools
+;;   :straight t
+;;   :defines pdf-annot-activate-created-annotations
+;;   :hook ((pdf-tools-enabled . pdf-view-auto-slice-minor-mode))
+;;   :mode ("\\.[pP][dD][fF]\\'" . pdf-view-mode)
+;;   :bind (:map pdf-view-mode-map
+;;          ([remap scroll-up-command] . pdf-view-scroll-up-or-next-page)
+;;          ([remap scroll-down-command] . pdf-view-scroll-down-or-previous-page))
+;;   :init
+;;   (setq pdf-view-use-scaling t
+;;         pdf-view-use-imagemagick nil
+;;         pdf-annot-activate-created-annotations t)
+;;   (setq pdf-sync-backward-display-action t
+;;       pdf-sync-forward-display-action t)
+;;   :config
+;;   (pdf-tools-install t nil t nil)
+;;   )
+;;
+;; (use-package pdf-isearch
+;;   :after pdf-tools
+;;   :hook (pdf-tools-enabled . pdf-isearch-minor-mode))
+;;
+;; (use-package pdf-outline
+;;   :after pdf-tools
+;;   :hook (pdf-tools-enabled . pdf-outline-minor-mode))
+;;
+;; ;; [saveplace-pdf-view] Recover last viewed position
+;; (use-package saveplace-pdf-view
+;;   :straight t
+;;   :when (ignore-errors (pdf-info-check-epdfinfo) t)
+;;   :autoload (saveplace-pdf-view-find-file-advice saveplace-pdf-view-to-alist-advice)
+;;   :init
+;;   (advice-add 'save-place-find-file-hook :around #'saveplace-pdf-view-find-file-advice)
+;;   (advice-add 'save-place-to-alist :around #'saveplace-pdf-view-to-alist-advice))
