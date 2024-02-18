@@ -177,9 +177,10 @@
           ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
            org-code verbatim)
           ("+" (:strike-through t))))
-;;   (setq org-latex-create-formula-image-program 'dvisvgm
-;;         org-startup-with-latex-preview nil)
-;;   (plist-put org-format-latex-options :scale 1.0)
+  ;;   (setq org-latex-create-formula-image-program 'dvisvgm
+  ;;         org-startup-with-latex-preview nil)
+  ;; (with-eval-after-load 'org
+  ;;   (plist-put org-format-latex-options :scale 1.0))
   :bind
   (:map org-mode-map
         ("C-c C-w" . org-copy-subtree)
@@ -351,7 +352,7 @@
 ;;
 ;;           )))
 
-;; 方便得插入图片
+;; 方便地在 org 插入图片
 (use-package org-download
   :straight t
   ;; :after (:any org markdown-mode)
@@ -410,7 +411,7 @@
   (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
   (org-download-heading-lvl nil))
 
-;; 字数统计
+;; 中文字数统计
 ;; Ns: 除了空白符以外的字符（字数）
 ;; AL: 并不排除空白符以外的字符（字数）
 ;; Ln: 行数
@@ -421,6 +422,7 @@
   :after (:any org markdown-mode)
   :straight (:type git :host github :repo "LdBeth/advance-words-count.el"))
 
+;; org 智能列表
 (use-package org-autolist
   :straight t
   :after org
@@ -441,27 +443,62 @@
 ;;   :bind
 ;;   ("C-c h" . hexo))
 
-;; [auctex]
+;; 更好的 LaTeX 支持
+;; emacs 内置的是 latex-mode, auctex 提供的是 LaTeX-mode
+;; C-c ret 是插入命令
+;; C-c C-c 编译，C-c C-v 预览当前位置，C-c C-r 局部编译，C-c ` 跳转到编译错误位置
+;; C-c * 快速选择一章，C-c . 快速选择一个环境
 (use-package latex
   :straight auctex
   :config
   (setq TeX-parse-self t             ; parse on load
         TeX-auto-save t              ; parse on save
-        TeX-source-correlate-mode t
-        TeX-source-correlate-method 'synctex
-        ;; Don't start the Emacs server when correlating sources.
-        TeX-source-correlate-start-server nil
         ;; Automatically insert braces after sub/superscript in `LaTeX-math-mode'.
         TeX-electric-sub-and-superscript t
         ;; Just save, don't ask before each compilation.
-        TeX-save-query nil))
-;;
-;;
-;; ;; [cdlatex]
-;; (use-package cdlatex
-;;   :straight t)
-;;
-;;
-;; ;; [reftex]
-;; (use-package reftex
-;;   :straight t)
+        TeX-save-query nil
+        )
+  ;; 在完成编译后刷新 pdf 文件
+  (add-hook 'TeX-after-compilation-finished-functions
+            #'TeX-revert-document-buffer)
+  ;; )
+  (setq-default TeX-engine 'xetex)
+
+  ;; (setq-default TeX-master nil) ;; 需要选择编译对象
+  ;; shell-escape 用于允许 LaTeX 编译器在编译过程中执行一些系统命令
+  (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' -shell-escape %t" TeX-run-TeX nil t))
+
+  ;; 设置 eaf 为阅读器
+  (add-to-list 'TeX-view-program-list '("eaf" eaf-pdf-synctex-forward-view))
+  (add-to-list 'TeX-view-program-selection '(output-pdf "eaf"))
+  ;; Use pdf-tools to open PDF files
+  ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  )
+
+
+;; 快捷输入法，按 `, ' 都可以已经快捷输入符号，类似于 abbrev 的效果
+;; 输入一些字符后按 tab 也可以快速模板展开，类似于 snippet 的效果
+;; tab 也可以用于快速跳转
+(use-package cdlatex
+  :straight t
+  :hook
+  (LaTeX-mode . cdlatex-mode))
+
+
+;; 增强标签索引功能
+(use-package reftex
+  :straight t
+  :hook
+  (LaTeX-mode . reftex-mode)
+  :bind
+  (:map reftex-mode-map
+        ("C-c i" . reftex-toc)))
+
+;; 为 latex 提供折叠大纲功能
+(use-package outline
+  :hook
+  (LaTeX-mode . outline-minor-mode)
+  :bind
+  (:map outline-minor-mode-map
+        ("C-c C-o" . outline-cycle)))

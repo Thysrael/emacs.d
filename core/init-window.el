@@ -96,6 +96,7 @@
           "\\*eww bookmarks\\*"
           "\\*Outline:.*\\*.*$" PDF-Outline-mode
           "Bookmark List" bookmark-bmenu-mode
+          "\\*toc\\*" toc-mode
           comint-mode
           compilation-mode
           ibuffer-mode
