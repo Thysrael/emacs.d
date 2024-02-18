@@ -28,15 +28,20 @@
 (use-package avy
   :straight t
   :bind
-  ("C-h" . avy-goto-char-timer)
+  ("C-h" . avy-goto-char-2)
   :config
   (setq avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
   (setq avy-background t) ; 在跳转时背景变黑
   :init
   (setq avy-single-candidate-jump nil)
-  (advice-add 'avy-action-goto :after (lambda (&rest _args)
-                                        (forward-word)))
+  ;; (advice-add 'avy-action-goto :after (lambda (&rest _args)
+  ;;                                       (forward-word)))
   )
+
+(use-package ace-pinyin
+  :straight t
+  :after avy
+  :init (ace-pinyin-global-mode t))
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mosey
