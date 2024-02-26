@@ -103,7 +103,7 @@
   )
 
 ;; 按 F 会有 avy 类似的效果
-;; 按 N 会将其转换为 eww 界面
+;; 按 N 会将其转换为 eww 界面，不过最近还需要按 g 刷新才能正常显示
 (use-package eaf-browser
   :straight nil
   :init
@@ -115,6 +115,16 @@
   (setq eaf-webengine-pc-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15")
   :bind
   ("C-c Q" . eaf-open-browser-with-history)
+  :config
+  ;; 用 eaf-bind-key 进行快捷键绑定，同时不能直接绑定命令，要绑定去掉 `eaf-proxy` 后的命令
+  (eaf-bind-key copy_text "C-w" eaf-browser-keybinding)
+  (eaf-bind-key kill_text "C-q" eaf-browser-keybinding)
+  (eaf-bind-key nil "C-d" eaf-browser-keybinding)
+  (eaf-bind-key nil "C-t" eaf-browser-keybinding)
+  (eaf-bind-key refresh_page "g" eaf-browser-keybinding)
+  (eaf-bind-key insert_or_new_blank_page "s" eaf-browser-keybinding)
+  (eaf-bind-key insert_or_scroll_up "n" eaf-browser-keybinding)
+  (eaf-bind-key insert_or_toggle_device "p" eaf-browser-keybinding)
   )
 
 (use-package eaf-pdf-viewer
