@@ -88,7 +88,7 @@
           "\\*Apropos\\*"
           "\\*Backtrace\\*"
           "\\*Calendar\\*"
-          "\\*Embark Actions\\*"
+          ;; "\\*Embark Actions\\*"
           "\\*Finder\\*"
           "\\*Kill Ring\\*"
           "\\*Go-Translate\\*"
@@ -129,7 +129,11 @@
           "^\\*elfeed-entry\\*$"
           "^\\*macro expansion\\**"
 
-          "\\*Agenda Commands\\*" "\\*Org Select\\*" "\\*Capture\\*" "^CAPTURE-.*\\.org*"
+          "\\*Agenda Commands\\*"
+          "\\*Org Select\\*"
+          "\\*Capture\\*"
+          "^CAPTURE-.*\\.org*"
+          helpful-mode
           "\\*docker-.+\\*"
           "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
           "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
