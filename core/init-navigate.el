@@ -62,28 +62,17 @@
   (setq imenu-auto-rescan t)
   )
 
-;; ;; 中文分词跳转
-;; (use-package emacs-chinese-word-segmentation
-;;   :straight (emacs-chinese-word-segmentation
-;;              :type git :host github :repo "kanglmf/emacs-chinese-word-segmentation")
-;;   :hook
-;;   (org-mode . cns-mode)
-;;   (gfm-mode . cns-mode)
-;;   (eww-mode . cns-mode)
-;;   :bind
-;;   (:map cns-mode-map
-;;    ("C-f" . cns-forward-word))
-;;   :init
-;;   (setq cns-prog (no-littering-expand-var-file-name "emacs-chinese-word-segmentation/cnws"))
-;;   (setq cns-dict-directory (no-littering-expand-var-file-name "emacs-chinese-word-segmentation/cppjieba/dict"))
-;;   ;; :config
-;;   ;; (add-hook 'org-mode-hook
-;;   ;;           (lambda ()
-;;   ;;             (define-key org-mode-map (kbd "C-f") 'cns-forward-word)))
-;;   ;; (add-hook 'gfm-mode-hook
-;;   ;;           (lambda ()
-;;   ;;             (define-key gfm-mode-map (kbd "C-f") 'cns-forward-word)))
-;;   ;; (add-hook 'eww-mode-hook
-;;   ;;           (lambda ()
-;;   ;;             (define-key eww-mode-map (kbd "C-f") 'cns-forward-word)))
-;;   )
+;; 中文分词跳转
+(use-package cns
+  :load-path "~/.emacs.d/site-lisp/emacs-chinese-word-segmentation/"
+  :hook
+  (org-mode . cns-mode)
+  (gfm-mode . cns-mode)
+  (eww-mode . cns-mode)
+  :bind
+  (:map cns-mode-map
+   ("C-f" . cns-forward-word))
+  :init
+  (setq cns-prog "~/.emacs.d/site-lisp/emacs-chinese-word-segmentation/cnws")
+  (setq cns-dict-directory "~/.emacs.d/site-lisp/emacs-chinese-word-segmentation/cppjieba/dict")
+  )
