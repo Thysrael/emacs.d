@@ -138,6 +138,7 @@
   :hook (vertico-mode . marginalia-mode))
 
 ;; 为 minibuffer 中出现的条目（不至于 minibuffer 条目）
+;; 可以用 C-h 查看所有的条目
 (use-package embark
   :straight t
   :bind (("C-;" . embark-act)
@@ -270,6 +271,20 @@
         ediff-merge-split-window-function 'split-window-horizontally
         ;; turn off whitespace checking
         ediff-diff-options "-w")
+  )
+
+;; 增强帮助文档
+(use-package helpful
+  :straight t
+  :commands (helpful-callable helpful-variable helpful-command helpful-key helpful-mode)
+  :bind (([remap describe-command] . helpful-command)
+         ("<f1> f" . helpful-callable)
+         ("<f1> v" . helpful-variable)
+         ("<f1> s" . helpful-symbol)
+         ("<f1> S" . describe-syntax)
+         ("<f1> m" . describe-mode)
+         ("<f1> F" . describe-face)
+         ([remap describe-key] . helpful-key))
   )
 
 ;; [ispell] spell checker
