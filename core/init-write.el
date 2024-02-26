@@ -24,9 +24,10 @@
   :custom-face
   ;; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
   (markdown-code-face ((t (:inherit nil))))
-  ;; (markdown-header-face-1 ((t (:foreground "#c099ff" :weight bold :height 1.4 :family "LXGW WenKai"))))
-  ;; (markdown-header-face-2 ((t (:inherit outline-1 :extend nil :weight bold :height 1.3 :family "LXGW WenKai"))))
-  ;; (markdown-header-face-3 ((t (:inherit outline-2 :extend nil :weight bold :height 1.2 :family "LXGW WenKai"))))
+  (markdown-header-face-1 ((t (:inherit org-level-1))))
+  (markdown-header-face-2 ((t (:inherit org-level-2))))
+  (markdown-header-face-3 ((t (:inherit org-level-3))))
+  (markdown-header-face-4 ((t (:inherit org-level-4))))
   ;; (markdown-header-face-4 ((t (:inherit outline-3 :extend nil :weight bold :height 1.1 :family "LXGW WenKai"))))
   (markdown-pre-face ((t (:inherit org-block :foreground "#c3e88d"))))
   (markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
@@ -136,11 +137,13 @@
   (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :family "Sarasa Mono SC"))))
   (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :family "Sarasa Mono SC"))))
   (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :family "Sarasa Mono SC"))))
+  (org-level-4 ((t (:inherit outline-4 :extend nil :weight bold :family "Sarasa Mono SC"))))
   (org-table ((t (:family "Sarasa Mono SC")))) ; 设置表格为中英等宽字体
   :custom
   (org-image-actual-width '(800))
   ;; (org-startup-with-inline-images t) ; 默认显示图片
-  (org-ellipsis "…") ; 设置折叠提示符
+  ;; (org-ellipsis "…") ; 设置折叠提示符
+  (org-ellipsis "¶")
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . org-num-mode) ; 添加标题序号
