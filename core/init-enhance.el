@@ -273,19 +273,19 @@
         ediff-diff-options "-w")
   )
 
-;; 增强帮助文档
-(use-package helpful
-  :straight t
-  :commands (helpful-callable helpful-variable helpful-command helpful-key helpful-mode)
-  :bind (([remap describe-command] . helpful-command)
-         ("<f1> f" . helpful-callable)
-         ("<f1> v" . helpful-variable)
-         ("<f1> s" . helpful-symbol)
-         ("<f1> S" . describe-syntax)
-         ("<f1> m" . describe-mode)
-         ("<f1> F" . describe-face)
-         ([remap describe-key] . helpful-key))
-  )
+;; ;; 增强帮助文档，启动有些卡顿
+;; (use-package helpful
+;;   :straight t
+;;   :commands (helpful-callable helpful-variable helpful-command helpful-key helpful-mode)
+;;   :bind (([remap describe-command] . helpful-command)
+;;          ("<f1> f" . helpful-callable)
+;;          ("<f1> v" . helpful-variable)
+;;          ("<f1> s" . helpful-symbol)
+;;          ("<f1> S" . describe-syntax)
+;;          ("<f1> m" . describe-mode)
+;;          ("<f1> F" . describe-face)
+;;          ([remap describe-key] . helpful-key))
+;;   )
 
 ;; [ispell] spell checker
 (use-package ispell
