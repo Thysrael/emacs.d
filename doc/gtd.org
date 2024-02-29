@@ -1,0 +1,108 @@
+#+title: Agenda
+#+author: Thysrael
+
+* concept
+** Time
+关于时间，有如下分类：
+
++ 激活时间：会出现在 agenda 中的时间，用 =<>= 包裹
+  - scheduled time: 表示任务的计划开始时间。
+  - deadline time: 表示任务的计划截至时间。
++ 未激活时间：不会出现在 agenda 中的时间，用 =[]= 包裹
+  - 记录任务的实际开始时间和实际结束时间
+  - 记录任务状态发生转换的时间
+
+** Refile
+Refile 指的是将 org 的某个标题及其下的子树移动到一个特定的标题之下，这样可以方便的进行重构。
+
+** Log
+org-clock 可以计时，在 agenda 下是 I, O 快捷键。
+
+用 =org-clock-in= 开始计时，用 =org-clock-out= 结束计时，只能同时有一个任务在计时，关闭 emacs 会导致计时中断。用 =org-clock-report= 获得报表。用 =org-clock-display= 在 org buffer 中显示，用 =org-clock-remove-overlays= 关闭显示。
+
+在 agenda 下只要打开 =log-mode= 就会自动显示时间段，并且将时间报告显示在下方。
+
+** Archieve
+archieve 后只能用 refile 恢复。
+
+** Sort
+按照优先级进行排序 org-sort =C-c ^= 。
+
+** Search
+根据标签或者进度等进行搜索。
+
+* Design
+按照 gtd 的思想，将分为几个部分
+
+- inbox: 需要被拆分成具体可执行的子任务(tasks) ，等时机成熟(someday) 
+- tasks: 具体可执行的任务，任务需要根据优先级排序，任务需要记录执行时间，每天应当将当前要完成的计划
+- someday: 难以预估的，不可立即执行，不急切的任务
+- schedule: 周期性或者一次性的日程安排
+
+|----------+---------+--------+--------------+--------------------------|
+| heading  | capture | agenda | from         | to                       |
+|----------+---------+--------+--------------+--------------------------|
+| inbox    | yes     | no     | someday      | tasks, someday, schedule |
+| tasks    | no      | yes    | inbox        | someday, tasks           |
+| someday  | yes     | no     | inbox        | inbox, tasks             |
+| schedule | yes     | yes    | inbox, tasks |                          |
+|----------+---------+--------+--------------+--------------------------|
+
+这样的分类与 gtd 本身有一定的误差，这里解释一下：
+
+- 从目前看 gtd 只涉及学习工作，并不涉及生活。
+- inbox 除了 org-capture 外，还来自于手机备忘录，因为有的时候电脑并不在身旁，所以需要用手机捕获。
+- 合并了 project 和 inbox ，因为 project 需要列计划转成 tasks ，有些冗余，改成了未计划的 project 在 inbox 中。
+- reference 并不涉及任务管理，会单独做一个捕获，因为这样标签会更多更独立。
+- 取消了 trash ，因为可以直接使用 =C-c C-q= 删除。
+
+具有周期性的 gtd 行为，需要添加到 schedule 中：
+
+- 每天晚上将手机中的备忘录转移到电脑的 inbox 中。
+- 每天晚上审查 inbox ，考虑是否可以转移到 tasks, someday, schedule 。
+- 每天查看 tasks ，为当天或者下一天进行计划。
+- 每天查看 agenda 来规划日程
+- 每周查看 someday 看看是否时机成熟，可以转移到 inbox 中
+- 每周查看 inbox 和 tasks 是否有些不切实际的东西，转移到 someday 中或者删除
+- 每周查看 reference 中是否有些可以写入博客的
+- 每周进行归档
+
+gtd 会比原来的日程管理侧重如下特点：
+
+- 任务分解，将一项任务分解成不容易引起拖延的多个子任务
+- 任务排序，会清楚看到任务的重要性
+- 任务计划，分为开始时间和截至时间
+- 任务统计，会看到任务总共需要花费的时间
+
+除了这里提到的 3 个捕获外，还需要 reference 捕获用于收集参考资料，好的参考资料可以往博客上移动。Append 捕获用于补充已有 task 信息
+
+
+* Operation
+** Org
+- =C-c C-w=: refile
+- =C-c C-c=: set tags
+- =C-c C-t=: set sequence
+- =C-c \=: make sparse tree, use =org-mode= to revert it
+- =C-c ^=: sort children in specific sequence
+- =M-S-<Direction>=: change the level of subtree
+- =M-<Direction>=: change the level  of heading
+- =S-<Direction>=: change the TODO state or Priority
+
+** Agenda
+- =d, w, m, y=: view day, week, month, year
+- =n, p, f, b, ., j=: move next entry, previous entry, next interval, previous interval, current, specific day
+- =C-==: undo the change
+- =t, :, ,=: change the TODO state, tag, priority
+- =I, O, X=: clock in, out, cancel
+- =k=: capture
+- =A=: change agenda view, just like open the agenda commands menu
+- =q, x=: quit or quit completely
+- =c=: goto caclendar
+
+** Calender
+- =C-f, C-b, C-n, C-p, M-{, M-}=: move one day, week, month, recommand use =ESC {= to replace
+- =C-a, C-e, M-a, M-e=: start or end of a week or month
+- =.=: move to today
+- =g d=: move to specific day
+- =<, >=: scroll left or right
+- =SPC, M-==: use ~SPC~ to mark a region, use ~M-=~ to count days 
