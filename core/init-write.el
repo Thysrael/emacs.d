@@ -186,7 +186,7 @@
   ;;   (plist-put org-format-latex-options :scale 1.0))
   :bind
   (:map org-mode-map
-        ("C-c C-w" . org-copy-subtree)
+        ;; ("C-c C-w" . org-copy-subtree)
         ("C-c C-q" . org-cut-subtree))
   )
 

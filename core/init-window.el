@@ -132,6 +132,7 @@
           "\\*Agenda Commands\\*"
           "\\*Org Select\\*"
           "\\*Capture\\*"
+          ;; "\\*Org Agenda\\*"
           "^CAPTURE-.*\\.org*"
           helpful-mode
           "\\*docker-.+\\*"

@@ -40,6 +40,12 @@
 (use-package which-key
   :straight t)
 
+(defun +set-buffer-face-mode-mono ()
+  "Set buffer-face-mode for org-agenda."
+  (interactive)
+  (setq buffer-face-mode-face '(:family "Sarasa Mono SC"))
+  (buffer-face-mode))
+
 ;;; 工具宏
 ;; Thanks to DOOM Emacs
 (defmacro add-hook! (hooks &rest rest)
