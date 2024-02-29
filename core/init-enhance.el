@@ -57,6 +57,12 @@
   :after vertico
   :hook (minibuffer-setup . vertico-repeat-save))
 
+(use-package all-the-icons-completion
+  :straight t
+  :hook ((after-init . all-the-icons-completion-mode)
+         (marginalia-mode . all-the-icons-completion-marginalia-setup))
+  )
+
 ;; 在 minibuffer 中提供补全支持，有多重风格
 (use-package orderless
   :straight t
