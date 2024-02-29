@@ -5,16 +5,24 @@
   ;; WORKAROUND: I don't know why I can't set it in :custom
   (setq org-outline-path-complete-in-steps nil)
   (setq org-refile-use-outline-path nil)
+  ;; 强制 TODO 的状态切换依赖（父任务必须等子任务完成才能完成）
+  (setq org-enforce-todo-dependencies t)
+  ;; ;; 设置父任务自动完成，当子任务全部完成
+  ;; (defun org-summary-todo (n-done n-not-done)
+  ;;   "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  ;;   (let (org-log-done org-log-states) ; turn off logging
+  ;;     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+  ;; (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
   :init
   ;; 禁止日程启动画面
   (setq org-agenda-inhibit-startup t)
   :custom
   ;; 当状态从 DONE 改成其他状态时，移除 CLOSED: [timestamp]
   (org-closed-keep-when-no-todo t)
-  ;; DONE 时加上时间戳
-  (org-log-done 'time)
-  ;; 重复执行时加上时间戳
-  (org-log-repeat 'time)
+  ;; ;; DONE 时加上时间戳
+  ;; (org-log-done 'time)
+  ;; ;; 重复执行时加上时间戳
+  ;; (org-log-repeat 'time)
   ;; Deadline 修改时加上一条记录
   (org-log-redeadline 'note)
   ;; Schedule 修改时加上一条记录
@@ -25,7 +33,7 @@
   (org-log-state-notes-insert-after-drawers nil)
 
   ;; refile 使用缓存
-  (org-refile-use-cache t)
+  (org-refile-use-cache nil)
   ;; refile 的目的地，这里设置的是 agenda 文件的所有标题
   (org-refile-targets '((org-agenda-files . (:maxlevel . 1))))
   ;; 是否按步骤 refile
@@ -87,6 +95,8 @@
       (goto-char (point-min))
       (re-search-forward (format "^[\\*]+ %s" choice))
       (forward-line 1)))
+  (defun prio ()
+    (format "[#%c]" org-default-priority))
   :custom
   (org-default-notes-file "~/learn/org/agenda.org")
   ;; %^g: tag
@@ -98,7 +108,7 @@
    '(
      ("i" "Inbox" entry
       (file+olp "" "inbox")
-      "* TODO %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+      "* TODO %(prio) %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
       :empty-lines-after 1)
      ("s" "Schedule" entry
       (file+olp "" "schedule")
@@ -106,21 +116,23 @@
       :empty-lines-after 1)
      ("d" "Deadline" entry
       (file+olp "" "inbox")
-      "* TODO %? %^g\nDEADLINE: %^T\n:PROPERTIES:\n:CREATED: %U:END:\n"
+      "* TODO %? %^g\nDEADLINE: %^T\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
       :empty-lines-after 1)
      ("S" "Someday" entry
       (file+olp "" "someday")
-      "* TODO %^{someday} %^g\n:PROPERTIES:\n:CREATED: %U:END:\n%?"
+      "* TODO %(prio) %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
       :empty-lines-after 1)
      ("r" "References" entry
       (file+olp "" "references")
-      "* TODO %?\n:PROPERTIES:\n:CREATED: %U:END:\n%c\n")
+      "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%c\n"
+      :empty-lines-after 1)
      ("a" "Append" item
       (file+function "" +org-select-top-level-header)
       "%?")
      ("h" "Habit" entry
       (file+olp "" "habits")
-	  "* TODO %?\nSCHEDULED: <%<%Y-%m-%d %a ++1d>>\n:PROPERTIES:\n:CREATED: %U\n:STYLE: habit\n:END:\n")
+	  "* TODO %?\nSCHEDULED: <%<%Y-%m-%d %a ++1d>>\n:PROPERTIES:\n:CREATED: %U\n:STYLE: habit\n:END:\n"
+      :empty-lines-after 1)
      ))
   ;; :config
   ;; (add-to-list 'org-capture-templates
@@ -171,6 +183,7 @@
 ;; ! means not done. * means done.
 (use-package org-habit
   :straight nil
+  :after org-agenda
   :init
   (require 'org-habit)
   :custom
@@ -182,12 +195,14 @@
   ;; ;; org habit show 7 days before today and 7 days after today.
   (org-habit-preceding-days 4)
   :custom-face
-  (org-habit-alert-face ((t (:background "#c51162" :weight bold))))
+  (org-habit-alert-face ((t (:background "#d2268b" :weight bold))))
   (org-habit-alert-future-face ((t (:background "#ad1457" :weight bold))))
   ;; (org-habit-overdue-face ((t (:background "#8bc34a" :weight bold))))
   ;; (org-habit-overdue-future-face ((t (:background "#558b2f" :weight bold))))
-  ;; (org-habit-ready-face ((t (:background "#0288d1" :weight bold))))
-  ;; (org-habit-ready-future-face ((t (:background "#01579b" :weight bold))))
+  (org-habit-clear-face ((t (:background "#0288d1" :weight bold))))
+  (org-habit-clear-future-face ((t (:background "#01579b" :weight bold))))
+  (org-scheduled-today ((t (:foreground "#f1fa8c"))))
+  (org-scheduled ((t (:foreground "#ffb86c"))))
   ;; (org-habit-clear-face ((t (:background "#d32f2f" :weight bold))))
   ;; (org-habit-clear-future-face ((t (:background "#ef5350" :weight bold))))
   )
