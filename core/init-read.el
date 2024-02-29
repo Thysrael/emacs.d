@@ -21,6 +21,33 @@
 ;;   :custom
 ;;   (maple-translate-engine 'youdao))
 
+;; 离线翻译
+;; 需要安装 sdcv 和 stardict 和字典
+;; 字典在 https://github.com/colordict/colordict.github.io/tree/master 可下载
+(use-package sdcv
+  :straight (:host github :repo "manateelazycat/sdcv")
+  :commands (sdcv-search-pointer+)
+  :bind ("C-," . sdcv-search-pointer+)
+  :config
+  (setq sdcv-say-word-p t)
+  (setq sdcv-dictionary-data-dir "/usr/share/stardict")
+  (setq sdcv-dictionary-simple-list
+        '("懒虫简明英汉词典"
+          "懒虫简明汉英词典"))
+  (setq sdcv-dictionary-complete-list
+        '("朗道英汉字典5.0"
+          "牛津英汉双解美化版"
+          "21世纪双语科技词典"
+          "quick_eng-zh_CN"
+          "新世纪英汉科技大词典"))
+  (setq sdcv-tooltip-timeout 10)
+  (setq sdcv-fail-notify-string "没找到释义")
+  (setq sdcv-tooltip-border-width 0)
+  :custom-face
+  ;; TODO: why can't just inherit font-lock
+  (sdcv-tooltip-face ((t (:background "#1E2029" :foreground "#ffc9e8"))))
+  )
+
 ;;; 浏览器
 ;; 内置浏览器
 (use-package eww
