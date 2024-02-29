@@ -67,6 +67,23 @@
           "*esh command on file*"))
   )
 
+;; 控制弹出窗口的行为
+;; https://depp.brause.cc/shackle/
+(use-package shackle
+  :straight t
+  :hook (after-init . shackle-mode)
+  :init
+  (setq shackle-lighter "")
+  (setq shackle-select-reused-windows nil) ; default nil
+  (setq shackle-default-alignment 'below)  ; default below
+  (setq shackle-rules
+        ;; CONDITION(:regexp)            :select     :inhibit-window-quit   :size+:align|:other     :same|:popup
+        '(
+          ;; ("\\*Org Agenda.*\\*" :regexp t :select t :size 1 :same t)
+          ("\\*Ibuffer\\*" :regexp t :select t :size 0.5 :align below)
+          ))
+  )
+
 ;; popper 是一种特殊 buffer，所有的 popper 都只会占用同一个 window （出现在底部）
 ;; 利用这种机制可以使我们将许多临时的 buffer 都管理在一个窗口下
 (use-package popper
