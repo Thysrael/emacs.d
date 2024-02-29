@@ -186,6 +186,15 @@
   ;;         org-startup-with-latex-preview nil)
   ;; (with-eval-after-load 'org
   ;;   (plist-put org-format-latex-options :scale 1.0))
+  :custom
+  ;; 默认只展开标题行
+  (org-startup-folded 'content)
+  ;; 列表的下一级设置
+  (org-list-demote-modify-bullet '(
+								   ("-"  . "+")
+                                   ("+"  . "1.")
+								   ("1." . "1)")
+								   ))
   :bind
   (:map org-mode-map
         ;; ("C-c C-w" . org-copy-subtree)
