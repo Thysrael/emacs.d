@@ -82,6 +82,7 @@
     (save-excursion
       (goto-char (point-min))
       (let ((headings nil))
+
         (while (re-search-forward "^[\\*]+ \\([^\\[\n]+\\)" nil t)
           (let ((heading (match-string-no-properties 1)))
             (add-to-list 'headings heading t)))
@@ -168,8 +169,10 @@
   ;; (org-agenda-timegrid-use-ampm nil)
   ;; 搜索是不看时间
   (org-agenda-search-headline-for-time nil)
-  ;; 提前3天截止日期到期告警
+  ;; 提前 3 天截止日期到期告警
   (org-deadline-warning-days 3)
+  ;; clock report level 增加到 3
+  (org-agenda-clockreport-parameter-plist '(:link t :maxlevel 3))
   ;; :custom-face
   ;; (org-schedule ((t (:family "Sarasa Mono SC"))))
   ;; (org-scheduled ((t (:family "Sarasa Mono SC"))))
@@ -177,10 +180,19 @@
   ;; (org-scheduled-previously ((t (:family "Sarasa Mono SC"))))
   :hook
   (org-agenda-mode . +set-buffer-face-mode-mono)
+  :custom-face
+  (org-scheduled-today ((t (:foreground "#f1fa8c"))))
+  ;; (org-scheduled ((t (:foreground "#ffb86c"))))
   )
 
 ;; 在 agenda 上显示记录
 ;; ! means not done. * means done.
+;; future 实际指的是“非本天”的意思，也就是如果不在当天这一列，那么就是非本天
+;; alert: 当天应当做的事情 alert-future 某天应当做的事情
+;; clear: 当天不需要做的事情 clear-future 某天不需要做的事情
+;; overdue: 当天已经过期的事情 overdue-future 某天已经过期的事情
+;; 需要注意 overdue 是相对于今天特定时间的事情，比如说今天的事情相对于明天来说一定是过期的
+;; ready: 当天已经做完的事情
 (use-package org-habit
   :straight nil
   :after org-agenda
@@ -195,16 +207,23 @@
   ;; ;; org habit show 7 days before today and 7 days after today.
   (org-habit-preceding-days 4)
   :custom-face
-  (org-habit-alert-face ((t (:background "#d2268b" :weight bold))))
-  (org-habit-alert-future-face ((t (:background "#ad1457" :weight bold))))
-  ;; (org-habit-overdue-face ((t (:background "#8bc34a" :weight bold))))
-  ;; (org-habit-overdue-future-face ((t (:background "#558b2f" :weight bold))))
-  (org-habit-clear-face ((t (:background "#0288d1" :weight bold))))
-  (org-habit-clear-future-face ((t (:background "#01579b" :weight bold))))
-  (org-scheduled-today ((t (:foreground "#f1fa8c"))))
-  (org-scheduled ((t (:foreground "#ffb86c"))))
-  ;; (org-habit-clear-face ((t (:background "#d32f2f" :weight bold))))
-  ;; (org-habit-clear-future-face ((t (:background "#ef5350" :weight bold))))
+  ;; (org-habit-alert-face ((t (:background "#ffc107" :weight bold))))
+  ;; (org-habit-alert-future-face ((t (:background "#ffa000" :weight bold))))
+  ;; (org-habit-overdue-face ((t (:background "#e64a19" :weight bold))))
+  ;; (org-habit-overdue-future-face ((t (:background "#bf360c" :weight bold))))
+  ;; (org-habit-clear-face ((t (:background "#009688" :weight bold))))
+  ;; (org-habit-clear-future-face ((t (:background "#00796B" :weight bold))))
+  ;; (org-habit-ready-face ((t (:background "#689F38" :weight bold))))
+  ;; (org-habit-ready-future-face ((t (:background "#CDDC39" :weight bold))))
+
+  (org-habit-alert-face ((t (:background "#edd389" :weight bold))))
+  (org-habit-alert-future-face ((t (:background "#d0bf8f" :weight bold))))
+  (org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
+  (org-habit-overdue-future-face ((t (:background "#8c5353" :weight bold))))
+  (org-habit-clear-face ((t (:background "#418d93" :weight bold))))
+  (org-habit-clear-future-face ((t (:background "#4c7073" :weight bold))))
+  (org-habit-ready-face ((t (:background "#7f9f7f" :weight bold))))
+  (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
   )
 
 (use-package calendar
