@@ -68,6 +68,7 @@
   :hook
   (org-mode . cns-mode)
   (gfm-mode . cns-mode)
+  (markdown-mode .cns-mode)
   (eww-mode . cns-mode)
   :bind
   (:map cns-mode-map
