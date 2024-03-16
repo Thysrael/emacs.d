@@ -379,28 +379,28 @@
   ;; (:map markdown-mode-map
   ;;       ("C-c m" . hydra-md-download/body))
   :config
-  (advice-add 'org-download--dir-1 :override
-              (lambda ()
-                (or org-download-image-dir
-                    (file-name-sans-extension
-                     (file-name-nondirectory buffer-file-name))))) ; 将默认行为修改为修改文件夹
-
-  (defun +org-download--fullname (link &optional ext)
-    (let* ((default-filename (when (boundp 'org-download-file-format-function)
-                               (funcall org-download-file-format-function
-                                        (file-name-nondirectory
-                                         (car (url-path-and-query
-                                               (url-generic-parse-url link)))))))
-           (filename (read-string (format "Enter file name [%s] : " default-filename)
-                                  nil nil default-filename)) ; 修改此处可以使得插入图片前询问名字
-           (dir (org-download--dir)))
-      (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
-        (setq filename (replace-match "" nil nil filename 1)))
-      (when ext
-        (setq filename (concat filename "." ext)))
-      (abbreviate-file-name
-       (expand-file-name filename dir))))
-  (advice-add 'org-download--fullname :override '+org-download--fullname)
+  ;; (advice-add 'org-download--dir-1 :override
+  ;;             (lambda ()
+  ;;               (or org-download-image-dir
+  ;;                   (file-name-sans-extension
+  ;;                    (file-name-nondirectory buffer-file-name))))) ; 将默认行为修改为修改文件夹
+  ;;
+  ;; (defun +org-download--fullname (link &optional ext)
+  ;;   (let* ((default-filename (when (boundp 'org-download-file-format-function)
+  ;;                              (funcall org-download-file-format-function
+  ;;                                       (file-name-nondirectory
+  ;;                                        (car (url-path-and-query
+  ;;                                              (url-generic-parse-url link)))))))
+  ;;          (filename (read-string (format "Enter file name [%s] : " default-filename)
+  ;;                                 nil nil default-filename)) ; 修改此处可以使得插入图片前询问名字
+  ;;          (dir (org-download--dir)))
+  ;;     (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
+  ;;       (setq filename (replace-match "" nil nil filename 1)))
+  ;;     (when ext
+  ;;       (setq filename (concat filename "." ext)))
+  ;;     (abbreviate-file-name
+  ;;      (expand-file-name filename dir))))
+  ;; (advice-add 'org-download--fullname :override '+org-download--fullname)
   ;; 失败的 markdown 尝试，但是应该是可以完成的
   ;; (setq org-download-annotate-function (lambda (link) ""))
   ;; (advice-add 'org-download-org-mode-p (lambda () (or (eq major-mode 'org-mode) (when (derived-mode-p 'org-mode) t) (eq major-mode 'markdown-mode))))
@@ -422,8 +422,8 @@
 
   :custom
   (org-download-screenshot-method "flameshot gui --raw > %s")
-  ;; (org-download-image-dir "./img") ; 将存在指定文件夹下
-  (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
+  (org-download-image-dir "./img") ; 将存在指定文件夹下
+  ;; (org-download-image-dir nil) ; 用前面的 advice 修改后的行为变成了存在 org 文件同名文件夹中
   (org-download-heading-lvl nil))
 
 ;; 中文字数统计
@@ -517,3 +517,53 @@
   :bind
   (:map outline-minor-mode-map
         ("C-c C-o" . outline-cycle)))
+
+;; 提供 wiki 式自下而上的笔记系统
+(use-package org-roam
+  :after org
+  :straight (:host github :repo "org-roam/org-roam"
+                   :files (:defaults "extensions/*"))
+  :custom
+  (org-roam-v2-ack t)
+
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
+  :config
+  (setq org-roam-directory "~/blog/source/roam/")
+  (setq org-roam-db-location "~/blog/source/roam/org-roam.db")
+
+  ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+  (org-roam-db-autosync-mode)
+  ;; 可以用 file-local 来确定要不要显示未链接的部分
+  ;; (setq org-roam-mode-sections
+  ;;       (list #'org-roam-backlinks-section
+  ;;             #'org-roam-unlinked-references-section
+  ;;             ))
+  ;; If using org-roam-protocol
+  (require 'org-roam-protocol)
+  )
+
+;; org-roam 可视化
+(use-package org-roam-ui
+  :after org-roam
+  :straight
+  (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  :after org-roam
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t)
+  ;; :custom
+  ;; (org-roam-ui-browser-function 'eaf-open-browser)
+  )

@@ -81,6 +81,7 @@
         '(
           ;; ("\\*Org Agenda.*\\*" :regexp t :select t :size 1 :same t)
           ("\\*Ibuffer\\*" :regexp t :select t :size 0.5 :align below)
+          ("\\*org-roam\\*" :regexp t :select t :size 0.5 :align below)
           ))
   )
 
@@ -148,9 +149,12 @@
 
           "\\*Agenda Commands\\*"
           "\\*Org Select\\*"
+          ;; "\\*org-roam\\*" ;; 因为 org9.7 报错 (setq warning-suppress-types '((org-element org-element-parser)))
           "\\*Capture\\*"
           ;; "\\*Org Agenda\\*"
           "^CAPTURE-.*\\.org*"
+
+          image-mode
           helpful-mode
           "\\*docker-.+\\*"
           "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
