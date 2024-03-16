@@ -100,6 +100,9 @@
 ;; 像素级 resize，可以解决 emacs 最大化时无法填满的问题
 (setq frame-resize-pixelwise t)
 
+;; 改变透明度
+(add-to-list 'default-frame-alist '(alpha-background . 99))
+
 ;; minibuffer 配置
 ; Allow minibuffer commands while in the minibuffer.
 (setq enable-recursive-minibuffers t

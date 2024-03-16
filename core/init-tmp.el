@@ -235,6 +235,43 @@
 ;; (use-package iscroll
 ;;   :straight t)
 
+;;  (defun my/org-insert-clipboard-image (width)
+;;    "create a time stamped unique-named file from the clipboard in the sub-directory
+;; (%filename.assets) as the org-buffer and insert a link to this file."
+;;    (interactive (list
+;;                  (read-string (format "Input image width, default is 800: ")
+;;                               nil nil "800")))
+;;    ;; 设置图片存放的文件夹位置为 `当前Org文件同名.assets'
+;;    (setq foldername (concat (file-name-base (buffer-file-name)) ".assets/"))
+;;    (if (not (file-exists-p foldername))
+;;        (mkdir foldername))
+;;    ;; 设置图片的文件名，格式为 `img_年月日_时分秒.png'
+;;    (setq imgName (concat "img_" (format-time-string "%Y%m%d_%H%M%S") ".png"))
+;;    ;; 图片文件的相对路径
+;;    (setq relativeFilename (concat (file-name-base (buffer-name)) ".assets/" imgName))
+;;    ;; 根据不同的操作系统设置不同的命令行工具
+;;    (cond ((string-equal system-type "gnu/linux")
+;;           (shell-command (concat "xclip -selection clipboard -t image/png -o > " relativeFilename)))
+;;          ((string-equal system-type "darwin")
+;;           (shell-command (concat "pngpaste " relativeFilename))))
+;;    ;; 给粘贴好的图片链接加上宽度属性，方便导出
+;;    (insert (concat "\n#+DOWNLOADED: screenshot @ "
+;;                    (format-time-string "%Y-%m-%d %a %H:%M:%S" (current-time))
+;;                    "\n#+CAPTION: \n#+ATTR_ORG: :width "
+;;                    width
+;;                    "\n#+ATTR_LATEX: :width "
+;;                    (if (>= (/ (string-to-number width) 800.0) 1.0)
+;;                        "1.0"
+;;                      (number-to-string (/ (string-to-number width) 800.0)))
+;;                    "\\linewidth :float nil\n"
+;;                    "#+ATTR_HTML: :width "
+;;                    width
+;;                    "\n[[file:" relativeFilename "]]\n"))
+;;    ;; 重新显示一下图片
+;;    (org-redisplay-inline-images)
+;;    )
+
+
 ;; (setq tree-sitter-load-path "~/.emacs.d/tree-sitter/")
 ;;
 ;; (use-package msgu
