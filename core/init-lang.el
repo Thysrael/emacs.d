@@ -8,6 +8,14 @@
   (setq c-default-style "linux")
   (setq c-basic-offset 4)
   (c-set-offset 'case-label '+)
+  :bind
+  (:map c-mode-map
+        ("C-d" . nil))
+  )
+
+(use-package c-mode
+  :hook
+  (c-mode . (lambda () (c-toggle-comment-style))) ;; 改变默认注释风格
   )
 
 ;; (use-package c-ts-mode

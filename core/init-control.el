@@ -224,6 +224,15 @@
   (org-habit-clear-future-face ((t (:background "#4c7073" :weight bold))))
   (org-habit-ready-face ((t (:background "#7f9f7f" :weight bold))))
   (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
+
+  ;; (org-habit-alert-face ((t (:background "#d0d7af" :weight bold))))
+  ;; (org-habit-alert-future-face ((t (:background "#b5c2c1" :weight bold))))
+  ;; (org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
+  ;; (org-habit-overdue-future-face ((t (:background "#7a556f" :weight bold))))
+  ;; (org-habit-clear-face ((t (:background "#3792c2" :weight bold))))
+  ;; (org-habit-clear-future-face ((t (:background "#417297" :weight bold))))
+  ;; (org-habit-ready-face ((t (:background "#6da3a7" :weight bold))))
+  ;; (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
   )
 
 (use-package calendar

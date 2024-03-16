@@ -256,7 +256,7 @@
   :straight nil
   :hook
   ((ediff-before-setup . +ediff-save-window-config)
-         ((ediff-quit ediff-suspend) . +ediff-restore-window-config))
+   ((ediff-quit ediff-suspend) . +ediff-restore-window-config))
   :functions (outline-show-all)
   :config
 

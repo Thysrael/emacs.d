@@ -203,5 +203,6 @@
 (load-theme 'doom-dracula t)
 ;; (load-theme'doom-nord t)
 ;; (load-theme 'modus-vivendi t)
+;; (load-theme 'doom-zenburn t)
 
 ;; (use-package ef-themes)

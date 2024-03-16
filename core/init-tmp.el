@@ -231,6 +231,7 @@
 ;;     (add-to-list 'meow-mode-state-list state))
 ;;  )
 
+;; 没有用，在边缘情况表现不是很好
 ;; (use-package iscroll
 ;;   :straight t)
 
