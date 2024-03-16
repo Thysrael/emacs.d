@@ -83,3 +83,6 @@
   :straight t
   :config
   (setq typescript-indent-level 2))
+
+(use-package dts-mode
+  :straight t)
