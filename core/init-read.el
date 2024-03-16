@@ -154,12 +154,34 @@
   (eaf-bind-key insert_or_toggle_device "p" eaf-browser-keybinding)
   )
 
+;; M-h: add annotation
+;; M-e: edit annotation
+;; M-d: delete annotation
+;; f: jump to link
+;; o: outline
 (use-package eaf-pdf-viewer
   :straight nil
   :init
   (require 'eaf-pdf-viewer)
   (setq eaf-pdf-dark-mode "follow")
+  ;; (setq eaf-pdf-dark-mode nil)
+  :config
+  (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
+  ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
+  (setq eaf-pdf-inline-text-annot-fontsize 14)
   )
+
+;; n, p: next, before iamge
+;; j, k, h, l: move focus
+;; -, =. 0: in, out, reset
+;; y, u, i, o: flip, rotate
+;; (use-package eaf-image-viewer
+;;   :straight nil
+;;   :init
+;;   (require 'eaf-image-viewer))
 
 ;; (use-package imenu-list
 ;;   :after imenu

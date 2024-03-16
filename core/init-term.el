@@ -6,6 +6,8 @@
    :map vterm-mode-map
    ("C-y" . vterm-yank)
    ("M-y" . vterm-yank-pop)
+   ("C-\\" . toggle-input-method)
+   ("C-M-\\" . rime-force-enable)
    :map vterm-copy-mode)
   :init
   (setq vterm-shell "zsh")
