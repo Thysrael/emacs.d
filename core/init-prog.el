@@ -151,6 +151,23 @@
 ;;   :after eglot
 ;;   )
 
+
+;; (use-package lsp-mode
+;;   :straight t)
+;;
+;; (use-package lsp-imenu
+;;   :init
+;;   ;; 启用 lsp-imenu 集成
+;;   (add-hook 'lsp-after-open-hook 'lsp-enable-imenu))
+;;
+;; (use-package lsp-ui
+;;   :straight t
+;;   :init
+;;   ;; 启用 lsp-ui
+;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
+;;   ;; 启用 flycheck
+;;   (add-hook 'python-mode-hook 'flycheck-mode))
+
 ;; 文档信息展示
 (use-package eldoc
   :straight t
