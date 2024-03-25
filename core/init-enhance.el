@@ -481,3 +481,10 @@
     (setq interprogram-cut-function 'xsel-cut-function)
     (setq interprogram-paste-function 'xsel-paste-function)
     ))
+
+;; remove `Indentation setup for shell type zsh`
+;; https://emacs.stackexchange.com/questions/52846/how-to-remove-message-indentation-setup-for-shell-type-sh
+(advice-add 'sh-set-shell :around
+            (lambda (orig-fun &rest args)
+              (let ((inhibit-message t))
+                (apply orig-fun args))))

@@ -18,6 +18,10 @@
   (c-mode . (lambda () (c-toggle-comment-style))) ;; 改变默认注释风格
   )
 
+(use-package c++-mode
+  :bind
+  (:map c++-mode-map
+        ("C-d" . nil)))
 ;; (use-package c-ts-mode
 ;;   :straight t
 ;;   :init

@@ -5,6 +5,8 @@
   :bind
   ("C-c j" . google-translate-at-point) ; 会询问一下是否是要查这个词
   ("C-c J" . google-translate-at-point-reverse)
+  (:map org-mode-map
+        ("C-," . nil)) ; conflict with sdcv
   :init
   (setq google-translate-translation-directions-alist '(("en" . "zh-CN")))) ; 用于设置 `smooth-translate`
 
@@ -163,8 +165,8 @@
   :straight nil
   :init
   (require 'eaf-pdf-viewer)
-  (setq eaf-pdf-dark-mode "follow")
-  ;; (setq eaf-pdf-dark-mode nil)
+  ;; (setq eaf-pdf-dark-mode "follow")
+  (setq eaf-pdf-dark-mode nil)
   :config
   (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
   (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)

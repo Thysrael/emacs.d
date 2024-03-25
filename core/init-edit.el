@@ -166,7 +166,7 @@
   :hook (((prog-mode minibuffer-setup) . subword-mode)))
 
 (use-package hideshow
-  :hook ((prog-mode conf-mode yaml-mode TeX-mode) . hs-minor-mode)
+  :hook ((prog-mode conf-mode yaml-mode TeX-mode nxml-mode) . hs-minor-mode)
   :bind
   ("C-o" . hs-toggle-hiding)
   ("C-M-o" . hs-toggle-all)

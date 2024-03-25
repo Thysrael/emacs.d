@@ -66,6 +66,7 @@
 				   ("blog"     . ?b)
 				   ("linux"    . ?l)
 				   ("misc"     . ?m)
+                   ;; ("deprecated" . ?d)
 				   (:endgroup)))
   ;; 预定义好的 seq
   (org-todo-keywords
