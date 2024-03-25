@@ -15,6 +15,7 @@
    dired-create-destination-dirs 'ask
    ;; symlink
    dired-hide-details-hide-symlink-targets nil
+   dired-listing-switches "-alh"
    )
   )
 
