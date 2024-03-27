@@ -64,7 +64,8 @@
 
 ;; 中文分词跳转
 (use-package cns
-  :load-path "~/.emacs.d/site-lisp/emacs-chinese-word-segmentation/"
+  :init
+  (add-to-list 'load-path (expand-file-name "site-lisp/emacs-chinese-word-segmentation/" user-emacs-directory))
   :hook
   (org-mode . cns-mode)
   (gfm-mode . cns-mode)
@@ -74,6 +75,6 @@
   (:map cns-mode-map
    ("C-f" . cns-forward-word))
   :init
-  (setq cns-prog "~/.emacs.d/site-lisp/emacs-chinese-word-segmentation/cnws")
-  (setq cns-dict-directory "~/.emacs.d/site-lisp/emacs-chinese-word-segmentation/cppjieba/dict")
+  (setq cns-prog (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cnws" user-emacs-directory))
+  (setq cns-dict-directory (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cppjieba/dict" user-emacs-directory))
   )

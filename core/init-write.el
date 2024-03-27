@@ -198,7 +198,8 @@
   :bind
   (:map org-mode-map
         ;; ("C-c C-w" . org-copy-subtree)
-        ("C-c C-q" . org-cut-subtree))
+        ("C-c C-q" . org-cut-subtree)
+        ("C-," . nil))
   )
 
 ;; 禁用一些 org-modules 的加载

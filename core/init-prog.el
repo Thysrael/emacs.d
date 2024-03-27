@@ -280,7 +280,7 @@
   (setq chatgpt-shell-prompt-query-response-style #'shell)
   (setq chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
   (setq chatgpt-shell-model-version 5)
-  (setq chatgpt-shell-root-path "~/.emacs.d/var")
+  (setq chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
   :bind
   ("C-c q" . chatgpt-shell-explain-code)
   ;; ("C-c q" . chatgpt-shell)

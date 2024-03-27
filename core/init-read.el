@@ -124,7 +124,7 @@
 (use-package eaf
   :straight nil
   :init
-  (add-to-list 'load-path "~/.emacs.d/site-lisp/emacs-application-framework/")
+  (add-to-list 'load-path (expand-file-name "site-lisp/emacs-application-framework/" user-emacs-directory))
   (require 'eaf)
   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
   (setq eaf-buffer-title-format "EAF: %s")

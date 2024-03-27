@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-;; git chrunk
+;; git chunk
 (use-package diff-hl
   :straight t
   :defines desktop-minor-mode-table
