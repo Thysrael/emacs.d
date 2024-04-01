@@ -11,6 +11,8 @@
   :bind
   (:map c-mode-map
         ("C-d" . nil))
+  (:map c++-mode-map
+        ("C-d" . nil))
   )
 
 (use-package c-mode
