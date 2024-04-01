@@ -199,6 +199,7 @@
   (:map org-mode-map
         ;; ("C-c C-w" . org-copy-subtree)
         ("C-c C-q" . org-cut-subtree)
+        ("C-c C-b" . org-emphasize)
         ("C-," . nil))
   )
 
@@ -444,6 +445,27 @@
   :after org
   :hook (org-mode . org-autolist-mode))
 
+(use-package org-src
+  :straight nil
+  :init
+  ;; 设置代码块的默认头参数
+  (setq org-babel-default-header-args
+        '(
+          (:eval    . "never-export")     ; 导出时不执行代码块
+          (:session . "none")
+          (:results . "value verbatim output replace") ; 多次执行结果覆盖，结果是代码而不是表格
+          (:exports . "both")             ; 导出代码和结果
+          (:cache   . "no")
+          (:noweb   . "no")
+          (:hlines  . "no")
+          (:tangle  . "no")               ; 不写入文件
+          ))
+  :custom
+  ;; 执行前是否需要确认
+  (org-confirm-babel-evaluate nil)
+  ;; 代码块默认前置多少空格
+  (org-edit-src-content-indentation 0)
+  )
 ;; (use-package org-latex-impatient
 ;;   :after org
 ;;   :hook (org-mode . org-latex-impatient-mode)

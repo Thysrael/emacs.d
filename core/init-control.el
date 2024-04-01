@@ -351,3 +351,10 @@
   ;; 设置日历的节日，通用节日已经包含了所有节日
   (setq calendar-holidays (append cal-china-x-general-holidays))
   )
+
+;; 似乎原本的 headline 就没有了
+;; (use-package clocktable-by-tag
+;;   :straight (:type git :host github :repo "cashpw/clocktable-by-tag")
+;;   :after org
+;;   :init
+;;   (require 'clocktable-by-tag))

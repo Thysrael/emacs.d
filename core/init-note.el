@@ -11,26 +11,38 @@
   :bind
   ("C-c n" . hydra-roam/body)
   ("C-c N" . org-roam-node-find)
+  ("C-c O" . org-roam-capture)
+  ("C-c I" . org-roam--node-insert)
   :config
   (setq org-roam-directory "~/blog/source/roam/")
   (setq org-roam-db-location "~/blog/source/roam/org-roam.db")
 
-  (defhydra hydra-roam (:color blue)
-    "Org-roam Commands"
-    ("f" org-roam-node-find "Find")
-    ("i" org-roam-node-insert "Insert")
+  (defhydra hydra-roam (:hint nil :color blue :foreign-keys run)
+  "
+        Operate^^        Links^^                 Misc^^
+  --------------------------------------------------------------
+        [_f_] Find        [_b_] Backlinks        [_t_] Tag
+        [_i_] Insert      [_B_] BackRecursive    [_a_] Alias
+        [_S_] Search      [_s_] ForwardLinks     [_d_] Sync
+        ^ ^               ^ ^                    [_o_] Capture
+        [_q_] Quit        ^ ^
+  "
+    ("f" org-roam-node-find)
+    ("i" org-roam-node-insert)
     ;; ("b" org-roam-buffer-toggle "Backlinks") ; 展示 backlinks
-    ("c" org-roam-capture "Capture") ; 在已有 node 内增加内容
-    ("s" consult-org-roam-search "Search")
-    ("u" org-roam-ui-open "UI")
+    ("o" org-roam-capture) ; 在已有 node 内增加内容
+    ("S" consult-org-roam-search)
+    ("u" org-roam-ui-open)
 
-    ("b" consult-org-roam-backlinks "Backlinks")
-    ("B" consult-org-roam-backlinks-recursive "BackRecursive")
-    ("s" consult-org-roam-forward-links "Forwardlinks")
-    ("a" org-roam-alias-add "Alias Add")
+    ("b" consult-org-roam-backlinks)
+    ("B" consult-org-roam-backlinks-recursive)
+    ("s" consult-org-roam-forward-links)
+    ("a" org-roam-alias-add)
     ;; ("ar" org-roam-alias-remove "Alias Remove")
-    ("t" org-roam-tag-add "Tag Add")
+    ("t" org-roam-tag-add)
     ;; ("tr" org-roam-tag-remove "Tag Remove")
+    ("d" org-roam-db-sync)
+    ("q" nil)
     )
 
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
