@@ -141,7 +141,7 @@
   (org-level-4 ((t (:inherit outline-4 :extend nil :weight bold :family "Sarasa Mono SC"))))
   (org-table ((t (:family "Sarasa Mono SC")))) ; 设置表格为中英等宽字体
   :custom
-  (org-image-actual-width '(800))
+  (org-image-actual-width '(600))
   ;; (org-startup-with-inline-images t) ; 默认显示图片
   ;; (org-ellipsis "…") ; 设置折叠提示符
   (org-ellipsis "¶")
