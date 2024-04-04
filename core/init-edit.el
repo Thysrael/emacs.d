@@ -322,7 +322,8 @@ begin and end of the block surrounding point."
   :init
   (define-key puni-mode-map (kbd "C-w") nil)
   (define-key puni-mode-map (kbd "C-d") nil)
-  (define-key puni-mode-map (kbd "<backspace>") nil))
+  (define-key puni-mode-map (kbd "<backspace>") nil)
+  (define-key puni-mode-map (kbd "<DEL>") nil))
 
 ;; 快速编辑成对出现的标点
 (use-package embrace
