@@ -9,10 +9,10 @@
   (org-roam-v2-ack t)
 
   :bind
-  ("C-c n" . hydra-roam/body)
-  ("C-c N" . org-roam-node-find)
+  ("C-c N" . hydra-roam/body)
+  ("C-c n" . org-roam-node-find)
   ("C-c O" . org-roam-capture)
-  ("C-c I" . org-roam--node-insert)
+  ("C-c I" . org-roam-node-insert)
   :config
   (setq org-roam-directory "~/blog/source/roam/")
   (setq org-roam-db-location "~/blog/source/roam/org-roam.db")
