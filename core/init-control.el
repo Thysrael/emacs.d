@@ -170,8 +170,8 @@
   ;; (org-agenda-timegrid-use-ampm nil)
   ;; 搜索是不看时间
   (org-agenda-search-headline-for-time nil)
-  ;; 提前 3 天截止日期到期告警
-  (org-deadline-warning-days 3)
+  ;; 提前 n 天截止日期到期告警
+  (org-deadline-warning-days 7)
   ;; clock report level 增加到 3 ，显示 tag
   (org-agenda-clockreport-parameter-plist '(:link t :maxlevel 3 :tags t))
   ;; :custom-face
