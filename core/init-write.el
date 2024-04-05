@@ -465,6 +465,11 @@
   (org-confirm-babel-evaluate nil)
   ;; 代码块默认前置多少空格
   (org-edit-src-content-indentation 0)
+  (org-babel-load-languages '((python          . t)
+                              (C               . t)
+                              (emacs-lisp      . t)
+                              (shell           . t)
+                              ))
   )
 ;; (use-package org-latex-impatient
 ;;   :after org
