@@ -81,8 +81,13 @@
   (require 'rime)
   :config
   (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
+  ;; https://manateelazycat.github.io/2023/04/05/emacs-rime-ice/
+  ;; (setq rime-user-data-dir "~/.config/fcitx/rime")
   (setq rime-disable-predicates
         '(
+          ;; meow-normal-mode-p
+          ;; meow-motion-mode-p
+          ;; meow-keypad-mode-p
           rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
           rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
           rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
@@ -125,7 +130,11 @@
   :straight t
   :hook
   (((text-mode prog-mode) . sis-context-mode)
-   ((text-mode prog-mode) . sis-inline-mode))
+   ((text-mode prog-mode) . sis-inline-mode)
+   (after-init . sis-global-inline-mode)
+   (after-init . sis-global-context-mode)
+   (after-init . sis-global-cursor-color-mode)
+   )
   :custom
   (sis-other-cursor-color "#c3e88d")
   :config
@@ -135,10 +144,15 @@
   ;; Use emacs-rime as default
   (sis-ism-lazyman-config nil "rime" 'native)
   ;; enable the /cursor color/ mode
-  (sis-global-cursor-color-mode t)
+  ;; (sis-global-cursor-color-mode t)
   ;; enable the /respect/ mode
-  (sis-global-respect-mode t)
-  ;; enable the /context/ mode for all buffers
-  (sis-global-context-mode t)
+  ;; (sis-global-respect-mode t)
+  ;; ;; enable the /context/ mode for all buffers
+  ;; (sis-global-context-mode t)
   ;; enable the /inline english/ mode for all buffers
-  (sis-global-inline-mode t))
+  ;; (sis-global-inline-mode t)
+
+  ;; Context mode
+  (add-hook 'meow-insert-exit-hook #'sis-set-english)
+  (add-to-list 'sis-context-hooks 'meow-insert-enter-hook)
+  )
