@@ -1,5 +1,17 @@
 ;;; -*- lexical-binding: t; -*-
 
+;;; NOTE:
+;;; 没有改到 hjkl 键位的关键在于，minibuffer 是没有办法用 C-j, C-k 的
+;;; 所以会造成一定的不一致性。
+;;; keypad 模式的逻辑是这样的，当按下 SPC 后，按 c, x, h 会分别对应 C-c, C-x, C-h
+;;; 之后再按的字母 <c> 都会变成 C-<c> ，如果想按出来不加 C- 的，那么就需要按 SPC-<c>
+;;; 此外 keypad 还有 fallback 逻辑，指的是当无法匹配的时候，会采用一种退而求其次的匹配
+;;; 但是 fallback 具体是什么我理解不了，我个人感觉是 SPC 后加一个非 c, x, h 键 <c>
+;;; 那么就会被翻译成 C-c <c> 。
+;;; 这种机制会导致基本上都是 3 键才能解决形如 C-[cx] C-<c> 的按键，这相对于原来 2 键就解决耽误了不少。
+;;; 对于 C-x <c> 需要 4 键才能解决，这些都是不能接受的。
+;;; 所以要将这些按键尽量放到 normal 下。
+;;; 但是 C-c C-<c> 因为是 major-mode 相关，所以没法简单改键位，所以这种按键会非常麻烦
 (use-package meow
   :straight t
   :hook
@@ -21,19 +33,19 @@
   (+meow-amend-keybinding "M-;" comment comment-dwin)
   (+meow-amend-keybinding "C-f" forward-char forward-char)
   (+meow-amend-keybinding "C-k" kill-line kill-line)
+  (defun +meow-append-line ()
+    (interactive)
+    (progn
+      (end-of-line)
+      (meow-append)))
   ;; [motion]
   (meow-motion-overwrite-define-key
+   ;; '("j" . meow-next)
+   ;; '("k" . meow-prev)
    '("<escape>" . ignore))
   ;; [leader]
   (meow-leader-define-key
-   ;; SPC j/k will run the original command in MOTION state.
    '("j" . "C-x")
-   '("b" . switch-to-buffer)
-   '("B" . ibuffer)
-   '("t" . "C-t")
-   '("T" . multi-vterm)
-   '("R" . "C-x r")
-   '("S" . save-buffer)
    ;; Use SPC (0-9) for digit arguments.
    '("1" . meow-digit-argument)
    '("2" . meow-digit-argument)
@@ -53,20 +65,26 @@
    '("<" . beginend-prog-mode-goto-beginning)
    '(">" . beginend-prog-mode-goto-end)
    ;; 模式切换键
-   '("O" . meow-open-below)
+   '("I" . meow-open-below)
    '("i" . meow-append)
-   '("I" . meow-open-above)
+   ;; '("I" . meow-open-above)
    '("c" . meow-change)
+   '("A" . +meow-append-line)
    ;; 移动键
    ;; 简单移动键
    '("f" . +smart-forward)
-   '("F" . meow-right-expand)
+   ;; '("F" . meow-right-expand)
    '("b" . backward-char)
    '("B" . meow-left-expand)
+   ;; '("j" . next-line)
+   ;; '("J" . meow-next-expand)
+   ;; '("k" . previous-line)
+   ;; '("K" . meow-prev-expand)
    '("n" . next-line)
    '("N" . meow-next-expand)
    '("p" . previous-line)
    '("P" . meow-prev-expand)
+
    ;; 单词符号移动键，可以移动到单词的行尾或者行首
    ;; '("w" . meow-next-word)
    ;; '("W" . meow-next-symbol)
@@ -91,7 +109,9 @@
    '("s" . consult-line)
    '("r" . query-replace-regexp)
    ;; window
-   '("o" . ace-window)
+   ;; '("o" . ace-window)
+   '("O" . ace-window)
+   '("o" . hs-toggle-hiding)
    '("9" . ace-delete-window)
    '("8" . ace-swap-window)
    '("0" . delete-window)
@@ -100,6 +120,13 @@
    '("3" . split-window-right)
    '("4 f" . find-file-other-window)
    '("4 b" . switch-to-buffer-other-window)
+   ;; C-x C-<c> 这些都要变成键程更短的操作
+   '("B" . switch-to-buffer)
+   '("S" . save-buffer)
+   '("C" . save-buffers-kill-terminal)
+   '("R" . recentf-open-files)
+   '("F" . find-file)
+   '("T" . window/body)
    ;; 标记
    '("m" . set-mark-command)
    '("M" . pop-to-mark-command)
@@ -131,3 +158,4 @@
          ))
     (add-to-list 'meow-mode-state-list state))
   )
+
