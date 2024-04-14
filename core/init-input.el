@@ -153,6 +153,12 @@
   ;; (sis-global-inline-mode t)
 
   ;; Context mode
-  (add-hook 'meow-insert-exit-hook #'sis-set-english)
-  (add-to-list 'sis-context-hooks 'meow-insert-enter-hook)
-  )
+  ;; (add-hook 'meow-insert-exit-hook #'sis-set-english)
+  ;; (add-to-list 'sis-context-hooks 'meow-insert-enter-hook)
+  ;; 这里的缩进有问题，不要在意
+  (defun +sis-remove-head-space-after-cc-punc (_)
+    (when (or (memq (char-before) '(?， ?。 ?？ ?！ ?； ?： ?（ ?【 ?「 ?“))
+                                                                (bolp))
+                                        (delete-char 1)))
+              (setq sis-inline-tighten-head-rule #'+sis-remove-head-space-after-cc-punc)
+              )
