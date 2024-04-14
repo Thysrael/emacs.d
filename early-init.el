@@ -66,3 +66,5 @@
 ;; 禁止 org-mode 加载一些模块
 ;; https://emacs-china.org/t/org-babel/18699/10
 (setq org-modules-loaded t)
+
+;; (setenv "LSP_USE_PLISTS" "true")

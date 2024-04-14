@@ -127,6 +127,7 @@
          (fundamental-mode . normal)
          (vterm-mode . insert)
          (vundo-mode . motion)
-         (chatgpt-shell-mode . insert)))
+         (chatgpt-shell-mode . insert)
+         ))
     (add-to-list 'meow-mode-state-list state))
   )

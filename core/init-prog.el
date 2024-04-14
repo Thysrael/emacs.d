@@ -108,6 +108,11 @@
   )
 
 (use-package eglot
+  ;; :straight (eglot :type git
+  ;;                 :host github
+  ;;                 :repo "AkibAzmain/eglot"
+  ;;                 :branch "semantic-tokens")
+
   :straight t
   :custom
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
@@ -149,17 +154,65 @@
 (use-package eglot-booster
   :straight (eglot-booster :type git :host github :repo "jdtsmith/eglot-booster")
   :after eglot
+  ;; :config (eglot-booster-mode)
   )
+
+;; 让 eglot 可以丰富 tempel, 使用中老报 warning
+;; (use-package eglot-tempel
+;;   :straight t
+;;   :after (eglot tempel)
+;;   :init
+;;   (eglot-tempel-mode)
+;;   )
 
 
 ;; (use-package lsp-mode
-;;   :straight t)
+;;   :straight t
+;;   :custom-face
+;;   (lsp-inlay-hint-face ((t (:inherit lsp-details-face))))
+;;   :config
+;;   (setq lsp-headerline-arrow ":")
+;;   :custom
+;;   (lsp-headerline-breadcrumb-icons-enable t)
+;;   (lsp-headerline-breadcrumb-segments '(symbols))
+;;   (lsp-eldoc-render-all t)
+;;   :hook
+;;   (lsp-mode . lsp-inlay-hints-mode))
+;;
+;; (defun lsp-booster--advice-json-parse (old-fn &rest args)
+;;   "Try to parse bytecode instead of json."
+;;   (or
+;;    (when (equal (following-char) ?#)
+;;      (let ((bytecode (read (current-buffer))))
+;;        (when (byte-code-function-p bytecode)
+;;          (funcall bytecode))))
+;;    (apply old-fn args)))
+;; (advice-add (if (progn (require 'json)
+;;                        (fboundp 'json-parse-buffer))
+;;                 'json-parse-buffer
+;;               'json-read)
+;;             :around
+;;             #'lsp-booster--advice-json-parse)
+;;
+;; (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+;;   "Prepend emacs-lsp-booster command to lsp CMD."
+;;   (let ((orig-result (funcall old-fn cmd test?)))
+;;     (if (and (not test?)                             ;; for check lsp-server-present?
+;;              (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+;;              lsp-use-plists
+;;              (not (functionp 'json-rpc-connection))  ;; native json-rpc
+;;              (executable-find "emacs-lsp-booster"))
+;;         (progn
+;;           (message "Using emacs-lsp-booster for %s!" orig-result)
+;;           (cons "emacs-lsp-booster" orig-result))
+;;       orig-result)))
+;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 ;;
 ;; (use-package lsp-imenu
 ;;   :init
 ;;   ;; 启用 lsp-imenu 集成
 ;;   (add-hook 'lsp-after-open-hook 'lsp-enable-imenu))
-;;
+
 ;; (use-package lsp-ui
 ;;   :straight t
 ;;   :init
@@ -271,6 +324,15 @@
 ;;     )
 ;;   (advice-add 'org-src-get-lang-mode :filter-return #'+remap-mode)
 ;;   )
+
+;; (use-package stickyfunc-enhance
+;;   :straight t
+;;   :init
+;;   (add-to-list 'semantic-default-submodes 'global-semantic-stickyfunc-mode)
+;;   (require 'stickyfunc-enhance)
+;;   (setq semantic-stickyfunc-sticky-classes '(function type variable))
+;;   :hook
+;;   (prog-mode . semantic-mode))
 
 ;; chatgpt 支持
 (use-package chatgpt-shell
