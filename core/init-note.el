@@ -11,7 +11,7 @@
   :bind
   ("C-c N" . hydra-roam/body)
   ("C-c n" . org-roam-node-find)
-  ("C-c O" . org-roam-capture)
+  ("C-c K" . org-roam-capture)
   ("C-c I" . org-roam-node-insert)
   :config
   (setq org-roam-directory "~/blog/source/roam/")

@@ -40,11 +40,24 @@
 (use-package which-key
   :straight t)
 
+;; 单独设置字体
 (defun +set-buffer-face-mode-mono ()
   "Set buffer-face-mode for org-agenda."
   (interactive)
   (setq buffer-face-mode-face '(:family "Sarasa Mono SC"))
   (buffer-face-mode))
+
+;; 超酷的截屏软件
+(use-package screenshot
+  :straight
+  (screenshot :type git :host github :repo "tecosaur/screenshot")
+  :bind
+  ("<f9>" . screenshot)
+  :config
+  (setq screenshot-line-numbers-p t)
+  (setq screenshot-max-width 400)
+  (setq screenshot-font-size 9) ; `9` is good, other maybe wrong
+  )
 
 ;;; 工具宏
 ;; Thanks to DOOM Emacs

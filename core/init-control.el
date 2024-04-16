@@ -76,7 +76,7 @@
 (use-package org-capture
   :straight nil
   :bind
-  ("C-c o" . org-capture)
+  ("C-c k" . org-capture)
   :config
   (defun +org-get-top-headings ()
     "Get the names of the headings in the current org file."

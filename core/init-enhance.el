@@ -199,7 +199,7 @@
   ([remap imenu]                         . consult-imenu)
   ("C-c i"                               . consult-imenu)
   ("C-c I"                               . consult-imenu-multi)
-  ("C-c o"                               . consult-outline)
+  ;; ("C-c o"                               . consult-outline)
   ("C-c b"                               . consult-bookmark)
   ("C-c k"                               . consult-kmacro)
   ([remap locate]                        . consult-locate)
@@ -330,7 +330,7 @@
 ;; buffer 管理
 (use-package ibuffer
   :straight t
-  :bind (("C-x C-b" . ibuffer))
+  :bind (("C-x C-B" . ibuffer))
   :config
 
   (setq ibuffer-show-empty-filter-groups nil

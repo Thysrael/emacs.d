@@ -74,6 +74,11 @@
   :bind
   ("<f7>" . symbol-overlay-put)
   ("<f8>" . symbol-overlay-remove-all)
+  (:map symbol-overlay-map
+        ("N" . symbol-overlay-jump-next)
+        ("P" . symbol-overlay-jump-prev)
+        ("n" . nil)
+        ("p" . nil))
   :hook
   (((prog-mode yaml-mode) . symbol-overlay-mode))
   )
@@ -347,16 +352,4 @@ begin and end of the block surrounding point."
   :straight t
   :config
   (setq wgrep-auto-save-buffer t)
-  )
-
-;; 超酷的截屏软件
-(use-package screenshot
-  :straight
-  (screenshot :type git :host github :repo "tecosaur/screenshot")
-  :bind
-  ("C-c c" . screenshot)
-  :config
-  (setq screenshot-line-numbers-p t)
-  (setq screenshot-max-width 400)
-  (setq screenshot-font-size 9) ; `9` is good, other maybe wrong
   )
