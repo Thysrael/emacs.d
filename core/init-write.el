@@ -261,7 +261,7 @@
   :after org
   :hook
   (org-mode . org-appear-mode)
-  :config
+  :init
   (setq org-appear-autoemphasis t
         org-appear-autosubmarkers t
         org-appear-autoentities t

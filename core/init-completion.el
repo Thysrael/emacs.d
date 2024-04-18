@@ -122,7 +122,7 @@
 (use-package cape
   :straight t
   :hook ((corfu-mode . +corfu-add-cape-backends)
-         ((tex-mode latex-mode org-mode markdown-mode) . +corfu-add-cape-tex-backends))
+         ((tex-mode latex-mode markdown-mode) . +corfu-add-cape-tex-backends))
   :config
   (defun +corfu-add-cape-backends ()
     (add-to-list 'completion-at-point-functions #'cape-file :append)
