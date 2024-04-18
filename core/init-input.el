@@ -137,6 +137,8 @@
    )
   :custom
   (sis-other-cursor-color "#c3e88d")
+  :init
+  (require 'sis)
   :config
   (add-hook! (+theme-changed-hook server-after-make-frame-hook) :call-immediately
     (defun +sis-set-other-cursor-color ()
