@@ -73,14 +73,28 @@
   (eww-mode . cns-mode)
   :bind
   (:map cns-mode-map
-   ("C-f" . +cns-forward-word))
+        ("C-f" . +smart-forward-cn))
   :init
   (setq cns-prog (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cnws" user-emacs-directory))
   (setq cns-dict-directory (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cppjieba/dict" user-emacs-directory))
   :config
   (defun +cns-forward-word ()
-  (interactive)
-  (if (org-at-table-p)
-      (+smart-forward)
-    (cns-forward-word)))
+    (interactive)
+    (if (org-at-table-p)
+        (+smart-forward)
+      (cns-forward-word)))
+
+  (defun +smart-forward-cn ()
+    "Move forward one word or to the end of line."
+    (interactive)
+    (let ((current-line (line-number-at-pos))
+          (current-point (point)))
+      (if (eolp)
+          (+cns-forward-word)
+        (progn
+          (+cns-forward-word)
+          (when (/= current-line (line-number-at-pos))
+            (progn
+              (goto-char current-point)
+              (end-of-line)))))))
   )
