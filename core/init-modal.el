@@ -22,11 +22,18 @@
   :straight t
   :hook
   (after-init . meow-global-mode)
+  ;; 改变 meow 的默认区域删除行为
   (meow-global-mode . (lambda () (setq delete-active-region t)))
+  ;; 在 insert 模式退出时关闭 corfu 补全窗口
+  (meow-insert-exit . (lambda () (corfu-quit)))
+  ;; (meow-insert-enter . (lambda () (corfu-mode +1)))
   :demand t
   :custom
-  (meow-keypad-meta-prefix 122)
+  (meow-keypad-meta-prefix ?z)
+  (meow-keypad-ctrl-meta-prefix ?Z)
   :config
+  ;; 关闭 change 选择行为
+  (setq meow-select-on-change nil)
   ;; 方便使用 SPC j b 打开 buffer
   (global-set-key (kbd "C-x C-b") 'switch-to-buffer)
   ;; 修复 meow 的原生功能。
