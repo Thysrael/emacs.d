@@ -24,6 +24,8 @@
   (after-init . meow-global-mode)
   (meow-global-mode . (lambda () (setq delete-active-region t)))
   :demand t
+  :custom
+  (meow-keypad-meta-prefix 122)
   :config
   ;; 方便使用 SPC j b 打开 buffer
   (global-set-key (kbd "C-x C-b") 'switch-to-buffer)
@@ -132,6 +134,7 @@
    ;; 撤销
    '("u" . meow-undo)
    '("U" . meow-undo-in-selection)
+   '("x" . meow-quit)
 
    ;; 搜索
    '("s" . meow-search)

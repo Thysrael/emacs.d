@@ -92,3 +92,6 @@
 
 (use-package dts-mode
   :straight t)
+
+(use-package kconfig-mode
+  :straight t)

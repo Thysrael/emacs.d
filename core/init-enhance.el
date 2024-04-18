@@ -330,7 +330,7 @@
 ;; buffer 管理
 (use-package ibuffer
   :straight t
-  :bind (("C-x C-B" . ibuffer))
+  :bind (("C-x C-b" . ibuffer))
   :config
 
   (setq ibuffer-show-empty-filter-groups nil
