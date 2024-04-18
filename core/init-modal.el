@@ -175,3 +175,23 @@
     (add-to-list 'meow-mode-state-list state))
   )
 
+;; change the cursor color with the input-method changing
+(defvar cursor-default-color (face-background 'cursor))
+(defvar cursor-activate-color (face-foreground 'error nil t))
+
+(defun set-cursor-color-red ()
+  "Set the cursor color to red."
+  (set-cursor-color cursor-activate-color))
+(defun set-cursor-color-default ()
+  "Set the cursor color to green."
+  (set-cursor-color cursor-default-color))
+(defun set-cursor-color-according-to-input-method ()
+  "Set cursor color based on the current input method."
+  (interactive)
+  (if (string= current-input-method "rime")
+      (set-cursor-color cursor-activate-color)
+    (set-cursor-color cursor-default-color)))
+
+(add-hook 'input-method-activate-hook 'set-cursor-color-red)
+(add-hook 'input-method-deactivate-hook 'set-cursor-color-default)
+(add-hook 'window-state-change-hook 'set-cursor-color-according-to-input-method)
