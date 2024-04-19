@@ -31,6 +31,7 @@
   :custom
   (meow-keypad-meta-prefix ?z)
   (meow-keypad-ctrl-meta-prefix ?Z)
+  (meow-keypad-describe-delay 1.0)
   :config
   ;; 关闭 change 选择行为
   (setq meow-select-on-change nil)
@@ -137,6 +138,7 @@
    '("y" . yank)
    '("/" . +smart-comment)
    '("." . embrace-commander)
+   '("k" . puni-kill-line)
 
    ;; 撤销
    '("u" . meow-undo)
@@ -144,8 +146,8 @@
    '("x" . meow-quit)
 
    ;; 搜索
-   '("s" . meow-search)
-   '("S" . consult-line)
+   '("S" . meow-search)
+   '("s" . consult-line)
    '("r" . query-replace-regexp)
 
    ;; 标记与区域

@@ -85,16 +85,17 @@
 (defun my-kill-region-or-line ()
   "Kill the region or the current line if no region is active, and keep the cursor at its original position."
   (interactive)
-  (let ((start (point)))
-    (if (region-active-p)
-        (progn
+  (if (region-active-p)
+      (progn
+        (let ((start (region-beginning)))
           (kill-region (region-beginning) (region-end))
           (goto-char start)
-          )
-      (progn
+          ))
+    (progn
         (kill-whole-line)
         (previous-line)
-        (end-of-line)))))
+        (end-of-line))
+    ))
 
 (defun my-copy-region-or-line ()
   "Save the region to the kill ring or the current line if no region is active, and keep the cursor at its original position."
