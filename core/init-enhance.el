@@ -68,27 +68,31 @@
   :straight t
   :init (require 'orderless)
   :config
-                                        ; 根据辅助字符来选择不同的补全风格
+  ;; 根据辅助字符来选择不同的补全风格
   (defun +vertico-orderless-dispatch (pattern _index _total)
     (cond
-                                        ; 以 $ 结尾的 pattern 会指定结尾
+     ;; 以 $ 结尾的 pattern 会指定结尾
      ((string-suffix-p "$" pattern) `(orderless-regexp . ,(concat (substring pattern 0 -1) "[\x200000-\x300000]*$")))
-                                        ; 忽略单个 !，是为下一个匹配做准备
+     ;; 忽略单个 !，是为下一个匹配做准备
      ((string= "!" pattern) `(orderless-literal . ""))
-                                        ; 以 ! 开头的 pattern 表示结果都是不匹配 pattern 的（反选）
+     ;; 以 ! 开头的 pattern 表示结果都是不匹配 pattern 的（反选）
      ((string-prefix-p "!" pattern) `(orderless-without-literal . ,(substring pattern 1)))
-                                        ; makes the string match ignoring diacritics and similar inflections on characters，似乎是只有俄语那种有音标的语言会需要
+     ;; makes the string match ignoring diacritics and similar inflections on characters，似乎是只有俄语那种有音标的语言会需要
      ((string-prefix-p "%" pattern) `(char-fold-to-regexp . ,(substring pattern 1)))
      ((string-suffix-p "%" pattern) `(char-fold-to-regexp . ,(substring pattern 0 -1)))
-                                        ; 首字母匹配
+     ;; 首字母匹配
      ((string-prefix-p "`" pattern) `(orderless-initialism . ,(substring pattern 1)))
      ((string-suffix-p "`" pattern) `(orderless-initialism . ,(substring pattern 0 -1)))
-                                        ; 不启动正则匹配，只使用文本匹配
+     ;; 不启动正则匹配，只使用文本匹配
      ((string-prefix-p "=" pattern) `(orderless-literal . ,(substring pattern 1)))
      ((string-suffix-p "=" pattern) `(orderless-literal . ,(substring pattern 0 -1)))
-                                        ; flex 风格：字符必须按照给定的顺序出现，但不一定要连续出现
+     ;; flex 风格：字符必须按照给定的顺序出现，但不一定要连续出现
      ((string-prefix-p "~" pattern) `(orderless-flex . ,(substring pattern 1)))
-     ((string-suffix-p "~" pattern) `(orderless-flex . ,(substring pattern 0 -1)))))
+     ((string-suffix-p "~" pattern) `(orderless-flex . ,(substring pattern 0 -1)))
+     ;; Annotations 匹配注释，性能不佳，最好只用于过滤
+     ((string-prefix-p "@" pattern) `(orderless-annotation . ,(substring pattern 1)))
+     ((string-suffix-p "@" pattern) `(orderless-annotation . ,(substring pattern 0 -1)))
+     ))
 
   ;; 远端文件补全只使用 basic 风格
   (defun +vertico-basic-remote-try-completion (string table pred point)
