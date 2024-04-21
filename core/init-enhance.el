@@ -149,25 +149,30 @@
 
 ;; 为 minibuffer 中出现的条目（不至于 minibuffer 条目）
 ;; 可以用 C-h 查看所有的条目
+;; 右键菜单，根据不同的对象提供不同的 map ，也就是不同的命令
 (use-package embark
   :straight t
   :bind (("C-;" . embark-act)
          ("C-c ; e" . embark-export)
          ("C-c ; c" . embark-collect)
+         ;; custom
+         :map embark-general-map
+         ("a" . consult-line)
+         ("s" . consult-ripgrep)
+         :map embark-variable-map
+         ("a" . consult-line)
+         ("s" . consult-ripgrep)
+         :map embark-symbol-map
+         ("a" . consult-line)
+         ("s" . consult-ripgrep)
+
          :map minibuffer-local-map
          ("C-c C-e" . +embark-export-write)
-         :map embark-file-map
-         ("s" . +reopen-file-with-sudo)
-         ("g" . +embark-magit-status))
+         )
   :defines (wgrep-change-to-wgrep-mode)
   :init
   (setq prefix-help-command 'embark-prefix-help-command)
   :config
-  (defun +embark-magit-status (file)
-    "Run `magit-status` on repo containing the embark target."
-    (interactive "GFile: ")
-    (magit-status (locate-dominating-file file ".git")))
-
   (defun +embark-export-write ()
     "Export the current vertico results to a writable buffer if possible.
      Supports exporting consult-grep/consult-ripgrep to wgrep, file to wdeired,
@@ -188,6 +193,7 @@
       (embark-export)))
   )
 
+;; 为 embark 和 consutl 配合提供支持，可能就是提供了 C 选项
 (use-package embark-consult
   :straight t
   :after (embark consult)

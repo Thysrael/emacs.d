@@ -127,7 +127,7 @@
    '("p" . previous-line)
    '("P" . meow-prev-expand)
    '("a" . move-beginning-of-line)
-   '("e" . mosey-forward-cycle)
+   '("e" . move-end-of-line)
    '("o" . hs-toggle-hiding)
    '("h" . meow-find)
    '("H" . avy-goto-char-2)
@@ -153,7 +153,7 @@
    ;; 标记与区域
    '("v" . set-mark-command)
    '("V" . exchange-point-and-mark)
-   '(";" . meow-reverse)
+   '(";" . embark-act)
    '("M" . pop-to-mark-command)
    '("l" . er/expand-region)
    '("L" . er/contract-region)
@@ -172,16 +172,16 @@
    '("t" . +start-vterm-in-project)
    )
 
-  (dolist
-      (state
-       '(
-         (View-mode . normal)
-         (fundamental-mode . normal)
-         (vterm-mode . insert)
-         (vundo-mode . motion)
-         (chatgpt-shell-mode . insert)
-         ))
-    (add-to-list 'meow-mode-state-list state))
+  ;; (dolist
+  ;;     (state
+  ;;      '(
+  ;;        (View-mode . normal)
+  ;;        (fundamental-mode . normal)
+  ;;        (vterm-mode . insert)
+  ;;        (vundo-mode . motion)
+  ;;        (chatgpt-shell-mode . insert)
+  ;;        ))
+  ;;   (add-to-list 'meow-mode-state-list state))
   )
 
 ;; change the cursor color with the input-method changing

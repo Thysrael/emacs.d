@@ -44,10 +44,11 @@
   :init (ace-pinyin-global-mode t))
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
-(use-package mosey
+(use-package mwim
   :straight t
-  :bind
-  ("C-e" . mosey-forward-cycle))
+  :bind (([remap move-beginning-of-line] . mwim-beginning-of-code-or-line)
+         ([remap move-end-of-line] . mwim-end-of-code-or-line)))
+
 
 ;; [beginend] Better M-< M-> for programming
 (use-package beginend
