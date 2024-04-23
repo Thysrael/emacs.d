@@ -67,7 +67,10 @@
   :straight (:files (:defaults "extensions/*.el"))
   :hook (((tex-mode prog-mode conf-mode yaml-mode shell-mode eshell-mode org-mode markdown-mode) . corfu-mode)
          ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil)))
-         (minibuffer-setup . +corfu-enable-in-minibuffer))
+         (minibuffer-setup . +corfu-enable-in-minibuffer)
+         ;; 在 insert 模式退出时关闭 corfu 补全窗口
+         (meow-insert-exit . (lambda () (corfu-quit))))
+
   :bind (:map corfu-map
               ("A-m" . +corfu-move-to-minibuffer)
               ("RET" . nil))

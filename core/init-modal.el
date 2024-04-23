@@ -24,8 +24,6 @@
   (after-init . meow-global-mode)
   ;; 改变 meow 的默认区域删除行为
   (meow-global-mode . (lambda () (setq delete-active-region t)))
-  ;; 在 insert 模式退出时关闭 corfu 补全窗口
-  (meow-insert-exit . (lambda () (corfu-quit)))
   ;; (meow-insert-enter . (lambda () (corfu-mode +1)))
   :demand t
   :custom
