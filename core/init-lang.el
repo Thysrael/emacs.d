@@ -95,3 +95,6 @@
 
 (use-package kconfig-mode
   :straight t)
+
+(use-package lua-mode
+  :straight t)

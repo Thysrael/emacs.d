@@ -150,6 +150,7 @@
 ;; 为 minibuffer 中出现的条目（不至于 minibuffer 条目）
 ;; 可以用 C-h 查看所有的条目
 ;; 右键菜单，根据不同的对象提供不同的 map ，也就是不同的命令
+;; embark 在 org-headline 上很好用
 (use-package embark
   :straight t
   :bind (("C-;" . embark-act)
@@ -163,6 +164,15 @@
          ("a" . consult-line)
          ("s" . consult-ripgrep)
          :map embark-symbol-map
+         ("a" . consult-line)
+         ("s" . consult-ripgrep)
+         :map embark-identifier-map
+         ("a" . consult-line)
+         ("s" . consult-ripgrep)
+         :map embark-library-map
+         ("a" . consult-line)
+         ("s" . consult-ripgrep)
+         :map embark-region-map
          ("a" . consult-line)
          ("s" . consult-ripgrep)
 
@@ -208,7 +218,7 @@
   ([remap goto-line]                     . consult-goto-line)
   ([remap imenu]                         . consult-imenu)
   ("C-c i"                               . consult-imenu)
-  ("C-c I"                               . consult-imenu-multi)
+  ;; ("C-c I"                               . consult-imenu-multi)
   ;; ("C-c o"                               . consult-outline)
   ("C-c b"                               . consult-bookmark)
   ("C-c k"                               . consult-kmacro)
