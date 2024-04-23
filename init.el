@@ -27,6 +27,7 @@
                      'init-control
                      'init-note
                      'init-modal
+                     'init-export
                      ))
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))
