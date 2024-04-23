@@ -203,6 +203,117 @@
         ("C-," . nil))
   )
 
+;; 中文行内样式避免空格
+(use-package org
+  :config
+  ;; HACK: inline highlight for CJK
+  (setq org-emphasis-regexp-components '("-[:space:]('\"{[:nonascii:][:alpha:]"
+                                         "-[:space:].,:!?;'\")}\\[[:nonascii:][:alpha:]"
+                                         "[:space:]"
+                                         "."
+                                         1))
+  (org-set-emph-re 'org-emphasis-regexp-components org-emphasis-regexp-components)
+  (org-element-update-syntax)
+  (org-element--set-regexps)
+
+  (defun +org-do-emphasis-faces (limit)
+    "Run through the buffer and emphasize strings."
+    (let ((quick-re (format "\\([%s]\\|^\\)\\([~=*/_+]\\).*?[~=*/_+]"
+                            (car org-emphasis-regexp-components))))
+      (catch :exit
+        (while (re-search-forward quick-re limit t)
+          (let* ((marker (match-string 2))
+                 (verbatim? (member marker '("~" "="))))
+            (when (save-excursion
+                    (goto-char (match-beginning 0))
+                    (and
+                     ;; HACK: Do not match latex fragments.
+                     (not (texmathp))
+                     ;; Do not match table hlines.
+                     (not (and (equal marker "+")
+                               (org-match-line
+                                "[ \t]*\\(|[-+]+|?\\|\\+[-+]+\\+\\)[ \t]*$")))
+                     ;; Do not match headline stars.  Do not consider
+                     ;; stars of a headline as closing marker for bold
+                     ;; markup either.
+                     (not (and (equal marker "*")
+                               (save-excursion
+                                 (forward-char)
+                                 (skip-chars-backward "*")
+                                 (looking-at-p org-outline-regexp-bol))))
+                     ;; Match full emphasis markup regexp.
+                     (looking-at (if verbatim? org-verbatim-re org-emph-re))
+                     ;; Do not span over paragraph boundaries.
+                     (not (string-match-p org-element-paragraph-separate
+                                          (match-string 2)))
+                     ;; Do not span over cells in table rows.
+                     (not (and (save-match-data (org-match-line "[ \t]*|"))
+                               (string-match-p "|" (match-string 4))))))
+              (pcase-let ((`(,_ ,face ,_) (assoc marker org-emphasis-alist))
+                          (m (if org-hide-emphasis-markers 4 2)))
+                (font-lock-prepend-text-property
+                 (match-beginning m) (match-end m) 'face face)
+                (when verbatim?
+                  (org-remove-flyspell-overlays-in
+                   (match-beginning 0) (match-end 0))
+                  (remove-text-properties (match-beginning 2) (match-end 2)
+                                          '(display t invisible t intangible t)))
+                (add-text-properties (match-beginning 2) (match-end 2)
+                                     '(font-lock-multiline t org-emphasis t))
+                (when (and org-hide-emphasis-markers
+                           (not (org-at-comment-p)))
+                  (add-text-properties (match-end 4) (match-beginning 5)
+                                       '(invisible t))
+                  (add-text-properties (match-beginning 3) (match-end 3)
+                                       '(invisible t)))
+                (throw :exit t))))))))
+  (advice-add #'org-do-emphasis-faces :override #'+org-do-emphasis-faces)
+  (defun +org-element--parse-generic-emphasis (mark type)
+    "Parse emphasis object at point, if any.
+
+MARK is the delimiter string used.  TYPE is a symbol among
+`bold', `code', `italic', `strike-through', `underline', and
+`verbatim'.
+
+Assume point is at first MARK."
+    (save-excursion
+      (let ((origin (point)))
+        (unless (bolp) (forward-char -1))
+        (let ((opening-re
+               (rx-to-string
+                `(seq (or line-start (any space ?- ?\( ?' ?\" ?\{ nonascii))
+                      ,mark
+                      (not space)))))
+          (when (looking-at opening-re)
+            (goto-char (1+ origin))
+            (let ((closing-re
+                   (rx-to-string
+                    `(seq
+                      (not space)
+                      (group ,mark)
+                      (or (any space ?- ?. ?, ?\; ?: ?! ?? ?' ?\" ?\) ?\} ?\\ ?\[
+                               nonascii)
+                          line-end)))))
+              (when (re-search-forward closing-re nil t)
+                (let ((closing (match-end 1)))
+                  (goto-char closing)
+                  (let* ((post-blank (skip-chars-forward " \t"))
+                         (contents-begin (1+ origin))
+                         (contents-end (1- closing)))
+                    (list type
+                          (append
+                           (list :begin origin
+                                 :end (point)
+                                 :post-blank post-blank)
+                           (if (memq type '(code verbatim))
+                               (list :value
+                                     (and (memq type '(code verbatim))
+                                          (buffer-substring
+                                           contents-begin contents-end)))
+                             (list :contents-begin contents-begin
+                                   :contents-end contents-end)))))))))))))
+  (advice-add #'org-element--parse-generic-emphasis :override #'+org-element--parse-generic-emphasis))
+
 ;; 禁用一些 org-modules 的加载
 ;; (with-eval-after-load 'org
 ;;   (setq org-modules (cl-set-difference org-modules '(ol-gnus ol-eww))))
@@ -258,16 +369,24 @@
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
   :straight t
-  :after org
-  :hook
-  (org-mode . org-appear-mode)
-  :init
-  (setq org-appear-autoemphasis t
-        org-appear-autosubmarkers t
-        org-appear-autoentities t
-        org-appear-autolinks t
-        org-appear-autokeywords t)
-  )
+  :hook ((org-mode . org-appear-mode))
+  :config
+  (setq
+   org-hide-emphasis-markers t
+
+   org-appear-autosubmarkers t
+   org-appear-autoentities t
+   org-appear-autokeywords t
+   org-appear-inside-latex t
+
+   org-appear-delay 0.1
+
+   org-appear-trigger 'manual)
+
+  (add-hook! org-mode-hook :call-immediately
+    (defun +org-add-appear-hook ()
+      (add-hook 'meow-insert-enter-hook #'org-appear-manual-start nil t)
+      (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t))))
 
 ;;; 让中文行内格式显示 https://emacs-china.org/t/org-mode/22313?u=vagrantjoker
 ;; (font-lock-add-keywords 'org-mode
