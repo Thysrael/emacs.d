@@ -8,7 +8,7 @@
   (org-export-with-smart-quotes nil)
   (org-export-with-section-numbers t)
   (org-export-with-sub-superscripts '{})
-  (org-export-with-date nil)
+  (org-export-with-date t)
   (org-export-with-author nil)
   ;; `org-export-use-babel' set to nil will cause all source block header arguments to be ignored This means that code blocks with the argument :exports none or :exports results will end up in the export.
   ;; See:
@@ -132,32 +132,26 @@
 (use-package engrave-faces
   :straight t)
 
-;; (use-package ox-pandoc
-;;   :straight t)
-
-;; (with-eval-after-load 'ox-latex
-;;   ;; http://orgmode.org/worg/org-faq.html#using-xelatex-for-pdf-export
-;;   ;; latexmk runs pdflatex/xelatex (whatever is specified) multiple times
-;;   ;; automatically to resolve the cross-references.
-;;   (setq org-latex-pdf-process '("latexmk -xelatex -quiet -shell-escape -f %f"))
-;;   (add-to-list 'org-latex-classes
-;;                '("elegantpaper"
-;;                  "\\documentclass[lang=cn]{elegantpaper}
-;;                    [NO-DEFAULT-PACKAGES]
-;;                    [PACKAGES]
-;;                    [EXTRA]"
-;;                  ("\\section{%s}" . "\\section*{%s}")
-;;                  ("\\subsection{%s}" . "\\subsection*{%s}")
-;;                  ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-;;                  ("\\paragraph{%s}" . "\\paragraph*{%s}")
-;;                  ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-;;
-;;   ;; 如果 org 设置了#+LATEX_HEADER: \usepackage{minted} 的话 则支持代码高亮和代码格式化
-;;   (setq org-latex-listings 'minted)
-;;   ;; Windows 加了这句的话 org 里 C-c C-x C-l 无法预览公式
-;;   ;; 为了兼容性就不加这句 然后 org 里加上 #+LATEX_HEADER: \usepackage{minted} 即可
-;;   ;; (add-to-list 'org-latex-packages-alist '("minted"))
-;;
-;;   ;; 解决 org 文件里面执行  org-latex-preview 生成的 .tex 格式不对的问题
-;;   ;; 通过 log 可以看到错误信息 ! Package minted Error: You must invoke LaTeX with the -shell-escape flag
-;;   )
+;; need install `htmlize, mathjax`
+(use-package ox-reveal
+  :straight t
+  :after ox
+  :init
+  (require 'ox-reveal)
+  :config
+  (setq org-reveal-hlevel 1)
+  ;; Avalable themes: night, black, white, league, beige, sky, serif, simple, solarized, blood, moon
+  (setq org-reveal-theme "dracula")
+  ;; can also set root to a CDN cloud: https://cdn.jsdelivr.net/npm/reveal.js
+  (setq org-reveal-root (expand-file-name "site-lisp/reveal.js" user-emacs-directory))
+  (setq org-reveal-mathjax t)
+  (setq org-reveal-ignore-speaker-notes t)
+  ;; 设置标题，似乎 %d 不起作用
+  (setq org-reveal-title-slide "<h1>%t</h1><p>%a</p>")
+  ;; 设置插件，其中 RevealMenu 是第三方插件
+  (setq org-reveal-plugins '(markdown zoom notes search RevealMenu))
+  (setq org-reveal-klipsify-src 'on)
+  ;; 需要手动下载插件到 plugiins 文件夹
+  (setq org-reveal-extra-script-before-src `(,(expand-file-name "site-lisp/reveal.js/plugin/reveal.js-menu/menu.js" user-emacs-directory)))
+  (setq org-reveal-extra-css (no-littering-expand-etc-file-name "reveal.js/extra.css"))
+  )

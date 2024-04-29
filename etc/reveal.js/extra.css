@@ -1,0 +1,12 @@
+.reveal p { font-size: 60%; }
+.reveal li { font-size: 70%; }
+.reveal th { font-size: 70%; }
+.reveal td { font-size: 70%; }
+.reveal h1 { font-size: 200%; }
+.reveal h2 { font-size: 170%; }
+.reveal h3 { font-size: 130%; }
+.reveal h4 { font-size: 100%; }
+.reveal img {
+  max-width: 60%;
+  height: auto;
+}
