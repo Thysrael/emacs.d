@@ -101,14 +101,17 @@
 }%, make the fonts bigger, make the title (only) bold
 \\posttitle{%
   \\end{center}%
-  \\noindent\\vrule height 2.5pt width \\textwidth
+  \\noindent\\vrule height 1.5pt width \\textwidth
   \\vspace{-4em}
 }
 \\renewcommand\\maketitlehooka{
-  \\noindent\\vrule height 2.5pt width \\textwidth
+  \\noindent\\vrule height 1.5pt width \\textwidth
 }
-\\let\\oldtitle\\title
-\\renewcommand{\\title}[1]{\\vspace{-4cm}\\oldtitle{#1}\\vspace{-2em}}
+
+\\usepackage{enumitem}
+\\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\\parskip,topsep=5pt}
+\\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\\parskip,topsep=5pt}
+\\setdescription{itemsep=0pt,partopsep=0pt,parsep=\\parskip,topsep=5pt}
 "
                  ("\\section{%s}" . "\\section*{%s}")
                  ("\\subsection{%s}" . "\\subsection*{%s}")
