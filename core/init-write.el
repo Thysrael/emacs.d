@@ -154,7 +154,7 @@
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮标题
   (setq org-src-tab-acts-natively t) ; 让源码块中的 tab 行为正常
-  (setq org-src-preserve-indentation nil) ; 让缩进正常
+  (setq org-src-preserve-indentation t) ; 让缩进正常
   (setq org-use-sub-superscripts "{}") ; 用 {} 表示上下标
   (setq org-pretty-entities t) ; 设置一些连体字和上下标
   (setq org-hide-emphasis-markers t) ; 隐藏格式控制符
