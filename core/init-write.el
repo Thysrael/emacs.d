@@ -496,7 +496,7 @@
   :after org
   :bind
   (:map org-mode-map
-        ("C-c C-M" . hydra-org-download/body)
+        ("C-c C-S-m" . hydra-org-download/body)
         ("C-c C-m" . org-download-clipboard))
   ;; (:map markdown-mode-map
   ;;       ("C-c m" . hydra-md-download/body))
