@@ -144,7 +144,7 @@
    '("x" . meow-quit)
 
    ;; 搜索
-   '("S" . meow-search)
+   '("S" . +consult-ripgrep-single-file)
    '("s" . consult-line)
    '("r" . query-replace-regexp)
 

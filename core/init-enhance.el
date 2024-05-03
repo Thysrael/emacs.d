@@ -250,6 +250,12 @@
   ;; [consult-xref] Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
+
+  (defun +consult-ripgrep-single-file ()
+    "Call `consult-ripgrep' for the current file (cann't just a buffer)."
+    (interactive)
+    (let ((consult-project-function (lambda (x) nil)))
+      (consult-ripgrep (list (shell-quote-argument buffer-file-name)))))
   )
 
 ;; [consult-dir] Insert path quickly in minibuffer
