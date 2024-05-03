@@ -12,6 +12,6 @@
   (setq tramp-use-ssh-controlmaster-options nil)
   )
 
-(use-package docker
-  :straight t
-  :bind ("C-c d" . docker))
+;; (use-package docker
+;;   :straight t
+;;   :bind ("C-c d" . docker))

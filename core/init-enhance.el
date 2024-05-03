@@ -429,6 +429,16 @@
                 project-file-relative)))
   )
 
+(use-package picture-mode
+  :bind
+  (:map picture-mode-map
+        ("C-f" . 'right-char)))
+
+(use-package artist-mode
+  :bind
+  (:map artist-mode-map
+        ("C-f" . 'right-char)))
+
 ;; burly-bookmark can save window configure
 ;; (use-package burly
 ;;   :hook

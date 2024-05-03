@@ -1,6 +1,3 @@
-;; (use-package holo-layer
-;;   :straight (holo-layer :type git :host github :repo "manateelazycat/holo-layer"))
-
 ;; 果冻光标
 ;;(add-to-list 'load-path "~/.emacs.d/straight/repos/holo-layer")
 ;;(require 'holo-layer)

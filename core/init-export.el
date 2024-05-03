@@ -133,6 +133,7 @@
   :straight t)
 
 ;; need install `htmlize, mathjax`
+;; reveal.js 目前不能轻松转换成 PDF
 (use-package ox-reveal
   :straight t
   :after ox
