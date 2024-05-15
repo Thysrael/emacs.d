@@ -109,6 +109,7 @@
 ;; 设置代码字体，不知道为什么不能写进去
 (custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono Nerd Font")))))
 
+;; 渲染 eww 内的代码高亮
 (use-package shr-tag-pre-highlight
   :straight t
   :after shr

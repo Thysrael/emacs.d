@@ -153,8 +153,6 @@
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮标题
-  (setq org-src-tab-acts-natively t) ; 让源码块中的 tab 行为正常
-  (setq org-src-preserve-indentation t) ; 让缩进正常
   (setq org-use-sub-superscripts "{}") ; 用 {} 表示上下标
   (setq org-pretty-entities t) ; 设置一些连体字和上下标
   (setq org-hide-emphasis-markers t) ; 隐藏格式控制符
@@ -581,10 +579,12 @@
           (:tangle  . "no")               ; 不写入文件
           ))
   :custom
+  (org-src-tab-acts-natively t) ; 让源码块中的 tab 行为正常
   ;; 执行前是否需要确认
   (org-confirm-babel-evaluate nil)
   ;; 代码块默认前置多少空格
-  (org-edit-src-content-indentation 0)
+  (org-src-preserve-indentation nil) ; 让缩进正常
+  (org-edit-src-content-indentation 0) ; 虽然丑了一些，但是方便粘贴
   (org-babel-load-languages '((python          . t)
                               (C               . t)
                               (emacs-lisp      . t)
