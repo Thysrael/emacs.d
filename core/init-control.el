@@ -172,8 +172,8 @@
   (org-agenda-search-headline-for-time nil)
   ;; 提前 n 天截止日期到期告警
   (org-deadline-warning-days 7)
-  ;; clock report level 增加到 3 ，显示 tag
-  (org-agenda-clockreport-parameter-plist '(:link t :maxlevel 3 :tags t))
+  ;; clock report level 增加到 3 ，显示 tag ，隐藏 agenda 文件显示
+  (org-agenda-clockreport-parameter-plist '(:link t :hidefiles t :maxlevel 3 :tags t))
   ;; :custom-face
   ;; (org-schedule ((t (:family "Sarasa Mono SC"))))
   ;; (org-scheduled ((t (:family "Sarasa Mono SC"))))

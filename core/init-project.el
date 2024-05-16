@@ -93,12 +93,12 @@
    )
   )
 
-(use-package treemacs-magit
-  :straight t
-  :demand t
-  :after treemacs magit
-  :commands treemacs-magit--schedule-update
-  :hook ((magit-post-commit
-          git-commit-post-finish
-          magit-post-stage
-          magit-post-unstage) . treemacs-magit--schedule-update))
+;; (use-package treemacs-magit
+;;   :straight t
+;;   :demand t
+;;   :after treemacs magit
+;;   :commands treemacs-magit--schedule-update
+;;   :hook ((magit-post-commit
+;;           git-commit-post-finish
+;;           magit-post-stage
+;;           magit-post-unstage) . treemacs-magit--schedule-update))
