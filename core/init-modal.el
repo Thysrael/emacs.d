@@ -186,6 +186,15 @@
   ;;   (add-to-list 'meow-mode-state-list state))
   )
 
+;; vterm 会与 meow normal 键冲突
+;; 使得 normal-mode 键绑定都可以正常使用
+(use-package meow-vterm
+  :straight (meow-vterm :type git :host github :repo "accelbread/meow-vterm")
+  :after vterm
+  :init
+  (setq vterm-keymap-exceptions '("C-c"))
+  (meow-vterm-enable))
+
 ;; change the cursor color with the input-method changing
 (defvar cursor-default-color (face-background 'cursor))
 (defvar cursor-activate-color (face-foreground 'error nil t))
