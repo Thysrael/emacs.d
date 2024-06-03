@@ -609,8 +609,7 @@
 (use-package bibtex-mode
   :bind
   (:map bibtex-mode-map
-        ("C-c f" . bibtex-reformat)
-        ("C-c C-f" . nil))
+        ("C-c C-f" . bibtex-reformat))
   )
 
 ;; 似乎不会实时刷新数据库
