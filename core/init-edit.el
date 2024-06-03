@@ -32,7 +32,7 @@
   :custom-face
   (hl-todo ((t (:inherit default :height 0.9 :width condensed :weight bold :inverse-video t))))
   :hook
-  ((prog-mode conf-mode yaml-mode) . hl-todo-mode)
+  ((prog-mode conf-mode yaml-mode LaTeX-mode) . hl-todo-mode)
   :config
   (setq hl-todo-require-punctuation t
         hl-todo-highlight-punctuation ":")

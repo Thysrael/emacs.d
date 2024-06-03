@@ -45,7 +45,7 @@
   ;; 设置标签的默认位置，默认是第 77 列右对齐
   (org-tags-column -80)
   ;; 自动对齐标签
-  (org-auto-align-tags nil)
+  (org-auto-align-tags t)
   ;; 标签不继承
   (org-use-tag-inheritance nil)
   ;; 在日程视图的标签不继承

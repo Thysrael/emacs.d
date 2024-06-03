@@ -57,6 +57,7 @@
   :after vertico
   :hook (minibuffer-setup . vertico-repeat-save))
 
+;; 增加补全图标
 (use-package all-the-icons-completion
   :straight t
   :hook ((after-init . all-the-icons-completion-mode)

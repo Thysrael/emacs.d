@@ -98,3 +98,16 @@
 
 (use-package lua-mode
   :straight t)
+
+(use-package gnuplot-mode
+  :straight t
+  :init
+  (setq auto-mode-alist (append '(("\\.gp$" . gnuplot-mode)) auto-mode-alist)))
+
+(use-package rust-mode
+  :straight t
+  )
+
+;; (use-package cargo
+;;   :straight t
+;;   :hook ((rust-mode) . cargo-minor-mode))

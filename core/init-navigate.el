@@ -79,6 +79,7 @@
   (setq cns-prog (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cnws" user-emacs-directory))
   (setq cns-dict-directory (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cppjieba/dict" user-emacs-directory))
   :config
+  (require 'org)
   (defun +cns-forward-word ()
     (interactive)
     (if (org-at-table-p)

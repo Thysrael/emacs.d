@@ -4,7 +4,7 @@
 ;; 让文本居中并限制宽度
 (use-package visual-fill-column
   :straight t
-  :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode) . +center-text)
+  :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . +center-text)
   :config
   (defun +center-text ()
     (interactive)
