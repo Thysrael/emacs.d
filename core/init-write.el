@@ -637,6 +637,11 @@
   ;; Use pdf-tools to open PDF files
   ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
   ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  ;; (add-to-list 'font-latex-match-reference-keywords-local '("upcite" "*[[{"))
+
+  :custom-face
+  ;; (font-latex-sedate-face ((t (:inherit org-bold))))
+  (font-latex-sedate-face ((t (:foreground "#ff5555" :weight bold))))
   )
 
 
@@ -648,20 +653,58 @@
   :hook
   (LaTeX-mode . cdlatex-mode))
 
-
-;; 增强标签索引功能
-(use-package reftex
-  :straight t
-  :hook
-  (LaTeX-mode . reftex-mode)
-  :bind
-  (:map reftex-mode-map
-        ("C-c i" . reftex-toc)))
-
 ;; 为 latex 提供折叠大纲功能
 (use-package outline
   :hook
   (LaTeX-mode . outline-minor-mode)
   :bind
   (:map outline-minor-mode-map
-        ("C-c C-o" . outline-cycle)))
+        ("C-c C-o" . outline-cycle)
+        ("C-c [" . nil)))
+
+(use-package bibtex-mode
+  :bind
+  (:map bibtex-mode-map
+        ("C-c f" . bibtex-reformat)
+        ("C-c C-f" . nil))
+  )
+
+;; 似乎不会实时刷新数据库
+;; (use-package ebib
+;;   :straight t
+;;   :config
+;;   (add-to-list 'ebib-citation-commands
+;;                '(LaTeX-mode
+;;                  (("upcite" "\\upcite{%K}")
+;;                   ("cite" "\\upcite{%K}")
+;;                   )))
+;;   :custom
+;;   (ebib-preload-bib-files '("./bibs.bib"))
+;;   :bind
+;;   ("C-c [" . ebib-insert-citation)
+;;   )
+
+;; (use-package citar
+;;   :straight t
+;;   :custom
+;;   (citar-bibliography '("./bibs.bib"))
+;;   (citar-latex-default-cite-command "upcite")
+;;   :hook
+;;   (LaTeX-mode . citar-capf-setup)
+;;   (org-mode . citar-capf-setup)
+;;   :bind
+;;   ("C-c [" . citar-insert-citation)
+;;   :custom
+;;   (citar-latex-cite-commands
+;;    '((("upcite"))))
+;;   )
+
+;; (use-package consult-bibtex
+;;   :straight (consult-bibtex :host github
+;;                             :repo "mohkale/consult-bibtex")
+;;   :config
+;;   (setq bibtex-completion-bibliography
+;;         '("./bibs.bib"))
+;;   :bind
+;;   ("C-c [" . consult-bibtex)
+;;   )

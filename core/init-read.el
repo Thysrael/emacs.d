@@ -129,16 +129,16 @@
     (or (car r) "c++"))
   )
 
-;; (use-package eaf
-;;   :straight nil
-;;   :init
-;;   (add-to-list 'load-path (expand-file-name "site-lisp/emacs-application-framework/" user-emacs-directory))
-;;   (require 'eaf)
-;;   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
-;;   (setq eaf-buffer-title-format "EAF: %s")
-;;   (setq eaf-kill-process-after-last-buffer-closed t)
-;;   )
-;;
+(use-package eaf
+  :straight nil
+  :init
+  (add-to-list 'load-path (expand-file-name "site-lisp/emacs-application-framework/" user-emacs-directory))
+  (require 'eaf)
+  (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+  (setq eaf-buffer-title-format "EAF: %s")
+  (setq eaf-kill-process-after-last-buffer-closed t)
+  )
+
 ;; ;; 按 F 会有 avy 类似的效果
 ;; ;; 按 N 会将其转换为 eww 界面，不过最近还需要按 g 刷新才能正常显示
 ;; (use-package eaf-browser
@@ -163,26 +163,26 @@
 ;;   (eaf-bind-key insert_or_scroll_up "n" eaf-browser-keybinding)
 ;;   (eaf-bind-key insert_or_toggle_device "p" eaf-browser-keybinding)
 ;;   )
-;;
-;; ;; M-h: add annotation
-;; ;; M-e: edit annotation
-;; ;; M-d: delete annotation
-;; ;; f: jump to link
-;; ;; o: outline
-;; (use-package eaf-pdf-viewer
-;;   :straight nil
-;;   :init
-;;   (require 'eaf-pdf-viewer)
-;;   ;; (setq eaf-pdf-dark-mode "follow")
-;;   (setq eaf-pdf-dark-mode nil)
-;;   :config
-;;   (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
-;;   ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
-;;   (setq eaf-pdf-inline-text-annot-fontsize 14)
-;;   )
+
+;; M-h: add annotation
+;; M-e: edit annotation
+;; M-d: delete annotation
+;; f: jump to link
+;; o: outline
+(use-package eaf-pdf-viewer
+  :straight nil
+  :init
+  (require 'eaf-pdf-viewer)
+  ;; (setq eaf-pdf-dark-mode "force")
+  (setq eaf-pdf-dark-mode nil)
+  :config
+  (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
+  ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
+  (setq eaf-pdf-inline-text-annot-fontsize 14)
+  )
 
 ;; (use-package nov
 ;;   :straight t

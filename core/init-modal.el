@@ -134,6 +134,7 @@
    '("q" . my-kill-region-or-line)
    '("w" . my-copy-region-or-line)
    '("y" . yank)
+   '("Y" . yank-media)
    '("/" . +smart-comment)
    '("." . embrace-commander)
    '("k" . puni-kill-line)
@@ -164,7 +165,6 @@
    '("G" . meow-grab)
    '("W" . meow-next-word)
    ;; 其他
-   '("'" . embark-act)
    '("," . sdcv-search-pointer+)
    '("d" . chatgpt-shell)
    '("t" . +start-vterm-in-project)
@@ -174,6 +174,8 @@
     (when (fboundp 'corfu-quit)
       (add-hook 'meow-insert-exit-hook 'corfu-quit)))
 
+  (with-eval-after-load 'eaf-pdf-viewer
+    (eaf-bind-key meow-keypad "<SPC>" eaf-pdf-viewer-keybinding))
   ;; (dolist
   ;;     (state
   ;;      '(
