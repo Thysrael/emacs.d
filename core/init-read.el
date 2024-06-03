@@ -81,15 +81,22 @@
   ("C-c w" . +toggle-eww)
   ("C-c W" . eww-list-bookmarks)
   (:map eww-mode-map
-        ("j" . next-line)
-        ("k" . previous-line)
-        ("l" . +smart-forward)
-        ("h" . backward-char)
-        ("i" . eww-toggle-images)
-        ("o" . maple-translate)
-        ("m" . set-mark-command)
-        ("," . eww-back-url)
-        ("." . eww-forward-url))
+        ("n" . next-line)
+        ("p" . previous-line)
+        ("f" . +smart-forward)
+        ("b" . backward-char)
+        ("a" . move-beginning-of-line)
+        ("e" . move-end-of-line)
+        ("o" . eww-toggle-images)
+        ("v" . set-mark-command)
+        ("q" . my-kill-region-or-line)
+        ("w" . my-copy-region-or-line)
+        ("," . sdcv-search-pointer+)
+        ("l" . er/expand-region)
+        ("L" . er/contract-region)
+        ("g" . keyboard-quit)
+        ("[" . eww-back-url)
+        ("]" . eww-forward-url))
   )
 
 ;; 将页面渲染成 org-mode
@@ -103,8 +110,8 @@
   (setq shrface-toggle-bullets t)
   :bind
   (:map shrface-mode-map
-        ("n" . shrface-next-headline)
-        ("p" . shrface-previous-headline)
+        ;; ("n" . shrface-next-headline)
+        ;; ("p" . shrface-previous-headline)
         ("C-c i" . shrface-headline-consult)))
 ;; 设置代码字体，不知道为什么不能写进去
 (custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono Nerd Font")))))
