@@ -176,16 +176,12 @@
 
   (with-eval-after-load 'eaf-pdf-viewer
     (eaf-bind-key meow-keypad "<SPC>" eaf-pdf-viewer-keybinding))
-  ;; (dolist
-  ;;     (state
-  ;;      '(
-  ;;        (View-mode . normal)
-  ;;        (fundamental-mode . normal)
-  ;;        (vterm-mode . insert)
-  ;;        (vundo-mode . motion)
-  ;;        (chatgpt-shell-mode . insert)
-  ;;        ))
-  ;;   (add-to-list 'meow-mode-state-list state))
+  (dolist
+      (state
+       '(
+         (color-rg-mode . motion)
+         ))
+    (add-to-list 'meow-mode-state-list state))
   )
 
 ;; vterm 会与 meow normal 键冲突
