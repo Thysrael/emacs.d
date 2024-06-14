@@ -1,20 +1,20 @@
 ;;; 翻译
-(use-package google-translate
-  :straight t
-  :defines (google-translate-translation-directions-alist)
-  :bind
-  ("C-c j" . google-translate-at-point) ; 会询问一下是否是要查这个词
-  ("C-c J" . google-translate-at-point-reverse)
-  (:map org-mode-map
-        ("C-," . nil)) ; conflict with sdcv
-  :init
-  (setq google-translate-translation-directions-alist '(("en" . "zh-CN")))) ; 用于设置 `smooth-translate`
-
-(use-package google-translate-default-ui
-  :straight nil
-  :custom
-  (google-translate-default-source-language "en") ; 用于设置 `at-point-reverse`
-  (google-translate-default-target-language "zh-CN"))
+;; (use-package google-translate
+;;   :straight t
+;;   :defines (google-translate-translation-directions-alist)
+;;   :bind
+;;   ("C-c j" . google-translate-at-point) ; 会询问一下是否是要查这个词
+;;   ("C-c J" . google-translate-at-point-reverse)
+;;   (:map org-mode-map
+;;         ("C-," . nil)) ; conflict with sdcv
+;;   :init
+;;   (setq google-translate-translation-directions-alist '(("en" . "zh-CN")))) ; 用于设置 `smooth-translate`
+;;
+;; (use-package google-translate-default-ui
+;;   :straight nil
+;;   :custom
+;;   (google-translate-default-source-language "en") ; 用于设置 `at-point-reverse`
+;;   (google-translate-default-target-language "zh-CN"))
 
 ;; (use-package maple-translate
 ;;   :straight (maple-translate :type git :host github :repo "honmaple/emacs-maple-translate")

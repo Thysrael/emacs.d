@@ -80,8 +80,9 @@
 
 \\usepackage{booktabs}
 \\usepackage{tikz}
+% 圆角
 \\let\\oldtexttt\\texttt
-\\renewcommand{\\texttt}[1]{\\tikz[baseline=(MeNode.base)]{\\node[rounded corners, fill=gray!20](MeNode){#1};}}
+\\renewcommand{\\texttt}[1]{\\tikz[baseline=(MeNode.base)]{\\node[rounded corners=2pt, fill=gray!20](MeNode){#1};}}
 
 \\usepackage{indentfirst}
 \\setlength{\\parindent}{2em}
@@ -134,25 +135,25 @@
 
 ;; need install `htmlize, mathjax`
 ;; reveal.js 目前不能轻松转换成 PDF
-(use-package ox-reveal
-  :straight t
-  :after ox
-  :init
-  (require 'ox-reveal)
-  :config
-  (setq org-reveal-hlevel 1)
-  ;; Avalable themes: night, black, white, league, beige, sky, serif, simple, solarized, blood, moon
-  (setq org-reveal-theme "dracula")
-  ;; can also set root to a CDN cloud: https://cdn.jsdelivr.net/npm/reveal.js
-  (setq org-reveal-root (expand-file-name "site-lisp/reveal.js" user-emacs-directory))
-  (setq org-reveal-mathjax t)
-  (setq org-reveal-ignore-speaker-notes t)
-  ;; 设置标题，似乎 %d 不起作用
-  (setq org-reveal-title-slide "<h1>%t</h1><p>%a</p>")
-  ;; 设置插件，其中 RevealMenu 是第三方插件
-  (setq org-reveal-plugins '(markdown zoom notes search RevealMenu))
-  (setq org-reveal-klipsify-src 'on)
-  ;; 需要手动下载插件到 plugiins 文件夹
-  (setq org-reveal-extra-script-before-src `(,(expand-file-name "site-lisp/reveal.js/plugin/reveal.js-menu/menu.js" user-emacs-directory)))
-  (setq org-reveal-extra-css (no-littering-expand-etc-file-name "reveal.js/extra.css"))
-  )
+;; (use-package ox-reveal
+;;   :straight t
+;;   :after ox
+;;   :init
+;;   (require 'ox-reveal)
+;;   :config
+;;   (setq org-reveal-hlevel 1)
+;;   ;; Avalable themes: night, black, white, league, beige, sky, serif, simple, solarized, blood, moon
+;;   (setq org-reveal-theme "dracula")
+;;   ;; can also set root to a CDN cloud: https://cdn.jsdelivr.net/npm/reveal.js
+;;   (setq org-reveal-root (expand-file-name "site-lisp/reveal.js" user-emacs-directory))
+;;   (setq org-reveal-mathjax t)
+;;   (setq org-reveal-ignore-speaker-notes t)
+;;   ;; 设置标题，似乎 %d 不起作用
+;;   (setq org-reveal-title-slide "<h1>%t</h1><p>%a</p>")
+;;   ;; 设置插件，其中 RevealMenu 是第三方插件
+;;   (setq org-reveal-plugins '(markdown zoom notes search RevealMenu))
+;;   (setq org-reveal-klipsify-src 'on)
+;;   ;; 需要手动下载插件到 plugiins 文件夹
+;;   (setq org-reveal-extra-script-before-src `(,(expand-file-name "site-lisp/reveal.js/plugin/reveal.js-menu/menu.js" user-emacs-directory)))
+;;   (setq org-reveal-extra-css (no-littering-expand-etc-file-name "reveal.js/extra.css"))
+;;   )

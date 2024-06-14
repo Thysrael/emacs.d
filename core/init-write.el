@@ -97,8 +97,8 @@
   )
 
 ;; markdown edit inderct
-(use-package edit-indirect
-  :straight t)
+;; (use-package edit-indirect
+;;   :straight t)
 
 ;;; org
 ;; org-mode
