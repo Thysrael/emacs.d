@@ -9,8 +9,8 @@
   ("<f10>"  . tab-next)
   ("s-<right>" . tab-next)
   ("s-<left>" . tab-previous)
-  ("s-l" . tab-next)
-  ("s-h" . tab-previous)
+  ("s-k" . tab-next)
+  ("s-j" . tab-previous)
   ;; Turn on tab-bar-mode in early-init to speed-up
   :hook (window-setup . tab-bar-mode)
   :config

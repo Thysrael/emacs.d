@@ -76,6 +76,7 @@
   (setq corfu-cycle t                ;; Enable cycling for `corfu-next/previous'
         corfu-auto t                 ;; Enable auto completion
         corfu-auto-prefix 1          ;; minimun prefix to enable completion
+        corfu-on-exact-match nil
         corfu-preview-current nil
         corfu-auto-delay 0.1)
 

@@ -33,7 +33,8 @@
 ;;   (setq c-ts-mode-indent-style 'gnu)
 ;;   )
 
-;; (use-package cmake-mode)
+(use-package cmake-mode
+  :straight t)
 
 (use-package js
   :straight t

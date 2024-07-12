@@ -117,8 +117,8 @@
 (setq epg-pinentry-mode 'loopback)
 
 ;; 字体，字体加载会花费大量时间
-(defvar +font-en-size 20)
-(defvar +font-han-size 21)
+(defvar +font-en-size 18)
+(defvar +font-han-size 18)
 (defvar +font-emoji-size 18)
 
 (defun +setup-fonts ()
