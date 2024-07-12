@@ -18,7 +18,7 @@
   (setq org-roam-db-location "~/blog/source/roam/org-roam.db")
 
   (defhydra hydra-roam (:hint nil :color blue :foreign-keys run)
-  "
+    "
         Operate^^        Links^^                 Misc^^
   --------------------------------------------------------------
         [_f_] Find        [_b_] Backlinks        [_t_] Tag
@@ -55,6 +55,44 @@
   ;;             ))
   ;; If using org-roam-protocol
   (require 'org-roam-protocol)
+  ;; add
+  (defun org-roam-backlinks-query* (NODE)
+    "Gets the backlinks of NODE with `org-roam-db-query'."
+    (org-roam-db-query
+     [:select [source dest]
+		      :from links
+		      :where (= dest $s1)
+		      :and (= type "id")]
+     (org-roam-node-id NODE)))
+
+  (defun org-roam-backlinks-p (SOURCE NODE)
+    "Predicate function that checks if NODE is a backlink of SOURCE."
+    (let* ((source-id (org-roam-node-id SOURCE))
+	       (backlinks (org-roam-backlinks-query* SOURCE))
+	       (id (org-roam-node-id NODE))
+	       (id-list (list id source-id)))
+      (member id-list backlinks)))
+
+  (defun org-roam-backlinks--read-node-backlinks (source)
+    "Runs `org-roam-node-read' on the backlinks of SOURCE.
+ The predicate used as `org-roam-node-read''s filter-fn is
+ `org-roam-backlinks-p'."
+    (org-roam-node-read nil (apply-partially #'org-roam-backlinks-p source)))
+
+  (defun org-roam-backlinks-node-read (entry)
+    "Read a NODE and run `org-roam-backlinks--read-node-backlinks'."
+    (let* ((node (get-text-property 0 'node entry))
+           (backlink (org-roam-backlinks--read-node-backlinks node)))
+      (find-file (org-roam-node-file backlink))))
+
+  (with-eval-after-load 'embark
+    (defvar-keymap embark-org-roam-map
+      :doc "Keymap for Embark org roam actions."
+      :parent embark-general-map
+      "i" #'org-roam-node-insert
+      "s" #'embark-collect
+      "b" #'org-roam-backlinks-node-read)
+    (add-to-list 'embark-keymap-alist '(org-roam-node . embark-org-roam-map)))
   )
 
 ;; org-roam 可视化
