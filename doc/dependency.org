@@ -1,0 +1,19 @@
+#+title: Emacs 依赖
+#+author: Thysrael
+
+* Font
+Jetbrain
+仓耳今楷
+更纱黑体
+霞鹜文楷
+nerd fonts
+all the icon
+
+* Program
+fd
+ripgrep
+libvterm
+aspell
+sdcv
+stardict
+cmake
