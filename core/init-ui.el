@@ -117,15 +117,28 @@
 (setq epg-pinentry-mode 'loopback)
 
 ;; 字体，字体加载会花费大量时间
-(defvar +font-en-size 18)
-(defvar +font-han-size 18)
-(defvar +font-emoji-size 18)
+(defvar +font-en-size)
+(defvar +font-han-size)
+(defvar +font-emoji-size)
+
+(let ((hostname (system-name)))
+  (if (string-equal hostname "banana")
+      (progn
+        ;; 当主机名为 banana 时
+        (setq +font-en-size 28)
+        (setq +font-han-size 28)
+        (setq +font-emoji-size 28))
+    (progn
+      ;; 当主机名不是 banana 时
+      (setq +font-en-size 18)
+      (setq +font-han-size 18)
+      (setq +font-emoji-size 18))))
 
 (defun +setup-fonts ()
   "Setup fonts."
   ;; JetBrainsMono 这个字体并不支持一些字符，好像 Sarasa Term SC 支持得更多一些，但是不知道 vscode 为啥可以
   (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
-  (set-fontset-font t 'han (font-spec :family "TsangerJinKai05 W03" :size +font-han-size))
+  (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
   (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
   (set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji") nil 'append)
   ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
