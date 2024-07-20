@@ -5,6 +5,12 @@
                            ("http" . "127.0.0.1:20171")
                            ("https" . "127.0.0.1:20171")))
 
+(let ((hostname (system-name)))
+  (when (string-equal hostname "banana")
+    (setq url-proxy-services '(("no_proxy" . "^\\(192\\.168\\..*\\)")
+                               ("http" . "127.0.0.1:7897")
+                               ("https" . "127.0.0.1:7897")))))
+
 (setq straight-check-for-modifications nil                   ; skip modification
       straight-vc-git-default-clone-depth '(1 single-branch) ; shadow clone
       comp-deferred-compilation-deny-list ()                 ; config native comp
@@ -13,10 +19,13 @@
                                                 (native-comp-available-p))))
 
 ;; 安装 straight.el，我们会使用这个新包管理器，但是需要手动下载
-(defvar bootstrap-version) ; 版本
+(defvar bootstrap-version)
 (let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 6))
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
         (url-retrieve-synchronously
