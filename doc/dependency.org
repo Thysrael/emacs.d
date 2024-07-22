@@ -17,3 +17,8 @@ aspell
 sdcv
 stardict
 cmake
+
+* EAF
+python-sexpdata
+python-epc(after python-setuptools)
+
