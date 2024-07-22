@@ -101,7 +101,7 @@
 (setq frame-resize-pixelwise t)
 
 ;; 改变透明度
-(add-to-list 'default-frame-alist '(alpha-background . 99))
+(add-to-list 'default-frame-alist '(alpha-background . 98))
 
 ;; minibuffer 配置
 ; Allow minibuffer commands while in the minibuffer.
@@ -140,6 +140,7 @@
   (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
   (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
   (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
+  (set-fontset-font t 'cjk-misc (font-spec :family "Sarasa Term SC" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
   (set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji") nil 'append)
   ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
   )
