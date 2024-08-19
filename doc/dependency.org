@@ -17,7 +17,8 @@ aspell
 sdcv
 stardict
 cmake
-
+ctags
+gnuplot
 * EAF
 python-sexpdata
 python-epc(after python-setuptools)
