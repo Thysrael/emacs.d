@@ -242,8 +242,8 @@
   (setq docstr-key-support t) ; 设置键入触发
   :config
   (docstr-faces-apply) ; 设置高亮
-  :hook
-  (after-init . global-docstr-mode)
+  ;; :hook
+  ;; (after-init . global-docstr-mode)
   :custom
   (docstr-desc-summary "@summary ")
   (docstr-desc-param " ")
