@@ -20,17 +20,13 @@
         vertico-resize nil
         vertico-count 15)
 
-                                        ; 这是在强化 minibuffer 的多行输入提示符，但是我还没有遇到过 minibuffer 的多行输入
+  ;; 这是在强化 minibuffer 的多行输入提示符，但是我还没有遇到过 minibuffer 的多行输入
   (advice-add #'completing-read-multiple :filter-args
               (lambda (args)
                 (cons (format "[CRM%s] %s"
                               (replace-regexp-in-string "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""  crm-separator)
                               (car args))
                       (cdr args))))
-
-                                        ; 这里说的是 org-refile 只支持基本的补全模式，并不支持 orderless 这样的补全，这个修改可以完善它
-  (setq org-refile-use-outline-path 'file
-        org-outline-path-complete-in-steps t)
   (advice-add #'org-olpath-completing-read :around
               (lambda (&rest args)
                 (minibuffer-with-setup-hook

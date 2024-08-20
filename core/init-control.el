@@ -1,18 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package org
-  :config
-  ;; WORKAROUND: I don't know why I can't set it in :custom
-  (setq org-outline-path-complete-in-steps nil)
-  (setq org-refile-use-outline-path nil)
-  ;; 强制 TODO 的状态切换依赖（父任务必须等子任务完成才能完成）
-  (setq org-enforce-todo-dependencies t)
-  ;; ;; 设置父任务自动完成，当子任务全部完成
-  ;; (defun org-summary-todo (n-done n-not-done)
-  ;;   "Switch entry to DONE when all subentries are done, to TODO otherwise."
-  ;;   (let (org-log-done org-log-states) ; turn off logging
-  ;;     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
-  ;; (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
   :init
   ;; 禁止日程启动画面
   (setq org-agenda-inhibit-startup t)
@@ -31,7 +19,8 @@
   (org-log-into-drawer t)
   ;; 紧接着标题行或者计划/截止时间戳后加上记录抽屉
   (org-log-state-notes-insert-after-drawers nil)
-
+  ;; 强制 TODO 的状态切换依赖（父任务必须等子任务完成才能完成）
+  (org-enforce-todo-dependencies t)
   ;; refile 使用缓存
   (org-refile-use-cache nil)
   ;; refile 的目的地，这里设置的是 agenda 文件的所有标题
