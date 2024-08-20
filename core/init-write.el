@@ -526,16 +526,13 @@
           (:hlines  . "no")
           (:tangle  . "no")               ; 不写入文件
           ))
-  ;;(require 'org-babel)
-  ;;(require 'org-babel-init)
-  ;;(require 'org-babel-gnuplot)
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((emacs-lisp . t)
-     (gnuplot .t)
-     (python . t)
-     (C               . t)
-     ))
+  ;; (org-babel-do-load-languages
+  ;;  'org-babel-load-languages
+  ;;  '((emacs-lisp . t)
+  ;;    (gnuplot .t)
+  ;;    (python . t)
+  ;;    (C               . t)
+  ;;    ))
   :custom
   (org-src-tab-acts-natively t) ; 让源码块中的 tab 行为正常
   ;; 执行前是否需要确认
@@ -543,12 +540,11 @@
   ;; 代码块默认前置多少空格
   (org-src-preserve-indentation nil) ; 让缩进正常
   (org-edit-src-content-indentation 0) ; 虽然丑了一些，但是方便粘贴
-  ;; (org-babel-load-languages '((python          . t)
-  ;;                             (C               . t)
-  ;;                             (emacs-lisp      . t)
-  ;;                             (shell           . t)
-  ;;                             (gnuplot         . t)
-  ;;                             ))
+  (org-babel-load-languages '((python          . t)
+                              (C               . t)
+                              (emacs-lisp      . t)
+                              (shell           . t)
+                              ))
   )
 ;; (use-package org-latex-impatient
 ;;   :after org
