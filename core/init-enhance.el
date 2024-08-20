@@ -54,10 +54,18 @@
   :hook (minibuffer-setup . vertico-repeat-save))
 
 ;; 增加补全图标
-(use-package all-the-icons-completion
+;; (use-package all-the-icons-completion
+;;   :straight t
+;;   :hook ((after-init . all-the-icons-completion-mode)
+;;          (marginalia-mode . all-the-icons-completion-marginalia-setup))
+;;   )
+
+(use-package nerd-icons-completion
   :straight t
-  :hook ((after-init . all-the-icons-completion-mode)
-         (marginalia-mode . all-the-icons-completion-marginalia-setup))
+  :after marginalia
+  :hook
+  ((after-init . nerd-icons-completion-mode)
+   (marginalia-mode . nerd-icons-completion-marginalia-setup))
   )
 
 ;; 在 minibuffer 中提供补全支持，有多重风格
