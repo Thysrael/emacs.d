@@ -1,9 +1,9 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package org
-  :init
-  ;; 禁止日程启动画面
-  (setq org-agenda-inhibit-startup t)
+  ;; :init
+  ;; ;; 禁止 org agenda file 的 showup 设置
+  ;; (setq org-agenda-inhibit-startup t)
   :custom
   ;; 当状态从 DONE 改成其他状态时，移除 CLOSED: [timestamp]
   (org-closed-keep-when-no-todo t)
