@@ -2,7 +2,6 @@
  ("ace-pinyin" . "47662c0b05775ba353464b44c0f1a037c85e746e")
  ("ace-window" . "77115afc1b0b9f633084cf7479c767988106c196")
  ("advance-words-count.el" . "9668d642e9411eb88b1b77b72f6825b6a01f3e84")
- ("all-the-icons.el" . "39ef44f810c34e8900978788467cc675870bcd19")
  ("auctex" . "4927855d9055e2bfe03c59f9bc0f1a0a6da7098e")
  ("auto-dim-other-buffers.el" . "f0f1905fdf1ca3021e49f220687a4fad2081ba08")
  ("avy" . "be612110cb116a38b8603df367942e2bb3d9bdbe")
