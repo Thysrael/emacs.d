@@ -184,10 +184,8 @@
 ;; 需要注意 overdue 是相对于今天特定时间的事情，比如说今天的事情相对于明天来说一定是过期的
 ;; ready: 当天已经做完的事情
 (use-package org-habit
-  :straight nil
   :after org-agenda
-  :init
-  (require 'org-habit)
+  :demand t
   :custom
   (org-habit-show-habits t)
   (org-habit-graph-column 50)

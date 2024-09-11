@@ -77,8 +77,6 @@
   (rime-preedit-face ((t (:inherit hl-line
                                    :background unspecified
                                    :inverse-video unspecified :underline t))))
-  :init
-  (require 'rime)
   :config
   (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
   ;; https://manateelazycat.github.io/2023/04/05/emacs-rime-ice/
@@ -132,8 +130,7 @@
   (((text-mode prog-mode) . sis-context-mode)
    ((text-mode prog-mode) . sis-inline-mode)
    )
-  :init
-  (require 'sis)
+  :demand t
   ;; :custom
   ;; (sis-other-cursor-color (face-foreground 'error nil t))
   :config
