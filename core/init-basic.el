@@ -37,7 +37,6 @@
 
 ;; 用于单行长文件
 (use-package so-long
-  :straight t
   :hook
   (after-init . global-so-long-mode)
   :config

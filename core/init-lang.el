@@ -34,7 +34,8 @@
 ;;   )
 
 (use-package cmake-mode
-  :straight t)
+  :mode ("CMakeLists\\.txt\\'" "\\.cmake\\'")
+  )
 
 (use-package js
   :straight t
@@ -42,7 +43,6 @@
   (setq js-indent-level 2))
 
 (use-package verilog-mode
-  :straight t
   :config
   (setq verilog-align-ifelse t
         verilog-auto-delete-trailing-whitespace t
