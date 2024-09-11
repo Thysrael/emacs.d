@@ -1,5 +1,4 @@
 todo.txt
-straight/
 var/
 etc/rime/*
 !etc/rime/default.custom.yaml
@@ -7,3 +6,5 @@ etc/rime/*
 elpha/
 tree-sitter/
 /site-lisp/
+/straight/*
+!/straight/versions/default.el/
