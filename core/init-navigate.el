@@ -65,23 +65,19 @@
 
 ;; 中文分词跳转
 (use-package cns
-  :init
-  (add-to-list 'load-path (expand-file-name "site-lisp/emacs-chinese-word-segmentation/" user-emacs-directory))
-  :hook
-  (org-mode . cns-mode)
-  (gfm-mode . cns-mode)
-  (markdown-mode .cns-mode)
-  (eww-mode . cns-mode)
-  :bind
-  (:map cns-mode-map
-        ("C-f" . +smart-forward-cn))
-  :init
-  (setq cns-prog (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cnws" user-emacs-directory))
-  (setq cns-dict-directory (expand-file-name "site-lisp/emacs-chinese-word-segmentation/cppjieba/dict" user-emacs-directory))
+  :straight (
+             :host github
+             :repo "kanglmf/emacs-chinese-word-segmentation"
+             :pre-build ("make")
+             :files ("*.el" "cnws" "cppjieba/dict")
+             )
   :config
-  (require 'org)
+  (defvar cns-packages-path (expand-file-name "cns" (expand-file-name straight-build-dir (expand-file-name "straight" straight-base-dir))))
+  (setq cns-prog (expand-file-name "cnws" cns-packages-path))
+  (setq cns-dict-directory (expand-file-name "dict" cns-packages-path))
   (defun +cns-forward-word ()
     (interactive)
+    (require 'org)
     (if (org-at-table-p)
         (+smart-forward)
       (cns-forward-word)))
@@ -99,4 +95,12 @@
             (progn
               (goto-char current-point)
               (end-of-line)))))))
+  :hook
+  (org-mode . cns-mode)
+  (gfm-mode . cns-mode)
+  (markdown-mode .cns-mode)
+  (eww-mode . cns-mode)
+  :bind
+  (:map cns-mode-map
+        ("C-f" . +smart-forward-cn))
   )

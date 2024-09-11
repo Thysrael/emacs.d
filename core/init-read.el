@@ -129,11 +129,27 @@
     (or (car r) "c++"))
   )
 
+;; (use-package eaf
+;;   :straight nil
+;;   :init
+;;   (add-to-list 'load-path (expand-file-name "site-lisp/emacs-application-framework/" user-emacs-directory))
+;;   (require 'eaf)
+;;   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+;;   (setq eaf-buffer-title-format "EAF: %s")
+;;   (setq eaf-kill-process-after-last-buffer-closed t)
+;;   )
+
 (use-package eaf
-  :straight nil
+  :straight (eaf
+               :type git
+               :host github
+               :repo "emacs-eaf/emacs-application-framework"
+               :files ("*.el" "*.py" "core" "app" "*.json")
+               :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
+               :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
+               )
+  :demand t
   :init
-  (add-to-list 'load-path (expand-file-name "site-lisp/emacs-application-framework/" user-emacs-directory))
-  (require 'eaf)
   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
   (setq eaf-buffer-title-format "EAF: %s")
   (setq eaf-kill-process-after-last-buffer-closed t)
@@ -170,9 +186,8 @@
 ;; f: jump to link
 ;; o: outline
 (use-package eaf-pdf-viewer
-  :straight nil
+  :demand t
   :init
-  (require 'eaf-pdf-viewer)
   ;; (setq eaf-pdf-dark-mode "force")
   (setq eaf-pdf-dark-mode nil)
   :config
