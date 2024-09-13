@@ -154,7 +154,8 @@
 (use-package eglot-booster
   :straight (eglot-booster :type git :host github :repo "jdtsmith/eglot-booster")
   :after eglot
-  ;; :config (eglot-booster-mode)
+  :demand t
+  :config (eglot-booster-mode)
   )
 
 ;; 让 eglot 可以丰富 tempel, 使用中老报 warning

@@ -19,6 +19,8 @@ stardict
 cmake
 ctags
 gnuplot
+emacs-lsp-booster
+
 * EAF
 python-sexpdata
 python-epc (after python-setuptools)
