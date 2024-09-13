@@ -1,13 +1,82 @@
 #+TITLE: 包的管理与配置
 
+* 软件包
+** load
+当代码量激增的时候，就需要分文件来管理了。
+
+作为一个单线程的脚本语言，elisp 提供了 ~load~ 来执行最为 *基本* 的多文件功能，它的语义就是根据路径名（配合 ~load-path~ ）找到文件并执行它，有两种形式，其中 ~load~ 不需要指定后缀名（可以加载 ~el, elc, eln~ ），如下所示：
+
+#+begin_src emacs-lisp
+(load "~/desktop/code")
+(load-file "~/desktop/code.el")
+#+end_src
+
+** provide/require
+有了 ~load~ 就可以实现多文件管理了，但是只有 ~load~ 会存在“重复执行”的问题，也就是当一个文件（基础库）被多个文件所依赖时，可能存在多次 ~load~ 的情况，每次 ~load~ 都会执行里面的代码，就会导致性能下降。
+
+Elisp 提供了 ~provide/require~ 机制来解决这个问题，对于库文件，在完成后通过写入
+
+#+begin_src emacs-lisp
+(provide 'my-feature)
+#+end_src
+
+来表示 provide 了一个 feature ，而 feature 本质就是一个标志。当执行 ~provide~ 时，它会被加入到 emacs 解释器中的一个被叫做 ~features~ 的全局变量数组中，当我们使用如下代码时：
+
+#+begin_src emacs-lisp
+(require 'my-feature)
+#+end_src
+
+会先检查 ~features~ 中有没有 ~my-feature~ 这个标志。如果有，说明已经执行过 ~provide~ 了，也就是说明已经 ~load~ 过一遍这个文件了；而如果没有，则说明这个文件还没有被 ~load~ ，那么 ~require~ 就会在 ~load-path~ 下查找 ~my-feature.el/elc/eln~ 文件，它也可以指定特定的特定的文件路径。
+
+在有了 ~provide/require~ 机制后，elisp 的包就可以被描述了，elisp 的包就是一组文件的集合，他们会用 ~provide~ 的形式提供给 emacs 它们的 feature ，当 emacs 需要使用他们的时候，就需要 ~require~ 它们。
+
+一般来说，包名就是 feature 的名字，但是也存在差异，比如说 ~auctex~ 这个包中， ~auctex~ 是包名，而提供的 feature 却是 ~tex~ 。这种差异会导致使用 ~use-package~ 时会需要特殊处理。
+
+** autoload
+Autoload 机制解决的是由于在启动时需要 ~load~ 大量的包而导致的启动速度过低的问题的。注意到并不是所有的包都会在启动后立刻被使用，我们其实可以在实际使用到某个函数的时候，再 ~load~ 函数所在的文件（注意加载整个文件而不是文件中的特定函数，因为函数的执行有可能依赖文件中的全局变量），这就是 autoload 机制的原理。
+
+在具体实现中，我们可以使用一种“占位符对象”来代替原本的函数，这个占位符中记录着函数所在的文件。当占位符被调用时，在去 ~load~ 文件。我们使用魔法注释：
+
+#+begin_src emacs-lisp
+;;;###autoload
+(defun my-hello-world ()
+  "Print Hello, World!"
+  (interactive)
+  (message "Hello, World!"))
+#+end_src 
+
+来表示一个函数是 autoload 的。其原理是，emacs 的 autoload 库会处理这种特殊的注释下的函数，使其可以生成如下代码：
+
+#+begin_src emacs-lisp
+(autoload 'my-hello-world "your-package" "Print Hello, World!" t)
+#+end_src
+
+** fetch/build/install
+一个 emacs 包的重点事件有 3 个：
+
+- fetch: 从源上获取包
+- build: 构建包
+- install: 安装包
+
+其中 fetch 非常直观，主要问题是考虑源的选择、包的版本和依赖。
+
+build 就没有那么直观了，脚本语言也是有 build 的，这是因为 elisp 可以被编译成 byte-code ，也就是以 ~elc~ 为后缀的文件。 ~package.el~ 会直接下载 ~elc~ ，而 ~straight~ 则是先下载 ~el~ 文件后在本地构建 ~elc~ 。
+
+install 指的是让 emacs 可以使用这个软件包，包括增加 ~load-path~ 和相关的 ~require~ 操作，此外因为存在 autoload 机制，所以还需要生成 autoload 文件（文件里全是占位符）。
+
+* 源
+源是第三方代码平台，在 emacs 中源被称为 Emacs Lisp Package Archive （elpa），这是一种抽象的概念，而非某个具体的源。
+
+Elpa 有如下几种实现：
+
+- *GNU Elpa*: 官方 elpa ，贡献它需要版权转让并与官方邮件列表合作。所以它收录的较少。
+- *Melpa*: 包数量最多的非官方存档。每个包都经过简短的代码风格审查
+
+似乎还有一种 *emacserror* 的存在，但是我不确定它是不是一个 elpa ，还只是一个 emacs 包的镜像。
+
 * 包管理器
 ** 概论
-包管理器就是一个下载和管理包的工具。我之前并没有详细研究过这个东西，不过仔细想来，无论是 manjaro 的 pacman 或者前端的 npm, yarn 或者是 vscode 的插件市场，它们都发挥着一定的作用，并在一定意义上影响了他们的产品和用户。如果仅仅将包管理器视为一个“特化的下载器”，显然是不客观的。
-
-我觉的包管理器应当有这样的功能：
-- 能够从源上稳定的下载尽可能多的包。
-- 可以控制包的版本。
-- 可以处理包之间的依赖和冲突。
+包管理器就是负责包的 fetch/build/install 的工具。我之前并没有详细研究过这个东西，不过仔细想来，无论是 manjaro 的 pacman 或者前端的 npm, yarn 或者是 vscode 的插件市场，它们都发挥着一定的作用，并在一定意义上影响了他们的产品和用户。如果仅仅将包管理器视为一个“特化的下载器”，显然是不客观的。
 
 在某种意义上，包管理器的不同（或者说源的不同）决定了产品的审美。
 
@@ -15,57 +84,76 @@
 package.el 是 emacs 自带的包管理器，我们可以给它用如下代码添加他的源
 
 #+BEGIN_SRC elisp
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
 #+END_SRC
 
 其实还可以添加很多个源，这里就不一一赘述了。
 
+它的特点是直接下载二进制包（没有源码和提交历史），无法进行有效的版本管理，但是速度比较快。
+
 ** straight.el 
+*** 特点
 straight.el 是 emacs 新一代的包管理器，至于它哪里信了，其实可以看它的 [[https://github.com/radian-software/straight.el#comparison-to-other-package-managers][README]]。我个人是觉得可以从不同源处下载不同分支不同版本的包很酷，而且按照作者的描述，这个包管理器比较激进，我很想尝试一下。
 
-此外我个人觉得可能即使不太行了，跑路 package.el 并不是一件难事，我设置了
+它的特点是会直接拉取完整的仓库到本地，并在本地进行 build 过程，所以速度比较慢。straight 也可以和 use-package 进行很好的配合。
 
-#+BEGIN_SRC elisp
-(setq straight-use-package-by-default t) ; use-package 默认使用 straight
-#+END_SRC
+straight 的核心是它的 recipe ，这是一个 plist ，用于配置软件包的 fetch/build/install 过程。下面介绍 recipe plist 中的 keyword.
 
-使得 use-package 和 straight 集合的很好，如果希望换掉包管理器，也可以直接从 use-package 入手。
+*** Fetch 相关
+包括：
+
+- ~:type~: 设置了 fetcher 的后端类型，常见的选项有 ~built-in/git~ 等
+- ~:repo~: 一般是 ~github~ 
+- ~:host~: 呈现为 ~user-name/repos-name~ 的形式
+- ~:branch~: 特定分支
+- ~:fork~: 分支的仓库
+
+straight 的 fetch 无法指定特定的 commit ，但是可以通过 ~straight-freeze-versions~ 来锁定版本。
+
+*** Build 相关
+包括：
+
+- ~:files~: 当你安装一个包时，如果包的目录结构不标准（例如，包的主要 Lisp 文件不在根目录下，或者有需要排除的文件），你就可以使用 ~:files~ 选项来准确指定要包含哪些文件。这帮助了 straight 正确构建和加载包。
+- ~:includes~: 里面填写的是这个包下包含的子包
+- ~:build~: 指定需要哪些 elsip 的 build 流程，如 ~autoloads/compile/native-compile/info~
+- ~:pre-build~: 指定在 elisp 构建前需要进行的操作，当用到非纯 elisp 包的时候会用到。
 
 * 包配置管理器
 ** 定义
 对于下载的包，我们需要对其进行个性化的配置。但是配置信息又很容易散乱。包配置管理器以一个包为基本单位，将与之相关的配置都集中到一起，大大提高了配置文件的整洁度和秩序性。
 
-除了集中配置的优势外，emacs 的包管理器还提供了更加人性化的配置手段，使得用户以一种统一且简单的方式进行配置。常用的包配置管理器有 use-package 和 leaf。
+除了集中配置的优势外，emacs 的包管理器还提供了更加人性化的配置手段，使得用户以一种统一且简单的方式进行配置。常用的包配置管理器有 ~use-package~ 和 ~leaf~ 。
 
-这里需要强调，“包”是一个比“插件”更为宏大的概念，我个人理解包指的是一个模块化的程序块，而“插件”则是外来的程序块。在 emacs 中甚至可以有这样的写法：
+~use-package~ 的本质是一个宏包，如果希望查看更加 raw 的代码，那么可以使用命令 ~pp-macroexpand-last-sexp~ 来查看宏展开后的结果。
 
-#+BEGIN_SRC elisp 
-(use-package emacs
-  :init
-  (setq sentence-end-double-space nil))
-#+END_SRC
+** ensure/straight
+严格上讲， ~use-package~ 不仅包括包的配置，还包括包的下载，涉及到的关键字有 ~:ensure/:straight~ 。
 
-我使用 use-package。接下来会介绍 use-package 的一些宏（这么神奇的东西应该是宏吧），以及这些宏设计的知识，基本上这一节可以看做如何使用 use-package 进行配置的一个总结。
+其实最重要的就是， ~ensure~ 会在展开后包括一个 ~require~ ，就不需要再在 ~init~ 中进行 ~require~ 了。而 ~straight~ 在展开后会增加一个 ~autoload~ ，所以 ~straight~ 对于没有 ~autoload~ 机制的包是没有办法的，所以需要显式声明 ~demand~ 。
 
-** defer, demand 和 command
-这里似乎涉及了 emacs 的延迟加载机制，但是这个机制本身的实现具体是怎样的，我并不太清楚。我只知道当一个包延迟加载的时候，他的启动性能会提高。
+有的时候存在这样的现象：
 
-~:defer t~ 表示可以延迟加载，~:demand t~ 表示这个包需要立刻加载。~:commands ~ 指定了导致包加载的“触发器”，不过我们似乎一般并不需要。
+#+begin_src emacs-lisp
+(use-package tex
+  :ensure auctex)
+#+end_src
 
-在加载的时候我们通常对于 use-package 进行如下配置，让其有注释中的效果：
+如果用 ~pp-macroexpand-last-sexp~ 展开，就会发现实际上 ~ensure~ 填写的内容是 package name ，而 ~use-package~ 后填写的内容是 feature name 。
 
-#+BEGIN_SRC elisp 
-(setq use-package-always-demand (daemonp) ; 当 Emacs 是以守护进程方式运行时，立即加载所需的包
-      use-package-always-defer (not (daemonp)) ; 当 Emacs 不是以守护进程方式运行时，延迟加载所需的包
-      use-package-expand-minimally t) ; 在展开配置时尽可能地精简，以减少额外的加载和计算
-#+END_SRC
+** defer/demand/command
+~:defer t~ 表示可以 autoload ， ~:demand t~ 表示这个包需要立刻加载。
 
-** init 和 config
+一般来说 ~command, hook, bind~ 等关键词都会自动完成 autoload 的设置，所以并不需要额外设置 ~defer~ 。
+
+但是如果没有这些关键词，或者这些关键词没有被触发（比如绑定的命令没有执行），那么包就不会被加载。这有的时候可能会造成包不会被自动加载，所以需要显式的指定 ~demand~ 。
+
+** init/config
 这两个都可以对于包进行一些“接入式”的配置，本质是配置 emacs 来适应包（与 custom 形成对比）。但是 init 是在延迟加载前进行的设置，config 是在延迟加载后进行的设置。
 
-虽然 init 在延迟加载前进行，但是有些变量依然可以设置了，这是 elisp 动态类型语言的特点。不过其实我也分不清到底什么应该在 init 中设置，什么应该在 config 中设置，所以就不深究了，尽量都放在 config 就不会出错。
+应该尽量减少 ~init~ 的代码，这样可以提高启动速度。
 
-** bind 
+** bind/bind-keymap
 bind 用于进行键位绑定。需要强调普通的 bind 指的是在 ~global-map~ 添加普通 commnad 的键位绑定。
 
 当然比较偏的有用于绑定 keymap 而非 command，示例如下：
@@ -87,7 +175,7 @@ bind 用于进行键位绑定。需要强调普通的 bind 指的是在 ~global-
       ("M-n" . term-send-do))
 #+END_SRC
 
-上面的指令表示分别在 ~term-mode-map~ 上绑定 ~M-p, M-n~，在 ~term-raw-map~ 上绑定 ~M-o, M-p, M-n~ 。
+上面的指令表示分别在 ~term-mode-map~ 上绑定 ~M-p, M-n~ ，在 ~term-raw-map~ 上绑定 ~M-o, M-p, M-n~ 。
 
 ** hook
 hook 可以将一些包中的函数挂到特定的钩子上，他可以视作 ~add-hook~ 的简化版：
@@ -100,7 +188,34 @@ hook 可以将一些包中的函数挂到特定的钩子上，他可以视作 ~a
 (add-hook 'prog-mode-hook #'company-mode)
 #+END_SRC
 
-** custom 和 custom-face 
+** if
+可以使用如下代码来实现在 GUI 和 Terminal 下的区分
+
+#+begin_src emacs-lisp
+(use-package package
+  :if (window-system))
+#+end_src
+
+** ensure-system-package
+这个可以保证系统包的存在，有如下形式：
+
+#+begin_src emacs-lisp
+(use-package rg
+  :ensure-system-package rg)
+
+(use-package rg
+  :ensure-system-package
+  (rg . ripgrep))
+
+(use-package ruby-mode
+  :ensure-system-package
+  ((rubocop     . "gem install rubocop")
+   (ruby-lint   . "gem install ruby-lint")
+   (ripper-tags . "gem install ripper-tags")
+   (pry         . "gem install pry")))
+#+end_src
+
+** custom/custom-face 
 custom 给我感觉是是一种特殊的“变量”，暴露给用户方便用户设置。这可以看做是一种“内化式”的设置，通过改变包的行为来适应 emacs 。包的开发者像这样定义 custom：
 
 #+BEGIN_SRC elisp 
@@ -115,7 +230,7 @@ custom 给我感觉是是一种特殊的“变量”，暴露给用户方便用�
          (message "The value of my-custom-variable has been set to %s" value)))
 #+END_SRC
 
-这里提到了 ~group~，这是 custom 的组织方式，配置同一个包或者同一类功能的 custom 会被组织成 custom group，emacs 提供了一个很友好的用户界面来配置 custom 。
+这里提到了 ~group~ ，这是 custom 的组织方式，配置同一个包或者同一类功能的 custom 会被组织成 custom group，emacs 提供了一个很友好的用户界面来配置 custom 。
 
 face 则是一种特殊对象，我感觉就是面向对象的那个对象，它有多种属性，如下所示：
 

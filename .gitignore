@@ -8,3 +8,4 @@ tree-sitter/
 /site-lisp/
 /straight/*
 !/straight/versions/default.el/
+.chatgpt-shell.el
