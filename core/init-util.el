@@ -12,17 +12,6 @@
   (setq custom-file (no-littering-expand-etc-file-name "custom.el")) ; 设置 custom-file 路径
   )
 
-;; 测量启动时间
-; 比较简朴的方式
-(defun efs/display-startup-time ()
-  (interactive)
-  (message
-   "Emacs loaded in %s with %d garbage collections."
-   (format
-    "%.4f seconds"
-    (float-time
-     (time-subtract after-init-time before-init-time)))
-   gcs-done))
 ; 使用 M-x esup 就可以显示关键路径
 (use-package esup
   :straight t)
@@ -47,18 +36,6 @@
   (setq buffer-face-mode-face '(:family "Sarasa Mono SC"))
   (buffer-face-mode))
 
-;; 超酷的截屏软件
-(use-package screenshot
-  :straight
-  (screenshot :type git :host github :repo "tecosaur/screenshot")
-  :bind
-  ("<f9>" . screenshot)
-  :config
-  (setq screenshot-line-numbers-p t)
-  (setq screenshot-max-width 400)
-  (setq screenshot-font-size 9) ; `9` is good, other maybe wrong
-  )
-
 ;;; 工具宏
 ;; Thanks to DOOM Emacs
 (defmacro add-hook! (hooks &rest rest)
@@ -67,7 +44,7 @@
 This macro accepts, in order:
 
   1. The hook(s) to add to.
-  2. Optional properties :local, :append, and/or :depth [N].
+  2. REST Optional properties :local, :append, and/or :depth [N].
   3. The function(s) to be added: this can be a quoted function, a quoted list
      thereof, a list of `defun' or `cl-defun' forms, or arbitrary forms (will
      implicitly be wrapped in a lambda).
@@ -130,24 +107,6 @@ DOCSTRING and BODY are as in `defun'.
          (dolist (target (cdr targets))
            (advice-add target (car targets) #',symbol))))))
 
-(defmacro +advice-pp-to-prin1! (&rest body)
-  "Define an advice called SYMBOL that map `pp' to `prin1' when called.
-PLACE is the function to which to add the advice, like in `advice-add'.
-
-\(fn SYMBOL &rest [PLACES...]\)"
-  `(progn
-     (dolist (target (list ,@body))
-       (advice-add target :around #'+call-fn-with-pp-to-prin1))))
-
-(defmacro +advice-pp-to-prin1! (&rest body)
-  "Define an advice called SYMBOL that map `pp' to `prin1' when called.
-PLACE is the function to which to add the advice, like in `advice-add'.
-
-\(fn SYMBOL &rest [PLACES...]\)"
-  `(progn
-     (dolist (target (list ,@body))
-       (advice-add target :around #'+call-fn-with-pp-to-prin1))))
-
 (defmacro defun-call! (symbol args &rest body)
   "Define a function and optionally apply it with specified arguments.
 
@@ -168,27 +127,3 @@ PLACE is the function to which to add the advice, like in `advice-add'.
               ,(if (listp apply-body)
                    `(list ,@apply-body)
                  `(list ,apply-body))))))
-
-(defun +call-fn-with-pp-to-prin1 (fn &rest args)
-  "Call FN with ARGS, map `pp' to `prin1' when called."
-  (cl-letf (((symbol-function #'pp) #'prin1)
-            ((symbol-function #'pp-to-string) #'prin1-to-string))
-    (apply fn args)))
-
-(defun +unfill-region (start end)
-  "Replace newline chars in region from START to END by single spaces.
-This command does the inverse of `fill-region'."
-  (interactive "r")
-  (let ((fill-column most-positive-fixnum))
-    (fill-region start end)))
-
-(defun +temp-buffer-p (buffer)
-  "Return t if BUFFER is temporary."
-  (string-match-p "^ " (buffer-name buffer)))
-
-;; theme changed hook
-(defvar +theme-changed-hook nil
-  "Hook run after the theme is changed.")
-(defadvice! +run-theme-changed-hook-a (&rest _)
-  :after #'enable-theme
-  (run-hooks '+theme-changed-hook))
