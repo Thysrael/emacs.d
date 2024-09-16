@@ -25,10 +25,6 @@
   :hook ((html-mode css-mode) . rainbow-mode)
   )
 
-;; 快捷键展示
-;; (use-package which-key
-;;   :straight t)
-
 ;; 单独设置字体
 (defun +set-buffer-face-mode-mono ()
   "Set buffer-face-mode for org-agenda."
