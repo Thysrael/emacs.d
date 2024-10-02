@@ -103,20 +103,6 @@
           ("Updated" 10 t nil updated nil)))
   )
 
-;; Show TODOs in magit
-(use-package magit-todos
-  :straight t
-  :after magit
-  :init
-  (let ((inhibit-message t))
-    (magit-todos-mode 1))
-  :config
-  (with-eval-after-load 'magit-status
-    (transient-append-suffix 'magit-status-jump '(0 0 -1)
-      '("t " "Todos" magit-todos-jump-to-todos)))
-  )
-
-
 ;; Highlight all the conflicted regions for git
 (use-package smerge-mode
   :straight t
