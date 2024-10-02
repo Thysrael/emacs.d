@@ -2,8 +2,6 @@
 
 (use-package cc-mode
   :straight t
-  :init
-  (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-mode))
   :config
   (setq c-default-style "linux")
   (setq c-basic-offset 4)
@@ -21,9 +19,11 @@
   )
 
 (use-package c++-mode
+  :mode "\\.isa\\'"
   :bind
   (:map c++-mode-map
         ("C-d" . nil)))
+
 ;; (use-package c-ts-mode
 ;;   :straight t
 ;;   :init
@@ -72,11 +72,13 @@
 
 (use-package python-mode
   :straight nil
+  :mode (("SConstruct\\'" . python-mode)
+         ("SConscript\\'" . python-mode)
+         ("SConsopts\\'" . python-mode))
+  ;; :mode ("SConstruct\\'" . python-mode)
+  ;; :mode ("SConscript\\'" . python-mode)
+  ;; :mode ("SConsopts\\'" . python-mode)
   :init
-                                        ; 需要加到 init 里才可以自动触发
-  (add-to-list 'auto-mode-alist '("SConstruct\\'" . python-mode))
-  (add-to-list 'auto-mode-alist '("SConscript\\'" . python-mode))
-  (add-to-list 'auto-mode-alist '("SConsopts\\'" . python-mode))
   (setq python-indent-offset 4)
   )
 
@@ -102,8 +104,8 @@
 
 (use-package gnuplot-mode
   :straight t
-  :init
-  (setq auto-mode-alist (append '(("\\.gp$" . gnuplot-mode)) auto-mode-alist)))
+  :mode ("\\.gp$" . gnuplot-mode)
+  )
 
 (use-package rust-mode
   :straight t
@@ -112,3 +114,12 @@
 ;; (use-package cargo
 ;;   :straight t
 ;;   :hook ((rust-mode) . cargo-minor-mode))
+
+(use-package conf-mode
+  :mode
+  (
+   ("\\.service$" . conf-mode)
+   ("\\.path$" . conf-mode)
+   ("\\.target$" . conf-mode)
+   ("\\.socket$" . conf-mode)
+   ))

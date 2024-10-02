@@ -151,6 +151,7 @@
 ;; 需要先安装 https://github.com/blahgeek/emacs-lsp-booster
 ;; 在使用 elgot 前先开启 eglot-booster
 ;; 不知道为什么必须手动开启
+;; TODO: eglot-booster 无法放到 local 下，是因为 exec-path 的问题
 (use-package eglot-booster
   :straight (eglot-booster :type git :host github :repo "jdtsmith/eglot-booster")
   :after eglot

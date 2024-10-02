@@ -20,7 +20,8 @@ cmake
 ctags
 gnuplot
 emacs-lsp-booster
-
+texlive
+texlive-langchinese
 * EAF
 python-sexpdata
 python-epc (after python-setuptools)

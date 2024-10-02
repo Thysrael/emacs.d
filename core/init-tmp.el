@@ -41,3 +41,10 @@
 ;;                                       xref-go-back
 ;;                                       xref-find-definitions
 ;;                                       xref-find-references)))
+
+;; 只能按日展示，且有股塑料味儿
+;; (use-package org-analyzer
+;;   :straight t
+;;   :init
+;;   (setq org-analyzer-org-directory "~/learn/org/")
+;;   (setq org-analyzer-process-buffer "~/learn/org/agenda.org_archive"))

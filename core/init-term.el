@@ -13,7 +13,8 @@
   (setq vterm-shell "zsh")
   :config
   (setq vterm-tramp-shells '(("docker" "/bin/bash")
-                             ("ssh" "'/bin/bash'"))) ; 指定在 tramp 时使用的 shell
+                             ("ssh" "'/bin/bash'")
+                             ("sshx" "'/bin/zsh'"))) ; 指定在 tramp 时使用的 shell
   ; /bin/bash 先加双引号，后加单引号可以解决 ssh tmux error 具体文档如下 https://github.com/akermu/emacs-libvterm/issues/569
   ;; (setq vterm-always-compile-module t)
   (defun +start-vterm-in-project ()
