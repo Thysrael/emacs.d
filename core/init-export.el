@@ -45,81 +45,18 @@
   (setq make-backup-files nil)
   ;; 将默认格式设置为 cn-article
   (setq org-latex-default-class "cn-article")
-  (add-to-list 'org-latex-classes
-               '("cn-article"
-                 "
-\\documentclass[12pt, a4paper]{article}
-\\usepackage{fontenc}
-\\usepackage[slantfont, boldfont]{xeCJK}
-
-% set up English font
-\\setmainfont[BoldFont=Sarasa Mono SC Bold]{Source Han Serif CN}
-\\setmonofont{JetBrainsMono Nerd Font Mono}
-\\setsansfont{Comic Sans MS}
-
-% set up Chinese font, the font must be valid on your system
-\\setCJKmainfont[BoldFont=Sarasa Mono SC Bold]{TsangerJinKai05}
-\\setCJKmonofont{JetBrainsMono Nerd Font Mono}
-\\setCJKsansfont{YouYuan}
-
-% correct line break for chinese
-\\XeTeXlinebreaklocale \"zh\"
-\\XeTeXlinebreakskip = 0pt plus 1pt
-
-\\linespread{1.2}
-%页边距
-\\usepackage[a4paper]{geometry}
-\\geometry{verbose,
-  tmargin=2cm,% 上边距
-  bmargin=2cm,% 下边距
-  lmargin=2cm,% 左边距
-  rmargin=2cm % 右边距
-}
-\\usepackage{fvextra}
-\\fvset{tabsize=4}
-
-\\usepackage{booktabs}
-\\usepackage{tikz}
-% 圆角
-\\let\\oldtexttt\\texttt
-\\renewcommand{\\texttt}[1]{\\tikz[baseline=(MeNode.base)]{\\node[rounded corners=2pt, fill=gray!20](MeNode){#1};}}
-
-\\usepackage{indentfirst}
-\\setlength{\\parindent}{2em}
-
-\\usepackage{zhnumber}
-\\usepackage{titlesec} %自定义多级标题格式的宏包
-\\titleformat{\\section}[block]{\\Large\\bfseries}{\\zhnum{section}、}{0em}{}[]
-\\titleformat{\\subsection}[block]{\\Large\\bfseries}{\\arabic{section}.\\arabic{subsection}}{0.5em}{}[]
-\\titleformat{\\subsubsection}[block]{\\normalsize\\bfseries}{\\arabic{section}.\\arabic{subsection}.\\arabic{subsubsection}}{0.5em}{}[]
-\\titleformat{\\paragraph}[block]{\\normalsize\\bfseries}{\\arabic{section}.\\arabic{subsection}.\\arabic{subsubsection}.\\arabic{paragraph}}{0.5em}{}[]
-
-\\usepackage{titling}
-\\pretitle{
-  \\vspace{-2em}
-  \\begin{center}
-    \\Huge\\bfseries
-}%, make the fonts bigger, make the title (only) bold
-\\posttitle{%
-  \\end{center}%
-  \\noindent\\vrule height 1.5pt width \\textwidth
-  \\vspace{-4em}
-}
-\\renewcommand\\maketitlehooka{
-  \\noindent\\vrule height 1.5pt width \\textwidth
-}
-
-\\usepackage{enumitem}
-\\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\\parskip,topsep=5pt}
-\\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\\parskip,topsep=5pt}
-\\setdescription{itemsep=0pt,partopsep=0pt,parsep=\\parskip,topsep=5pt}
-"
-                 ("\\section{%s}" . "\\section*{%s}")
-                 ("\\subsection{%s}" . "\\subsection*{%s}")
-                 ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-                 ("\\paragraph{%s}" . "\\paragraph*{%s}")
-                 ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
+  (let ((tex-string ""))
+    (with-temp-buffer
+      (insert-file-contents (no-littering-expand-etc-file-name "cn-article.tex"))
+      (setq tex-string (buffer-string)))  ;; 将内容保存到字符串变量中
+    (add-to-list 'org-latex-classes
+                 `("cn-article"
+                   ,tex-string  ;; 使用逗号（,）来引用字符串
+                   ("\\section{%s}" . "\\section*{%s}")
+                   ("\\subsection{%s}" . "\\subsection*{%s}")
+                   ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                   ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                   ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
   ;; 如果 org 设置了#+LATEX_HEADER: \usepackage{minted} 的话 则支持代码高亮和代码格式化
   (setq org-latex-src-block-backend 'engraved)
   ;; (setq org-latex-default-table-environment "tabu")
