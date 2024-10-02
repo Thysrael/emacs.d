@@ -1,5 +1,5 @@
 (("Emacs-wgrep" . "208b9d01cfffa71037527e3a324684b3ce45ddc4")
- ("ace-pinyin" . "47662c0b05775ba353464b44c0f1a037c85e746e")
+ ("ace-pinyin" . "0bbd35267501408ec8ec9c4fee8aacf039657fa1")
  ("ace-window" . "77115afc1b0b9f633084cf7479c767988106c196")
  ("advance-words-count.el" . "9668d642e9411eb88b1b77b72f6825b6a01f3e84")
  ("auctex" . "8024447372b61deeed941eed9ecd60b22d8fd725")

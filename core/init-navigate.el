@@ -32,14 +32,10 @@
   :config
   (setq avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
   (setq avy-background t) ; 在跳转时背景变黑
-  :init
-  (setq avy-single-candidate-jump nil)
-  ;; (advice-add 'avy-action-goto :after (lambda (&rest _args)
-  ;;                                       (forward-word)))
   )
 
 (use-package ace-pinyin
-  :straight t
+  :straight (:host github :repo "yangsheng6810/ace-pinyin")
   :after avy
   :init (ace-pinyin-global-mode t))
 

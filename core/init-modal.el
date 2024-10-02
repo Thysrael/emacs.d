@@ -128,7 +128,7 @@
    '("e" . move-end-of-line)
    '("o" . hs-toggle-hiding)
    '("h" . meow-find)
-   '("H" . avy-goto-char-2)
+   '("j" . ace-pinyin-goto-char-timer)
 
    ;; 剪切，复制，粘贴，注释
    '("q" . my-kill-region-or-line)
