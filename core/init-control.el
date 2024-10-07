@@ -103,10 +103,6 @@
       :empty-lines-after 1)
      ("s" "Schedule" entry
       (file+olp "" "schedule")
-      "* TODO %? %^g\nSCHEDULED: %^T\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
-      :empty-lines-after 1)
-     ("d" "Deadline" entry
-      (file+olp "" "inbox")
       "* TODO %? %^g\nDEADLINE: %^T\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
       :empty-lines-after 1)
      ("S" "Someday" entry
