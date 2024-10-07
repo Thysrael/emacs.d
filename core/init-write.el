@@ -381,7 +381,7 @@
    org-appear-autoentities t
    org-appear-autokeywords t
    org-appear-inside-latex t
-
+   org-appear-autolinks t
    org-appear-delay 0.1
 
    org-appear-trigger 'manual)
@@ -389,7 +389,8 @@
   (add-hook! org-mode-hook :call-immediately
     (defun +org-add-appear-hook ()
       (add-hook 'meow-insert-enter-hook #'org-appear-manual-start nil t)
-      (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t))))
+      (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t)))
+  )
 
 ;;; 让中文行内格式显示 https://emacs-china.org/t/org-mode/22313?u=vagrantjoker
 ;; (font-lock-add-keywords 'org-mode
