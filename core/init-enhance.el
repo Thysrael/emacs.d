@@ -215,6 +215,7 @@
   :hook (embark-collect-mode . consult-preview-at-point-mode)
   )
 
+;; 使用 `C-u` 为前缀可以使得 consult-ripgrep 搜索 ignore 文件
 (use-package consult
   :straight t
   :bind

@@ -83,30 +83,6 @@
   (((prog-mode yaml-mode) . symbol-overlay-mode))
   )
 
-;; 搜索替换
-(global-set-key (kbd "C-r") 'query-replace-regexp)
-(use-package color-rg
-  :straight (color-rg :type git :host github :repo "Thysrael/color-rg")
-  :custom
-  (color-rg-search-no-ignore-file nil) ; 进行项目搜索时忽略文件
-  :bind
-  ;; ("C-r" . my-color-rg-search-input-in-buffer)
-  ("C-c r" . my-color-rg-search-input-in-project)
-  :config
-  ;; (defun my-color-rg-search-input-in-buffer ()
-  ;;   "Color-rg in the current file or perform query-replace based on the buffer's association with a file."
-  ;;   (interactive)
-  ;;   (if (buffer-file-name)
-  ;;       (color-rg-search-input-in-current-file)
-  ;;     (call-interactively 'query-replace)))
-
-  (defun my-color-rg-search-input-in-project ()
-    "Color-rg in the project."
-    (interactive)
-    (if (buffer-file-name)
-        (color-rg-search-input-in-project)
-      (message "Not in a project"))))
-
 ;; 撤销历史, 使用 a / e / f / b 移动
 (use-package vundo
   :straight t
