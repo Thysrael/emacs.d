@@ -34,10 +34,10 @@
   (setq avy-background t) ; 在跳转时背景变黑
   )
 
-(use-package ace-pinyin
-  :straight (:host github :repo "yangsheng6810/ace-pinyin")
-  :after avy
-  :init (ace-pinyin-global-mode t))
+;; (use-package ace-pinyin
+;;   :straight (:host github :repo "yangsheng6810/ace-pinyin")
+;;   :after avy
+;;   :init (ace-pinyin-global-mode t))
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mwim
