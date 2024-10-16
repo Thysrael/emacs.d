@@ -1,7 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 ;;; 代码补全
-;; 可以使用 M-/ 进行简单的补全
 (use-package dabbrev
   :straight t
   :config
@@ -24,10 +23,6 @@
   (setq tempel-trigger-prefix "`"
         tempel-path (no-littering-expand-etc-file-name "tempel-templates"))
   )
-
-(use-package tempel-collection
-  :straight t
-  :after tempel)
 
 (use-package corfu
   :straight (:files (:defaults "extensions/*.el"))

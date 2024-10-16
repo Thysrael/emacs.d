@@ -1,3 +1,5 @@
+;;; -*- mode: emacs-lisp; -*-
+
 c-mode
 c-ts-mode
 c++-ts-mode
@@ -10,4 +12,84 @@ c++-mode
 (incc "#include \"" p "\"")
 
 org-mode
+(ttl      & "#+title: " p n "#+author: " p n "#+language: " p n n)
+(nm       & "#+name: " p n)
+(lnk      & "[[" p "][" p "]]")
+(bgn      & "#+begin_" (s name) n r n "#+end_" name)
+(exmpl    & "#+begin_example" n> r> n> "#+end_example")
+(cntr     & "#+begin_center" n> r> n> "#+end_center")
+(comm     & "#+begin_comment" n> r> n> "#+end_comment")
+(mrginnte & "#+begin_marginnote" n> r> n "#+end_marginnote")
+(qt       & "#+begin_quote" n> r> n> "#+end_quote")
+(sdnt     & "#+begin_sidenote" n> r> n "#+end_sidenote")
 (src & "#+begin_src " p n r "#+end_src" :post (org-edit-src-code))
+(rst      & "#+begin_src restclient" p n r n "#+end_src"
+ :post (org-edit-src-code))
+(elsp     & "#+begin_src emacs-lisp" n r n "#+end_src"
+ :post (org-edit-src-code))
+(gnplt    & "#+begin_src gnuplot :var data=" (p "table") " :file " (p "plot.png") n r n "#+end_src"
+ :post (org-edit-src-code))
+(py_   & "#+begin_src python" n r n "#+end_src"
+ :post (org-edit-src-code))
+(py_vl & "#+begin_src python :results value" n r n "#+end_src"
+ :post (org-edit-src-code))
+(py_otpt & "#+begin_src python :results output" n r n "#+end_src"
+ :post (org-edit-src-code))
+(vrs & "#+begin_verse" n> r> n> "#+end_verse")
+(rdnly ":tangle yes :tangle-mode (identity #o444) :mkdirp yes" n)
+(oxhugo & ":PROPERTIES:"  n ":EXPORT_FILE_NAME: " (p "Simple Filename") n ":EXPORT_DATE: "
+ (format-time-string "%Y-%m-%d") n ":EXPORT_HUGO_DRAFT: false" n ":END:")
+(rdmecollapse  "*** " (p "Heading") n "#+HTML: <details> <summary> " (p "sub-heading")  " </summary>" n
+ (r> "link or any comments") n n "#+HTML: </details>" n)
+(cptn & "#+caption: ")
+(drwr & ":" p ":" n r ":end:")
+(inlsrc "src_" p "{" q "}")
+
+latex-mode LaTeX-mode
+
+;; taken from https://github.com/minad/tempel/blob/5b09f612cfd805dba5e90bf06580583cab045499/README.org#template-file-format
+(abstract "\\begin{abstract}\n" r> n> "\\end{abstract}")
+(align "\\begin{align}\n" r> n> "\\end{align}")
+(alignn "\\begin{align*}\n" r> n> "\\end{align*}")
+(gather "\\begin{gather}\n" r> n> "\\end{gather}")
+(gatherr "\\begin{gather*}\n" r> n> "\\end{gather*}")
+(appendix "\\begin{appendix}\n" r> n> "\\end{appendix}")
+(begin "\\begin{" (s env) "}" r> n> "\\end{" (s env) "}")
+(center "\\begin{center}\n" r> n> "\\end{center}")
+(displaymath "\\begin{displaymath}\n" r> n> "\\end{displaymath}")
+(document "\\begin{document}\n" r> n> "\\end{document}")
+(enumerate "\\begin{enumerate}\n\\item " r> n> "\\end{enumerate}")
+(equation "\\begin{equation}" r> n> "\\end{equation}")
+(flushleft "\\begin{flushleft}" r> n> "\\end{flushleft}")
+(flushright "\\begin{flushright}" r> n> "\\end{flushright}")
+(frac "\\frac{" p "}{" q "}")
+(fussypar "\\begin{fussypar}" r> n> "\\end{fussypar}")
+(itemize "\\begin{itemize}\n\\item " r> n> "\\end{itemize}")
+(letter "\\begin{letter}\n" r> n> "\\end{letter}")
+(math "\\begin{math}\n" r> n> "\\end{math}")
+(minipage "\\begin{minipage}[t]{0.5\linewidth}\n" r> n> "\\end{minipage}")
+(quotation "\\begin{quotation}\n" r> n> "\\end{quotation}")
+(quote "\\begin{quote}\n" r> n> "\\end{quote}")
+(sloppypar "\\begin{sloppypar}\n" r> n> "\\end{sloppypar}")
+(theindex "\\begin{theindex}\n" r> n> "\\end{theindex}")
+(trivlist "\\begin{trivlist}\n" r> n> "\\end{trivlist}")
+(verbatim "\\begin{verbatim}\n" r> n> "\\end{verbatim}")
+(verbatimm "\\begin{verbatim*}\n" r> n> "\\end{verbatim*}")
+
+sh-base-mode
+
+(! & "#!/usr/bin/env bash" n q)
+(if "if [ " p " ]" n "  then " p n "fi" q)
+(ife "if [ " p " ]" n "  then " p n "else" p n "fi" q)
+(cs "case " p " in" n> p " )" n> p n> ";;" n> q n "esac")
+(fr "for " p " in " p n "do" n> q n "done")
+
+fundamental-mode ;; Available everywhere
+
+(today (format-time-string "%Y-%m-%d"))
+(NOW (format-time-string "<%Y-%0m-%0d %a %H:%0M>"))
+(yesterday (format-time-string "<%Y-%0m-%0d %a>" (time-subtract nil (* 24 60 60))))
+(tomorrow (format-time-string "<%Y-%0m-%0d %a>" (time-add nil (* 24 60 60))))
+
+
+
