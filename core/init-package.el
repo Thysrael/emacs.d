@@ -2,14 +2,8 @@
 
 ;; 设置代理
 (setq url-proxy-services '(("no_proxy" . "^\\(192\\.168\\..*\\)")
-                           ("http" . "127.0.0.1:20171")
-                           ("https" . "127.0.0.1:20171")))
-
-(let ((hostname (system-name)))
-  (when (string-equal hostname "banana")
-    (setq url-proxy-services '(("no_proxy" . "^\\(192\\.168\\..*\\)")
                                ("http" . "127.0.0.1:7897")
-                               ("https" . "127.0.0.1:7897")))))
+                               ("https" . "127.0.0.1:7897")))
 
 (setq straight-check-for-modifications nil                   ; skip modification
       straight-vc-git-default-clone-depth '(1 single-branch) ; shadow clone

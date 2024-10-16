@@ -340,10 +340,9 @@
 (use-package chatgpt-shell
   :straight t
   :config
-  (when (string-equal (system-name) "banana")
-    (setq chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
+  (setq chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
     ;; 设置代理
-    (setq chatgpt-shell-additional-curl-options '("-x" "http://127.0.0.1:7897")))
+    (setq chatgpt-shell-additional-curl-options '("-x" "http://127.0.0.1:7897"))
 
   ;; (setq chatgpt-shell-api-url-path "")
   (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
