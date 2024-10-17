@@ -79,7 +79,8 @@
     )
 
   (defun +corfu-add-cape-write-backends ()
-    (add-to-list 'completion-at-point-functions #'cape-dict :append)
+    (remove #'cape-dabbrev completion-at-point-functions) ; 移除 dabbrev
+    (add-to-list 'completion-at-point-functions #'cape-dict :append) ; 加入 dict 享受完美搜索
     ;; 数学符号补全，有了 auctex 后不需要
     ;; (add-to-list 'completion-at-point-functions #'cape-tex :append)
     )

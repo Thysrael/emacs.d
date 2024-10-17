@@ -22,6 +22,7 @@ gnuplot
 emacs-lsp-booster
 texlive
 texlive-langchinese
+words
 * EAF
 python-sexpdata
 python-epc (after python-setuptools)
