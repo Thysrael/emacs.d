@@ -335,29 +335,3 @@
 ;;   (setq semantic-stickyfunc-sticky-classes '(function type variable))
 ;;   :hook
 ;;   (prog-mode . semantic-mode))
-
-;; chatgpt 支持
-(use-package chatgpt-shell
-  :straight t
-  :config
-  (setq chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
-    ;; 设置代理
-    (setq chatgpt-shell-additional-curl-options '("-x" "http://127.0.0.1:7897"))
-
-  ;; (setq chatgpt-shell-api-url-path "")
-  (setq chatgpt-shell-openai-key (getenv "OPENAI_API_KEY"))
-  (setq chatgpt-shell-prompt-query-response-style #'shell)
-  (setq chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
-  (setq chatgpt-shell-model-versions '("gpt-4o" "gpt-4o-mini"))
-  (setq chatgpt-shell-model-version 1)
-  (setq chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
-  :bind
-  ("C-c q" . chatgpt-shell-explain-code)
-  ;; ("C-c q" . chatgpt-shell)
-  ;; (global-set-key (kbd "C-d") 'chatgpt-shell)
-  ("C-d" . chatgpt-shell)
-  ;; M-n/p 可以查询历史
-  (:map chatgpt-shell-mode-map
-        ("M-<return>" . chatgpt-shell-newline)
-        ("<return>" . chatgpt-shell-submit)
-        ("C-l" . chatgpt-shell-clear-buffer)))

@@ -166,7 +166,7 @@
    '("W" . meow-next-word)
    ;; 其他
    '("," . sdcv-search-pointer+)
-   '("d" . chatgpt-shell)
+   '("d" . gptel)
    '("t" . +start-vterm-in-project)
    )
   ;; 在退出 insert 模式时自动退出 corfu 补全

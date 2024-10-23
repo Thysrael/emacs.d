@@ -1,0 +1,1 @@
+((gptel-menu "g*ChatGPT*"))

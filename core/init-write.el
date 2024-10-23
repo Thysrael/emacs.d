@@ -15,8 +15,7 @@
 (use-package pangu-spacing
   :straight t
   :hook
-  (eww-mode . pangu-spacing-mode)
-  (chatgpt-shell-mode . pangu-spacing-mode))
+  (eww-mode . pangu-spacing-mode))
 
 ;;; markdown
 ;; markdown-mode

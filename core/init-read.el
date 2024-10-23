@@ -195,7 +195,7 @@
   (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
   (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
   (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key chatgpt-shell "d" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key gptel "d" eaf-pdf-viewer-keybinding)
   ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
   (setq eaf-pdf-inline-text-annot-fontsize 14)
   )
