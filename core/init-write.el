@@ -39,8 +39,8 @@
         ("C-c C-v" . +toggle-markdown-mode)
         ("C-c C-b" . markdown-insert-bold)
         )
+  :mode ("\\.md$" . gfm-mode)
   :config
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . gfm-mode))
   (setq markdown-enable-math t
         markdown-enable-wiki-links t
         markdown-italic-underscore t
