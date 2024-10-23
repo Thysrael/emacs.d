@@ -8,8 +8,6 @@ c++-mode
       "#define " (s defname) n
       q
       "\n#endif")
-(inc "#include <" p ">")
-(incc "#include \"" p "\"")
 
 org-mode
 (ttl      & "#+title: " p n "#+author: " p n "#+language: " p n n)

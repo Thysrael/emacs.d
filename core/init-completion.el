@@ -69,18 +69,18 @@
 (use-package cape
   :straight t
   :hook
-  ((corfu-mode . +corfu-add-cape-backends)
+  ((prog-mode . +corfu-add-cape-prog-backends)
    ((LaTeX-mode markdown-mode org-mode) . +corfu-add-cape-write-backends))
   :config
-  ;; 这里的顺序并不能随意调换，否则 dict 和 dabbrev 会不正常工作
-  (defun +corfu-add-cape-backends ()
+  ;; 编程用到的 cape
+  (defun +corfu-add-cape-prog-backends ()
     (add-to-list 'completion-at-point-functions #'cape-file :append)
     (add-to-list 'completion-at-point-functions #'cape-dabbrev :append)
     )
-
+  ;; 写作用到的 cape
   (defun +corfu-add-cape-write-backends ()
-    (remove #'cape-dabbrev completion-at-point-functions) ; 移除 dabbrev
     (add-to-list 'completion-at-point-functions #'cape-dict :append) ; 加入 dict 享受完美搜索
+    (add-to-list 'completion-at-point-functions #'cape-file :append)
     ;; 数学符号补全，有了 auctex 后不需要
     ;; (add-to-list 'completion-at-point-functions #'cape-tex :append)
     )
