@@ -12,9 +12,9 @@
 (defconst +mode-line-window-width-limit 90)
 (defvar-local +mode-line-enough-width-p nil)
 (add-hook! (after-revert-hook buffer-list-update-hook window-size-change-functions)
-           (defun +mode-line-window-size-change-function (&rest _)
-             (setq +mode-line-enough-width-p
-                   (> (window-total-width) +mode-line-window-width-limit))))
+  (defun +mode-line-window-size-change-function (&rest _)
+    (setq +mode-line-enough-width-p
+          (> (window-total-width) +mode-line-window-width-limit))))
 
 ;;; face
 (defgroup +mode-line nil
@@ -194,6 +194,13 @@
 (advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info)
 
 
+(defun +nerd-icons-icon-for-buffer ()
+  (interactive)
+  (if (eq major-mode 'eaf-mode)
+      ;; WORKAROUND: eaf don't have `buffer-file-name`
+      (nerd-icons-icon-for-file (buffer-name))
+    (nerd-icons-icon-for-buffer)))
+
 ;; [buffer position]
 (defsubst +mode-line-buffer-position ()
   (let ((pos (format-mode-line '(-3 "%p"))))
@@ -227,8 +234,8 @@
                 ;;          (concat "▸" imenu)))
                 ))
          (rhs `(
-                (,active-p ,(nerd-icons-icon-for-buffer) ; 选中时使用彩色 icon
-                           (:propertize ,(nerd-icons-icon-for-buffer) face nil)) ; 非选中的时候选用无色 icon
+                (,active-p ,(+nerd-icons-icon-for-buffer) ; 选中时使用彩色 icon
+                           (:propertize ,(+nerd-icons-icon-for-buffer) face nil)); 非选中的时候选用无色 icon
                 " "
                 (:propertize mode-name face ,(when active-p '+mode-line-mode-name-active-face))
                 (,active-p ,+mode-line-vcs-info
@@ -263,7 +270,7 @@
   :commands breadcrumb--header-line
   :config
   (setq breadcrumb-imenu-crumb-separator "▸"
-        breadcrumb-project-max-length 0.3
+        breadcrumb-project-max-length 0.7 ; 用当前 window 的 70% 来显示 breadcrumb
         breadcrumb-imenu-max-length 0.3
         breadcrumb-idle-time 10))
 
