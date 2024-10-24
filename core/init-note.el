@@ -14,8 +14,8 @@
   ("C-c K" . org-roam-capture)
   ("C-c I" . org-roam-node-insert)
   :config
-  (setq org-roam-directory "~/blog/source/roam/")
-  (setq org-roam-db-location "~/blog/source/roam/org-roam.db")
+  (setq org-roam-directory "~/roam/")
+  (setq org-roam-db-location "~/roam/org-roam.db")
 
   (defhydra hydra-roam (:hint nil :color blue :foreign-keys run)
     "
