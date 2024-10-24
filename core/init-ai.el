@@ -10,7 +10,7 @@
          (key (plist-get auth-info :secret))
          )
     (setq-default gptel-backend
-                  (gptel-make-openai "ChatGPT"
+                  (gptel-make-openai "IPADS"
                     :protocol "http"
                     :host host
                     :stream t
@@ -37,9 +37,50 @@
   (with-eval-after-load 'corfu
     (when (fboundp 'corfu-quit)
       (add-hook 'gptel-pre-response-hook 'corfu-quit)))
-  ;; :bind
-  ;; ("C-c q" . gptel-send)
+  ;; And spaces around source code.
+  (define-advice gptel--replace-source-marker (:after (num-ticks &optional end) add-space)
+    (unless (= num-ticks 3)
+      (if end
+          (unless (or (= (point) (line-end-position))
+                      (= (char-after) 32))
+            (insert " "))
+        (unless (or (= (point) (1+ (line-beginning-position)))
+                    (= (char-after (- (point) 2)) 32))
+          (backward-char)
+          (insert " ")
+          (forward-char)))))
+  (defun +gptel--transform-cjk-symbols (beg end)
+    "Transform CJK symbols from BEG and END to ASCII symbols."
+    (let ((cjk-transfer-map '(("，" . ", ")
+                              ("：" . ": ")
+                              ("。" . ". ")
+                              ("！" . "! ")
+                              ("\\*（" . "*(")
+                              ("）\\*" . ")*")
+                              ("（" . " (")
+                              ("）" . ") "))))
+      (mapc (lambda (recipe)
+              (replace-regexp-in-region (car recipe)
+                                        (propertize (cdr recipe) 'gptel 'response) beg end))
+            cjk-transfer-map)))
+
+  (add-hook 'gptel-post-response-functions #'+gptel--transform-cjk-symbols)
+  (setq gptel--num-messages-to-send 0)
+  :bind
+  ("C-c Q" . gptel-menu)
   )
+
+(use-package gptel-transient
+  :commands gptel--suffix-send
+  :config
+  (defun gptel-send-with-options (&optional arg)
+    "Send query.  With prefix ARG open gptel's menu instead."
+    (interactive "P")
+    (if arg
+        (call-interactively 'gptel-menu)
+      (gptel--suffix-send (transient-args 'gptel-menu))))
+  :bind
+  ("C-c q" . gptel-send-with-options))
 
 ;; chatgpt 支持
 ;; (use-package chatgpt-shell

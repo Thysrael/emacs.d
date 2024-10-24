@@ -152,6 +152,7 @@
           ;; "\\*org-roam\\*" ;; 因为 org9.7 报错 (setq warning-suppress-types '((org-element org-element-parser)))
           "\\*Capture\\*"
           "\\*ChatGPT\\*"
+          "\\*IPADS\\*"
           "\\*chat.*"
           ;; "\\*Org Agenda\\*"
           "^CAPTURE-.*\\.org*"

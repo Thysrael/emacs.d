@@ -1,1 +1,1 @@
-((gptel-menu "g*ChatGPT*"))
+((gptel-menu "g*IPADS*"))
