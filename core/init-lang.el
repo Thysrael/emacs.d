@@ -122,4 +122,6 @@
    ("\\.path$" . conf-mode)
    ("\\.target$" . conf-mode)
    ("\\.socket$" . conf-mode)
+   ("\\.inf$" . conf-mode)
+   ("\\.dsc$" . conf-mode)
    ))
