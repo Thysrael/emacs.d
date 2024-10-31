@@ -123,5 +123,6 @@
  ("ws-butler" . "e3a38d93e01014cd47bf5af4924459bd145fd7c4")
  ("xref" . "03bbbf88dc2f358cfb9662b7fe3493d3fd8f482a")
  ("yaml-mode" . "d91f878729312a6beed77e6637c60497c5786efa")
- ("yaml.el" . "70c4fcead97e9bd6594e418c922ae769818f4245"))
+ ("yaml.el" . "70c4fcead97e9bd6594e418c922ae769818f4245")
+ ("zoom" . "f5f635e1fc5a8f606b7386286546bb6439e7124c"))
 :gamma

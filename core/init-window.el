@@ -194,9 +194,14 @@
 
 
 ;; 可以随着所在 window 调整其他 window 的大小
+;; 会导致 pop 提高，这是无法避免的
 ;; (use-package zoom
+;;   :straight t
 ;;   :hook
 ;;   (window-setup . zoom-mode)
+;;   :custom
+;;   ;; (zoom-ignored-buffer-names '("*Agenda Commands*" "*vterm*"))
+;;   ;; (zoom-ignored-major-modes '('chatgpt-shell-mode 'vterm-mode))
 ;;   )
 
 ;; 不活跃的 window 会变暗

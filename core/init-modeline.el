@@ -236,7 +236,7 @@
          (rhs `(
                 (,active-p ,(+nerd-icons-icon-for-buffer) ; 选中时使用彩色 icon
                            (:propertize ,(+nerd-icons-icon-for-buffer) face nil)); 非选中的时候选用无色 icon
-                " "
+                "  "
                 (:propertize mode-name face ,(when active-p '+mode-line-mode-name-active-face))
                 (,active-p ,+mode-line-vcs-info
                            (:propertize ,+mode-line-vcs-info face nil))
