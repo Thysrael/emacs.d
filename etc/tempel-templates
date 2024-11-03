@@ -42,6 +42,8 @@ org-mode
 (cptn & "#+caption: ")
 (drwr & ":" p ":" n r ":end:")
 (inlsrc "src_" p "{" q "}")
+(m "\\( " p " \\) ")
+(M "\\[" n q  n "\\] ")
 
 latex-mode LaTeX-mode
 

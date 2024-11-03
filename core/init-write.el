@@ -154,6 +154,12 @@
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . org-num-mode) ; 添加标题序号
   (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
+  (org-mode . (lambda () (setq-local electric-pair-pairs
+                                '((?\" . ?\")
+                                  (?\{ . ?\})
+                                  (?\( . ?\))
+                                  (?\[ . ?\])
+                                  (?\$ . ?\$)))))
   :config ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
