@@ -149,6 +149,7 @@
   ;; (org-startup-with-inline-images t) ; 默认显示图片
   ;; (org-ellipsis "…") ; 设置折叠提示符
   (org-ellipsis "¶")
+  (org-highlight-latex-and-related '(native))
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . org-num-mode) ; 添加标题序号
