@@ -150,9 +150,9 @@
   ;; (org-ellipsis "…") ; 设置折叠提示符
   (org-ellipsis "¶")
   (org-highlight-latex-and-related '(native))
+  (org-startup-numerated t) ; 添加标题序号
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
-  (org-mode . org-num-mode) ; 添加标题序号
   (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
   (org-mode . (lambda () (setq-local electric-pair-pairs
                                 '((?\" . ?\")
