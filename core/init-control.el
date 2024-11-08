@@ -219,6 +219,9 @@
   ;; (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
   )
 
+;; 使用 C-{f, b, a, e} 进行移动
+;; g d 可以选择日期
+;; C-<SPACE> 标记，用 M-= 来计算间隔
 (use-package calendar
   :straight nil
   :bind

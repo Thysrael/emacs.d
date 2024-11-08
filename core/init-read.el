@@ -129,6 +129,13 @@
     (or (car r) "c++"))
   )
 
+(use-package image-mode
+  :bind
+  (:map image-mode-map
+        ("=" . image-increase-size)
+        ("-" . image-decrease-size)
+        )
+  )
 ;; (use-package eaf
 ;;   :straight nil
 ;;   :init

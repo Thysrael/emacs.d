@@ -159,7 +159,9 @@
                                   (?\{ . ?\})
                                   (?\( . ?\))
                                   (?\[ . ?\])
-                                  (?\$ . ?\$)))))
+                                  (?\$ . ?\$)
+                                  (?\“  . ?\”)
+                                  ))))
   :config ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
