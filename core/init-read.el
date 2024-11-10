@@ -136,6 +136,7 @@
         ("-" . image-decrease-size)
         )
   )
+
 ;; (use-package eaf
 ;;   :straight nil
 ;;   :init

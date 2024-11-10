@@ -116,6 +116,8 @@
   :straight t
   :custom
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
+  (eglot-events-buffer-config '(:size 0 :format full))
+  (eglot-report-progress nil)
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
   ("C-c l" . hydra-eglot/body)
