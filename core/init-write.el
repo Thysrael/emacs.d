@@ -174,6 +174,12 @@
   (setq org-special-ctrl-k t) ; 在标题处 Ctrl-k 会删除整个标题
   (setq org-element-use-cache nil)
   (setq org-element-cache-persistent nil)
+  ;; 根据不同屏幕显示图片不同大小
+  (let ((hostname (system-name)))
+    (if (string-equal hostname "banana")
+        (setq org-image-actual-width '(1200))
+      (setq org-image-actual-width '(600))))
+
   ;; 配置 org 行内样式
   (defface org-bold
     '((t :foreground "#d2268b"
@@ -554,6 +560,7 @@
                               (C               . t)
                               (emacs-lisp      . t)
                               (shell           . t)
+                              (gnuplot         . t)
                               ))
   )
 ;; (use-package org-latex-impatient
