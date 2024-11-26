@@ -12,6 +12,9 @@
       straight-disable-native-compile (not (and (fboundp 'native-comp-available-p)
                                                 (native-comp-available-p))))
 
+;; 设置 protocol 协议为 ssh ，可以避免 https 连不上时的卡死
+(setq straight-vc-git-default-protocol 'ssh)
+
 ;; 安装 straight.el，我们会使用这个新包管理器，但是需要手动下载
 (defvar bootstrap-version)
 (let ((bootstrap-file

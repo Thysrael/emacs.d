@@ -220,7 +220,7 @@
 
 ;; 优化垃圾回收
 (use-package gcmh
-  :straight t
+  :straight (:host github :repo "emacsmirror/gcmh")
   :hook
   (emacs-startup . gcmh-mode)
   :config

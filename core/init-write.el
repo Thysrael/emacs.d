@@ -3,7 +3,7 @@
 ;;; general
 ;; 让文本居中并限制宽度
 (use-package visual-fill-column
-  :straight t
+  :straight (:protocol https)
   :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . +center-text)
   :config
   (defun +center-text ()
