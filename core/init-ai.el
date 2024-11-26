@@ -83,9 +83,13 @@
 ;; :bind
 ;; ("C-c q" . gptel-send-with-options))
 
+(use-package shell-maker
+  :straight (:host github :repo "Thysrael/shell-maker"))
+
 ;; chatgpt 支持
 (use-package chatgpt-shell
-  :straight t
+  :straight (:host github :repo "Thysrael/chatgpt-shell")
+  :after shell-maker
   :config
   (setq chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
   ;; 设置代理
