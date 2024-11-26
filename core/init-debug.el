@@ -21,10 +21,6 @@
   (add-hook 'compilation-filter-hook #'comint-truncate-buffer)
   )
 
-;; 编译结果查看器（看上去像汇编和源码的对应关系）
-(use-package rmsbolt
-  :straight t)
-
 ;; 快速编译运行当前 buffer, 刷算法题和写脚本应该很舒服
 (use-package quickrun
   :straight t
