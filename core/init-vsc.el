@@ -55,9 +55,12 @@
   )
 
 ;; [magit] Version control interface
+;; magit-blame 后会进入一个特殊模式，按 q 退出
 (use-package magit
   :straight t
-  :bind (("C-c v" . magit))
+  :bind (
+         ("C-c v" . magit)
+         ("C-c V" . magit-blame-addition))
   :hook ((magit-process-mode . goto-address-mode))
   :config
   (setq
@@ -104,6 +107,8 @@
   )
 
 ;; Highlight all the conflicted regions for git
+;; 可以用 C-c ^ 前缀来使用各种 merge 操作
+;; 或许可以写一个 hydra 
 (use-package smerge-mode
   :straight t
   :hook ((find-file . smerge-try-smerge))
@@ -118,10 +123,11 @@
   )
 
 ;; show blame info in sidebar
-(use-package blamer
-  :straight (:host github :repo "artawower/blamer.el")
-  :bind (("C-c G" . global-blamer-mode))
-  :custom
-  (blamer-idle-time 0.3)
-  (blamer-min-offset 40)
-  (blamer-commit-formatter "* %s"))
+;; 不常用，而且可以用 magit-blame 代替
+;; (use-package blamer
+;;   :straight (:host github :repo "artawower/blamer.el")
+;;   :bind (("C-c G" . global-blamer-mode))
+;;   :custom
+;;   (blamer-idle-time 0.3)
+;;   (blamer-min-offset 40)
+;;   (blamer-commit-formatter "* %s"))
