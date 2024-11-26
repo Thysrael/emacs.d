@@ -27,7 +27,7 @@
   )
 
 ;; 多 vterm 支持的同时不影响 vterm toggle 逻辑
-(use-package multi-vterm
-  :straight t
-  :bind
-  ("C-c t" . multi-vterm))
+;; (use-package multi-vterm
+;;   :straight t
+;;   :bind
+;;   ("C-c t" . multi-vterm))
