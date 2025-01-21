@@ -220,3 +220,12 @@
 ;; (load-theme 'doom-zenburn t)
 
 ;; (use-package ef-themes)
+
+;; 对代码高亮进行微调
+(custom-set-faces
+ '(font-lock-function-call-face ((t (:inherit font-lock-function-name-face :slant italic))))
+ '(font-lock-number-face ((t (:foreground "#8be9fd"))))
+ '(font-lock-property-name-face ((t (:inherit font-lock-variable-name-face :slant italic))))
+ '(font-lock-property-use-face ((t (:inherit font-lock-value-use-face :slant italic))))
+ '(font-lock-variable-use-face ((t (:inherit nil))))
+ )

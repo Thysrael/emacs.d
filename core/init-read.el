@@ -147,6 +147,18 @@
 ;;   (setq eaf-kill-process-after-last-buffer-closed t)
 ;;   )
 
+;; (use-package image-slicing
+;;   :straight (image-slicing :type git :host github :repo "ginqi7/image-slicing")
+;;   :config
+;;   (require 'image-slicing)
+;;   )
+
+
+;; (use-package org-sliced-images
+;;   :straight t
+;;   :custom
+;;   (org-sliced-images-round-image-height 40))
+
 (use-package eaf
   :straight (eaf
                :type git

@@ -24,14 +24,14 @@
   (:map c++-mode-map
         ("C-d" . nil)))
 
-;; (use-package c-ts-mode
-;;   :straight t
-;;   :init
-;;   (add-to-list 'auto-mode-alist '("\\.isa\\'" . c++-ts-mode))
-;;   :config
-;;   (setq c-ts-mode-indent-offset 4)
-;;   (setq c-ts-mode-indent-style 'gnu)
-;;   )
+(use-package c-ts-mode
+  :straight t
+  :config
+  (setq c-ts-mode-indent-offset 4)
+  (setq c-ts-mode-indent-style 'linux)
+  :hook
+  ((c-ts-mode . (lambda () (c-ts-mode-toggle-comment-style))))
+  )
 
 (use-package cmake-mode
   :mode ("CMakeLists\\.txt\\'" "\\.cmake\\'")
