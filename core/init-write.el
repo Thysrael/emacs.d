@@ -183,7 +183,7 @@
   ;; 配置 org 行内样式
   (defface org-bold
     '((t :foreground "#d2268b"
-         ;; :family "TsangerJinKai05 W05"
+         :family "Sarasa Mono SC"
          :weight bold
          ;; :underline t
          ;; :overline t
