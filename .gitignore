@@ -9,3 +9,4 @@ tree-sitter/
 /straight/*
 !/straight/versions/default.el/
 .chatgpt-shell.el
+eln-cache
