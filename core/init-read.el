@@ -160,6 +160,7 @@
 ;;   (org-sliced-images-round-image-height 40))
 
 (use-package eaf
+  :if (window-system)
   :straight (eaf
                :type git
                :host github
@@ -206,6 +207,7 @@
 ;; f: jump to link
 ;; o: outline
 (use-package eaf-pdf-viewer
+  :if (window-system)
   :demand t
   :init
   ;; (setq eaf-pdf-dark-mode "force")
