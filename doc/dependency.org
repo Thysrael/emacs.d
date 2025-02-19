@@ -23,6 +23,8 @@ emacs-lsp-booster
 texlive
 texlive-langchinese
 words
+aspell
+aspell-en
 
 * EAF
 python-sexpdata

@@ -325,7 +325,7 @@
 ;;          ([remap describe-key] . helpful-key))
 ;;   )
 
-;; [ispell] spell checker
+;; 使用 `ispell-buffer` 可以检查英文拼写
 (use-package ispell
   :straight nil
   :hook ((org-mode . org-skip-region-alist)
