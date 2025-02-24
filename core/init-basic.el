@@ -240,3 +240,6 @@
 ;;   (after-init . global-auto-revert-mode)
 ;;   :config
 ;;   (setq revert-without-query (list ".")))
+
+;; 只在有问题的时候 warning
+(setq warning-minimum-level :emergency)
