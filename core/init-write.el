@@ -16,7 +16,7 @@
   :straight t
   :hook
   (eww-mode . pangu-spacing-mode)
-  (chatgpt-shell . pangu-spacing-mode))
+  (chatgpt-shell-mode . pangu-spacing-mode))
 
 ;;; markdown
 ;; markdown-mode
