@@ -118,6 +118,8 @@
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
   (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-report-progress nil)
+  :custom-face
+  (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono Nerd Font"))))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
   ("C-c l" . hydra-eglot/body)
