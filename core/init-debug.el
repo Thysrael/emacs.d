@@ -27,6 +27,8 @@
   :bind (("C-c x"  . quickrun)))
 
 ;; 语法检查
+;; flymake-show-buffer-diagnostics 可以显示错误并复制
+;; 实际上用 embark 然后 w 也可以
 (use-package flymake
   :straight t
   :hook
@@ -34,6 +36,6 @@
   :bind
   ("C-c e" . consult-flymake)
   :config
-  (setq
-   flymake-diagnostic-functions nil)
+  (setq flymake-diagnostic-functions nil)
+  (setq flymake-show-diagnostics-at-end-of-line 'short)
   )
