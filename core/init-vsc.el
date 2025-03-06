@@ -124,10 +124,10 @@
 
 ;; show blame info in sidebar
 ;; 不常用，而且可以用 magit-blame 代替
-;; (use-package blamer
-;;   :straight (:host github :repo "artawower/blamer.el")
-;;   :bind (("C-c G" . global-blamer-mode))
-;;   :custom
-;;   (blamer-idle-time 0.3)
-;;   (blamer-min-offset 40)
-;;   (blamer-commit-formatter "* %s"))
+(use-package blamer
+  :straight (:host github :repo "artawower/blamer.el")
+  :bind (("C-c G" . global-blamer-mode))
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 40)
+  (blamer-commit-formatter "* %s"))
