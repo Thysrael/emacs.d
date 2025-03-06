@@ -27,13 +27,13 @@
 ;; 滚动
 (setq
  fast-but-imprecise-scrolling t ; 滚动风格
- ; 滚动不会让光标过于靠上或者靠下（最多 5 行）
+ ;; 滚动不会让光标过于靠上或者靠下（最多 5 行）
  scroll-step 0
  scroll-margin 5
  scroll-conservatively 101
  ;; Reduce cursor lag by a tiny bit by not auto-adjusting `window-vscroll' for tall lines.
  auto-window-vscroll nil
- ; 水平滚动
+ ;; 水平滚动
  auto-hscroll-mode t
  hscroll-step 0
  hscroll-margin 2)
@@ -101,16 +101,16 @@
 (add-to-list 'default-frame-alist '(alpha-background . 98))
 
 ;; minibuffer 配置
-; Allow minibuffer commands while in the minibuffer.
+;; Allow minibuffer commands while in the minibuffer.
 (setq enable-recursive-minibuffers t
       echo-keystrokes 0.02)
-; Keep the cursor out of the read-only portions of the minibuffer
+;; Keep the cursor out of the read-only portions of the minibuffer
 (setq minibuffer-prompt-properties '(read-only t
                                                intangible t
                                                cursor-intangible t
                                                face minibuffer-prompt))
 (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
-; Allow emacs to query passphrase through minibuffer
+;; Allow emacs to query passphrase through minibuffer
 (setq epg-pinentry-mode 'loopback)
 
 ;; 字体，字体加载会花费大量时间
@@ -155,10 +155,7 @@
 ;;     )
 
 (+setup-fonts)
-;; 设置变宽字体和等宽字体，但是不知道为啥不能放到 UI 里
-(custom-set-faces
- '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
- '(variable-pitch ((t (:height 0.9 :family "Sarasa Term SC LXGW WenKai"))))) ;; SourceHanSerifCN
+
 (add-hook 'server-after-make-frame-hook #'+setup-fonts)
 
 ;; 光标
@@ -221,11 +218,18 @@
 
 ;; (use-package ef-themes)
 
-;; 对代码高亮进行微调
 (custom-set-faces
+ ;; 对代码高亮进行微调
  '(font-lock-function-call-face ((t (:inherit font-lock-function-name-face :slant italic))))
- '(font-lock-number-face ((t (:foreground "#8be9fd"))))
+ '(font-lock-number-face ((t (:foreground nil :inherit (font-lock-constant-face)))))
  '(font-lock-property-name-face ((t (:inherit font-lock-variable-name-face :slant italic))))
  '(font-lock-property-use-face ((t (:inherit font-lock-value-use-face :slant italic))))
  '(font-lock-variable-use-face ((t (:inherit nil))))
+ '(font-lock-preprocessor-face ((t (:foreground nil :family "JetBrainsMono Nerd Font"))))
+ '(font-lock-regexp-grouping-backslash ((t (:foreground nil))))
+ ;; 设置变宽字体和等宽字体，但是不知道为啥不能放到 UI 里
+ '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
+ '(variable-pitch ((t (:height 0.9 :family "Sarasa Term SC LXGW WenKai")))) ;; SourceHanSerifCN
+ ;; 设置加粗字体
+ '(bold ((t (:inherit (font-lock-builtin-face) :weight bold :family "Sarasa Mono SC"))))
  )

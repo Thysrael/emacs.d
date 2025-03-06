@@ -16,7 +16,7 @@
   :straight t
   :hook
   (eww-mode . pangu-spacing-mode)
-  (chatgpt-shell . pangu-spacing-mode))
+  (chatgpt-shell-mode . pangu-spacing-mode))
 
 ;;; markdown
 ;; markdown-mode
@@ -30,7 +30,7 @@
   (markdown-header-face-3 ((t (:inherit org-level-3))))
   (markdown-header-face-4 ((t (:inherit org-level-4))))
   ;; (markdown-header-face-4 ((t (:inherit outline-3 :extend nil :weight bold :height 1.1 :family "LXGW WenKai"))))
-  (markdown-pre-face ((t (:inherit org-block :foreground "#c3e88d"))))
+  (markdown-pre-face ((t (:inherit org-code))))
   (markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
   (markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9)))) ; 标题前的 #
   (markdown-table-face ((t (:inherit org-table))))
@@ -180,25 +180,6 @@
         (setq org-image-actual-width '(1200))
       (setq org-image-actual-width '(600))))
 
-  ;; 配置 org 行内样式
-  (defface org-bold
-    '((t :foreground "#d2268b"
-         :family "Sarasa Mono SC"
-         :weight bold
-         ;; :underline t
-         ;; :overline t
-         ))
-    "Face for org-mode bold."
-    :group 'org-faces )
-  (setq org-emphasis-alist
-        '(("*" org-bold)
-          ("/" italic)
-          ("_" underline)
-          ("=" ;; (:background "maroon" :foreground "white")
-           org-verbatim verbatim)
-          ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
-           org-code verbatim)
-          ("+" (:strike-through t))))
   ;;   (setq org-latex-create-formula-image-program 'dvisvgm
   ;;         org-startup-with-latex-preview nil)
   ;; (with-eval-after-load 'org
