@@ -29,6 +29,7 @@
 ;; 语法检查
 ;; flymake-show-buffer-diagnostics 可以显示错误并复制
 ;; 实际上用 embark 然后 w 也可以
+;; 其实最方便的是使用 eldoc 查看
 (use-package flymake
   :straight t
   :hook
@@ -38,4 +39,19 @@
   :config
   (setq flymake-diagnostic-functions nil)
   (setq flymake-show-diagnostics-at-end-of-line 'short)
+  ;; 让 dignostic info 变短
+  (defun deku/flymake-diagnostic-oneliner (diag &optional nopaintp)
+    "Get truncated one-line text string for diagnostic DIAG.
+This is useful for displaying the DIAG's text to the user in
+confined spaces, such as the echo are.  Unless NOPAINTP is t,
+propertize returned text with the `echo-face' property of DIAG's
+type."
+    (let* ((txt (car (split-string (flymake-diagnostic-text diag) "\\:")))
+           (txt (substring txt 0 (cl-loop for i from 0 for a across txt
+                                          when (eq a ?\n) return i))))
+      (if nopaintp txt
+        (propertize txt 'face
+                    (flymake--lookup-type-property
+                     (flymake-diagnostic-type diag) 'echo-face 'flymake-error)))))
+  (advice-add #'flymake-diagnostic-oneliner :override #'deku/flymake-diagnostic-oneliner)
   )
