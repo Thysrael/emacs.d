@@ -567,7 +567,12 @@
 ;; C-c * 快速选择一章，C-c . 快速选择一个环境
 (use-package latex
   :straight auctex
+  :hook ((TeX-mode . prettify-symbols-mode)
+         (TeX-mode . (lambda ()
+                       (push '("\\lnot" . ?¬) prettify-symbols-alist)
+                       (prettify-symbols-mode 1))))
   :config
+  
   (setq TeX-parse-self t             ; parse on load
         TeX-auto-save t              ; parse on save
         ;; Automatically insert braces after sub/superscript in `LaTeX-math-mode'.
@@ -598,9 +603,12 @@
   (font-latex-sedate-face ((t (:foreground "#ff5555" :weight bold))))
   )
 
-
-;; 快捷输入法，按 `, ' 都可以已经快捷输入符号，类似于 abbrev 的效果
+;; 快捷输入法，
+;; 按 ` 可以输入数学符号
+;; 按 ' 后再按 b 可以加粗，应该是样式控制符。
 ;; 输入一些字符后按 tab 也可以快速模板展开，类似于 snippet 的效果
+;; 比如输入 env 后按 tab ，要避免 corfu 的补全。
+;; C-c { 是插入环境，也可以 env 后按 tab
 ;; tab 也可以用于快速跳转
 (use-package cdlatex
   :straight t
@@ -621,6 +629,15 @@
   (:map bibtex-mode-map
         ("C-c C-f" . bibtex-reformat))
   )
+
+;; 都存在对于高亮块不支持，解析不完善的情况，可能以后会好吧
+;; (use-package markdown-ts-mode
+;;   :straight t
+;;   :mode ("\\.md\\'" . markdown-ts-mode))
+
+;; (use-package md-ts-mode
+;;   :straight (:type git :host github :repo "eki3z/md.el")
+;;   :mode ("\\.md\\'" . md-ts-mode))
 
 ;; 似乎不会实时刷新数据库
 ;; (use-package ebib
