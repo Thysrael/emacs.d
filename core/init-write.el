@@ -184,6 +184,7 @@
   ;;         org-startup-with-latex-preview nil)
   ;; (with-eval-after-load 'org
   ;;   (plist-put org-format-latex-options :scale 1.0))
+  (push '("jupyter-python" . python) org-src-lang-modes)
   :custom
   ;; 默认只展开标题行
   (org-startup-folded 'content)

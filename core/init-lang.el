@@ -125,3 +125,13 @@
    ("\\.inf$" . conf-mode)
    ("\\.dsc$" . conf-mode)
    ))
+
+(use-package code-cells
+  :straight t
+  :custom
+  (code-cells-convert-ipynb-style
+   '(
+     ("pandoc" "--to" "ipynb" "--from" "org")
+     ("pandoc" "--to" "org" "--from" "ipynb")
+     org-mode))
+  )
