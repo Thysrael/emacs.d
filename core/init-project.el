@@ -31,67 +31,67 @@
   (setq project-vc-merge-submodules nil)
   )
 
-(use-package treemacs
-  :straight t
-  :functions
-  (treemacs-filewatch-mode treemacs-git-mode treemacs-delete-other-windows)
-  :custom-face
-  (cfrs-border-color ((t (:inherit posframe-border))))
-  (variable-pitch ((t nil))) ; 取消 treemacs 的默认字体
-  :bind
-  (("M-0"    . +switch-with-treemacs)
-   ("<f6>"   . +treemacs-toggle)
-   :map treemacs-mode-map
-   ([mouse-1]   . treemacs-single-click-expand-action))
-  :config
-  ;; Bind after load treemacs
-  ;; (bind-keys :package treemacs
-  ;;            ("C-x 1"     . treemacs-delete-other-windows))
-
-  ;; treemacs-git-mode
-  (pcase (cons (not (null (executable-find "git")))
-               (not (null (executable-find "python3"))))
-    (`(t . t)
-     (treemacs-git-mode 'deferred))
-    (`(t . _)
-     (treemacs-git-mode 'simple)))
-
-  (setq treemacs-collapse-dirs           (if treemacs-python-executable 3 0)
-        treemacs-missing-project-action  'remove
-        treemacs-sorting                 'alphabetic-case-insensitive-asc
-        treemacs-follow-after-init       t
-        treemacs-is-never-other-window   t
-        treemacs-width                   30
-        treemacs-no-png-images           nil)
-
-  (treemacs-filewatch-mode t)
-  (treemacs-follow-mode -1)
-
-  (defun +treemacs-toggle ()
-    (interactive)
-    (require 'treemacs)
-    (pcase (treemacs-current-visibility)
-      (`visible (delete-window (treemacs-get-local-window)))
-      (_ (if (project-current)
-             (treemacs-add-and-display-current-project-exclusively)
-           (treemacs)))))
-  (defun +switch-with-treemacs()
-    (interactive)
-    (require 'treemacs)
-    (if (not (eq (treemacs-current-visibility) `visible))
-        (+treemacs-toggle)
-      (if (eq (treemacs-get-local-window) (get-buffer-window))
-          (other-window -1)
-        (select-window (treemacs-get-local-window))
-        )
-      )
-    )
-
-  (custom-set-faces
-   '(variable-pitch ((t nil))) ; 严格意义上说，取消 treemacs 的默认字体
-   '(variable-pitch ((t (:height 0.9)))) ; 缩小默认字体
-   )
-  )
+;; (use-package treemacs
+;;   :straight t
+;;   :functions
+;;   (treemacs-filewatch-mode treemacs-git-mode treemacs-delete-other-windows)
+;;   :custom-face
+;;   (cfrs-border-color ((t (:inherit posframe-border))))
+;;   (variable-pitch ((t nil))) ; 取消 treemacs 的默认字体
+;;   :bind
+;;   (("M-0"    . +switch-with-treemacs)
+;;    ("<f6>"   . +treemacs-toggle)
+;;    :map treemacs-mode-map
+;;    ([mouse-1]   . treemacs-single-click-expand-action))
+;;   :config
+;;   ;; Bind after load treemacs
+;;   ;; (bind-keys :package treemacs
+;;   ;;            ("C-x 1"     . treemacs-delete-other-windows))
+;;
+;;   ;; treemacs-git-mode
+;;   (pcase (cons (not (null (executable-find "git")))
+;;                (not (null (executable-find "python3"))))
+;;     (`(t . t)
+;;      (treemacs-git-mode 'deferred))
+;;     (`(t . _)
+;;      (treemacs-git-mode 'simple)))
+;;
+;;   (setq treemacs-collapse-dirs           (if treemacs-python-executable 3 0)
+;;         treemacs-missing-project-action  'remove
+;;         treemacs-sorting                 'alphabetic-case-insensitive-asc
+;;         treemacs-follow-after-init       t
+;;         treemacs-is-never-other-window   t
+;;         treemacs-width                   30
+;;         treemacs-no-png-images           nil)
+;;
+;;   (treemacs-filewatch-mode t)
+;;   (treemacs-follow-mode -1)
+;;
+;;   (defun +treemacs-toggle ()
+;;     (interactive)
+;;     (require 'treemacs)
+;;     (pcase (treemacs-current-visibility)
+;;       (`visible (delete-window (treemacs-get-local-window)))
+;;       (_ (if (project-current)
+;;              (treemacs-add-and-display-current-project-exclusively)
+;;            (treemacs)))))
+;;   (defun +switch-with-treemacs()
+;;     (interactive)
+;;     (require 'treemacs)
+;;     (if (not (eq (treemacs-current-visibility) `visible))
+;;         (+treemacs-toggle)
+;;       (if (eq (treemacs-get-local-window) (get-buffer-window))
+;;           (other-window -1)
+;;         (select-window (treemacs-get-local-window))
+;;         )
+;;       )
+;;     )
+;;
+;;   (custom-set-faces
+;;    '(variable-pitch ((t nil))) ; 严格意义上说，取消 treemacs 的默认字体
+;;    '(variable-pitch ((t (:height 0.9)))) ; 缩小默认字体
+;;    )
+;;   )
 
 ;; (use-package treemacs-magit
 ;;   :straight t

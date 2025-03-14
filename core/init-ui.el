@@ -3,19 +3,19 @@
 (use-package nerd-icons
   :straight t
   :custom
-  (nerd-icons-font-family "Sarasa Gothic SC Nerd Font")
-  (nerd-icons-scale-factor 1.2)
+  (nerd-icons-font-family "JetBrainsMono Nerd Font")
+  ;; (nerd-icons-scale-factor 1.1)
   )
 
 ;; treemacs needed
-(use-package all-the-icons
-  :straight t
-  ;; :custom
-  ;; The Nerd Font you want to use in GUI
-  ;; "Symbols Nerd Font Mono" is the default and is recommended
-  ;; but you can use any other Nerd Font if you want
-  ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
-  )
+;; (use-package all-the-icons
+;;   :straight t
+;;   ;; :custom
+;;   ;; The Nerd Font you want to use in GUI
+;;   ;; "Symbols Nerd Font Mono" is the default and is recommended
+;;   ;; but you can use any other Nerd Font if you want
+;;   ;; (nerd-icons-font-family "Symbols Nerd Font Mono")
+;;   )
 
 ;; UI 性能优化
 (setq
