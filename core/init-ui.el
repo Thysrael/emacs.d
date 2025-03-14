@@ -220,13 +220,14 @@
 
 (custom-set-faces
  ;; 对代码高亮进行微调
+ ;; unspecified 就是忽略的意思
  '(font-lock-function-call-face ((t (:inherit font-lock-function-name-face :slant italic))))
- '(font-lock-number-face ((t (:foreground nil :inherit (font-lock-constant-face)))))
+ '(font-lock-number-face ((t (:foreground unspecified :inherit (font-lock-constant-face)))))
  '(font-lock-property-name-face ((t (:inherit font-lock-variable-name-face :slant italic))))
  '(font-lock-property-use-face ((t (:inherit font-lock-value-use-face :slant italic))))
- '(font-lock-variable-use-face ((t (:inherit nil))))
- '(font-lock-preprocessor-face ((t (:foreground nil :family "JetBrainsMono Nerd Font"))))
- '(font-lock-regexp-grouping-backslash ((t (:foreground nil))))
+ '(font-lock-variable-use-face ((t (:inherit unspecified))))
+ '(font-lock-preprocessor-face ((t (:foreground unspecified :family "JetBrainsMono Nerd Font"))))
+ '(font-lock-regexp-grouping-backslash ((t (:foreground unspecified))))
  ;; 设置变宽字体和等宽字体，但是不知道为啥不能放到 UI 里
  '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
  '(variable-pitch ((t (:height 0.9 :family "Sarasa Term SC LXGW WenKai")))) ;; SourceHanSerifCN

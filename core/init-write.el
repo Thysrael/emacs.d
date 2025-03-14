@@ -103,6 +103,7 @@
 
 ;;; org
 ;; org-mode
+;; org-link-preview 是 org-toggle-inline-image 的代替
 (use-package org
   :straight t
   ;; :straight (:type built-in)
