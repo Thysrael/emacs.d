@@ -2,14 +2,6 @@
 (use-package tramp
   :straight nil
   :config
-  ;; 似乎是支持 remote 启动其他进程的
-  (connection-local-set-profile-variables
-   'remote-direct-async-process
-   '((tramp-direct-async-process . t)))
-  (connection-local-set-profiles
-   '(:application tramp :protocol "ssh")
-   'remote-direct-async-process)
-
   (setq tramp-default-method "ssh"
         tramp-auto-save-directory (no-littering-expand-var-file-name "tramp-autosaves/")
         tramp-backup-directory-alist backup-directory-alist
@@ -22,6 +14,14 @@
         "-o ControlMaster=auto -o ControlPath=tramp.%%C -o ControlPersist=no -t")
   ;; 只需要输入一次密码 https://www.reddit.com/r/emacs/comments/3liwm7/is_it_possible_to_configure_tramp_such_that_i/
   (setq tramp-use-ssh-controlmaster-options nil)
+  (setq tramp-chunksize 2000)
+  ;; 似乎是支持 remote 启动其他进程的
+  (connection-local-set-profile-variables
+   'remote-direct-async-process
+   '((tramp-direct-async-process . t)))
+  (connection-local-set-profiles
+   '(:application tramp :protocol "ssh")
+   'remote-direct-async-process)
   )
 
 ;; (use-package docker
