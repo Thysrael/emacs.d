@@ -30,7 +30,7 @@
   (dirvish-collapse-file-face ((t (:height 0.8))))
   (dirvish-collapse-dir-face ((t (:inherit dired-directory :height 0.8))))
   :custom
-  (dirvish-quick-access-entries ; It's a custom option, `setq' won't work
+  (dirvish-quick-access-entries
    '(("h" "~/" "Home")
      ("d" "~/Desktop/" "Desktop")
      ("p" "~/project/" "Project")
@@ -57,6 +57,7 @@
   (dirvish-window-fringe 4)
   (dirvish-hide-cursor t)
   ;; (dirvish-hide-details '(dirvish-side))
+  (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
   :bind
   (("<f9>" . dirvish)
    ("<f6>" . dirvish-side)
@@ -75,9 +76,11 @@
    ("<"   . dired-up-directory)
    (">"   . dired-find-file)
    ;; 快速排序
-   ("s"   . dirvish-quicksort)
+   ("s"   . consult-line)
+   ("S"   . dirvish-quicksort)
    ;; 快速标记
    ("M" . dirvish-mark-menu)
+   ("W" . dirvish-copy-file-path)
    ("v"   . dirvish-vc-menu)      ; remapped `dired-view-file'
    ("TAB" . dirvish-subtree-toggle)
    ("M-t" . dirvish-layout-toggle)
@@ -86,6 +89,14 @@
    ("M-j" . dirvish-fd-jump))
   :hook
   (dirvish-mode . dired-omit-mode)
+  :config
+  ;; 让 side-window 在 ace-window 表现的更自然
+  (with-eval-after-load 'ace-window
+  (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)
+    (or (funcall orig-fn window)
+        (and (> (length (window-list)) 2) ;; Check if there are more than two windows
+             (functionp 'dirvish-side--session-visible-p)
+             (eq window (dirvish-side--session-visible-p))))))
   )
 
 ;; [dired-x] Extra Dired functionality
