@@ -53,10 +53,10 @@
 ;;; 浏览器
 ;; 内置浏览器
 (use-package eww
-  :init
-  (add-hook 'eww-after-render-hook #'shrface-mode)
+  ;; :init
+  ;; (add-hook 'eww-after-render-hook #'shrface-mode)
   :config
-  (require 'shrface)
+  ;; (require 'shrface)
   (setq eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
         shr-max-image-proportion 0.6)
   (defun +toggle-eww ()
@@ -99,35 +99,35 @@
         ("]" . eww-forward-url))
   )
 
-;; 将页面渲染成 org-mode
-(use-package shrface
-  :straight t
-  :config
-  (shrface-basic)
-  (shrface-trial)
-  (shrface-default-keybindings) ; setup default keybindings
-  (setq shrface-href-versatile t)
-  (setq shrface-toggle-bullets t)
-  :bind
-  (:map shrface-mode-map
-        ;; ("n" . shrface-next-headline)
-        ;; ("p" . shrface-previous-headline)
-        ("C-c i" . shrface-headline-consult)))
-;; 设置代码字体，不知道为什么不能写进去
-(custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono Nerd Font")))))
-
-;; 渲染 eww 内的代码高亮
-(use-package shr-tag-pre-highlight
-  :straight t
-  :after shr
-  :init
-  (require 'shr-tag-pre-highlight)
-  (add-to-list 'shr-external-rendering-functions
-               '(pre . shr-tag-pre-highlight))
-  (define-advice shr-tag-pre-highlight-guess-language-attr (:filter-return (&rest r) fallback-to-cpp)
-    "如果检测不出来哪种语言，默认 C++."
-    (or (car r) "c++"))
-  )
+;; ;; 将页面渲染成 org-mode
+;; (use-package shrface
+;;   :straight t
+;;   :config
+;;   (shrface-basic)
+;;   (shrface-trial)
+;;   (shrface-default-keybindings) ; setup default keybindings
+;;   (setq shrface-href-versatile t)
+;;   (setq shrface-toggle-bullets t)
+;;   :bind
+;;   (:map shrface-mode-map
+;;         ;; ("n" . shrface-next-headline)
+;;         ;; ("p" . shrface-previous-headline)
+;;         ("C-c i" . shrface-headline-consult)))
+;; ;; 设置代码字体，不知道为什么不能写进去
+;; (custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono Nerd Font")))))
+;;
+;; ;; 渲染 eww 内的代码高亮
+;; (use-package shr-tag-pre-highlight
+;;   :straight t
+;;   :after shr
+;;   :init
+;;   (require 'shr-tag-pre-highlight)
+;;   (add-to-list 'shr-external-rendering-functions
+;;                '(pre . shr-tag-pre-highlight))
+;;   (define-advice shr-tag-pre-highlight-guess-language-attr (:filter-return (&rest r) fallback-to-cpp)
+;;     "如果检测不出来哪种语言，默认 C++."
+;;     (or (car r) "c++"))
+;;   )
 
 (use-package image-mode
   :bind
