@@ -1,5 +1,87 @@
 ;;; -*- lexical-binding: t; -*-
 
+;; transient
+(use-package transient
+  :straight t
+  :demand t
+  :bind
+  (
+   ("C-x t" . transient-window)
+   ("C-x r" . transient-BRR)
+   )
+  :config
+  ;; window 相关操作
+  (transient-define-prefix transient-window ()
+    "transient for window"
+    [
+     ["Tab"
+      ("c" "Switch" tab-switch)
+      ("0" "Close" tab-close)
+      ("2" "New" tab-new)
+      ("r" "Rename" tab-rename :transient t)
+      ]
+
+     ["Winner"
+      ("u" "Undo" winner-undo :transient t)
+      ("U" "Redo" winner-redo :transient t)
+      ("+" "enlarge" enlarge-window-horizontally :transient t)
+      ]
+
+     ["Desktop"
+      ("S" "Save" desktop-save-in-desktop-dir)
+      ("l" "Load" desktop-read)
+      ]
+
+     ["Dired"
+      ("d" "Dired" dirvish-dwim)
+      ("s" "Side" dirvish-side)
+      ("f" "Follow" dirvish-side-follow-mode)
+      ]
+
+     ["Resize"
+      ("=" "↕" enlarge-window :transient t)
+      ("-" "⇅" shrink-window :transient t)
+      ("+" "↔" enlarge-window-horizontally :transient t)
+      ("_" "⇄" shrink-window-horizontally :transient t)
+      ]
+     ]
+    )
+
+  (transient-define-prefix transient-BRR ()
+    "transient for Bookmark, Register and Rectangle"
+    [
+     ["Bookmark"
+      ("v" "List" list-bookmarks)
+      ("M" "Mark" bookmark-set-no-overwrite)
+      ("b" "Jump" bookmark-jump)
+      ]
+     ;; 寄存器就是一段暂存的内容，可以用一个字母索引
+     ["Register"
+      ("l" "List" consult-register)
+      ("SPC" "Point" point-to-register)
+      ("s" "Text" copy-to-register)
+      ("r" "Rectangle" copy-rectangle-to-register)
+      ("W" "Window" window-configuration-to-register)
+      ("K" "Kmacro" kmacro-to-register)
+      ]
+
+     ["Rectangle"
+      ("m" "Mark "rectangle-mark-mode)
+      ;; 在矩形前加上标号
+      ("i" "Index" rectangle-number-lines)
+      ;; 用 str 填充矩形
+      ("t" "String" string-rectangle)
+      ;; 在矩形前加上空格
+      ("o" "Space" open-rectangle)
+      ;; 删除矩形
+      ("c"  "Clear" clear-rectangle)
+      ("k" "Kill" kill-rectangle)
+      ("y" "Yank" yank-rectangle)
+      ]
+     ]
+    )
+  )
+
 ;;; NOTE:
 ;;; 没有改到 hjkl 键位的关键在于，minibuffer 是没有办法用 C-j, C-k 的
 ;;; 所以会造成一定的不一致性。
@@ -88,8 +170,8 @@
    '("3" . split-window-right)
    '("4 f" . find-file-other-window)
    '("4 b" . switch-to-buffer-other-window)
-   '("R" . Cx-r/body)
-   '("T" . window/body)
+   '("r" . transient-BRR)
+   '("t" . transient-window)
    '("/" . meow-keypad-describe-key)
    '("?" . meow-cheatsheet)
    )

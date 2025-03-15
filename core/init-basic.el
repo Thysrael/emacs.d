@@ -157,9 +157,8 @@
 
   (add-to-list 'recentf-exclude
                (recentf-expand-file-name no-littering-var-directory)) ; ~/.emacs/var 排除
-  (add-to-list 'recentf-exclude
-               (recentf-expand-file-name no-littering-etc-directory)) ; ~/.emacs/etc 排除
-
+  ;; (add-to-list 'recentf-exclude
+  ;;              (recentf-expand-file-name no-littering-etc-directory)) ; ~/.emacs/etc 排除
   (add-to-list 'recentf-filename-handlers #'abbreviate-file-name) ; 展示时使用相对路径
   (add-to-list 'recentf-filename-handlers #'substring-no-properties) ; 移除文件名中的文本属性
   (add-hook 'dired-mode-hook (lambda () (recentf-add-file default-directory))) ; 加入 dired

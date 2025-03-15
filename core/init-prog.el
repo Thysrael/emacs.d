@@ -63,7 +63,7 @@
   ;;   ("C-t h" . citre-ace-peek)
   ;;   ("C-t u" . citre-update-this-tags-file)
   ;;   ("C-t n" . citre-create-tags-file))
-  ("M-t" . hydra-citre/body)
+  ("M-t" . transient-citre)
   :init
   (require 'citre-config)
   :config
@@ -99,12 +99,14 @@
         (or (with-demoted-errors "%s, fallback to citre"
               (funcall fetcher))
             (funcall citre-fetcher)))))
-  (defhydra hydra-citre (:color blue)
-    "Citre Commands"
-    ("p" citre-peek "Peek")
-    ("h" citre-ace-peek "Ace Peek")
-    ("u" citre-update-this-tags-file "Update Tags File")
-    ("n" citre-create-tags-file "Create Tags File"))
+  (transient-define-prefix transient-citre ()
+    [
+     ("p" "Peek" citre-peek)
+     ("h" "Ace Peek"citre-ace-peek)
+     ("u" "Update Tags File" citre-update-this-tags-file)
+     ("n" "Create Tags File" citre-create-tags-file)
+     ]
+    )
   )
 
 (use-package eglot
@@ -122,24 +124,31 @@
   (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono Nerd Font"))))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
-  ("C-c l" . hydra-eglot/body)
+  ("C-c l" . transient-hydra)
   :config
   (setq eglot-events-buffer-size 0
         eglot-connect-timeout 10
         eglot-autoshutdown t
         ;; use global completion styles
         completion-category-defaults nil)
-  (defhydra hydra-eglot (:color blue :columns 3)
-    "Eglot Menu"
-    ("f" eglot-format "Format selection")
-    ("b" eglot-format-buffer "Format buffer")
-    ("r" eglot-rename "Rename symbol at point")
-    ("d" eglot-find-declaration "Find declaration")
-    ("i" eglot-find-implementation "Find implementation")
-    ("t" eglot-find-typeDefinition "Find type definition")
-    ("s" eglot-shutdown "Shutdown eglot server")
-    ("c" consult-eglot-symbols "Consult Eglot Symbols")
-    ("q" nil "Quit" :color blue))
+  (transient-define-prefix transient-hydra ()
+    ["Eglot Menu"
+     [
+      ("f" "Format selection" eglot-format)
+      ("b" "Format buffer" eglot-format-buffer)
+      ("r" "Rename symbol at point" eglot-rename)
+      ]
+     [
+      ("d" "Find declaration" eglot-find-declaration)
+      ("i" "Find implementation" eglot-find-implementation)
+      ("t" "Find type definition" eglot-find-typeDefinition)
+      ]
+     [
+      ("s" "Shutdown eglot server" eglot-shutdown)
+      ("c" "Consult Eglot Symbols" consult-eglot-symbols)
+      ]
+     ]
+    )
   )
 
 ;; consult-eglot-symbols 可以提供一个具有所有 lsp symbol 的候选栏

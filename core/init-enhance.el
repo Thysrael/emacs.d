@@ -457,46 +457,6 @@
 ;;   :hook
 ;;   (tab-bar-mode . burly-tabs-mode))
 
-;; Bookmark Register Rectangle
-(defhydra Cx-r (
-                :hint nil ; 只显示注释字符串，不显示绑定信息
-                :color blue ; 执行完一次后就退出
-                :foreign-keys run ; 如果不在 hydra 按键内，则执行，并不退出 hydra
-                )
-  "
-        Bookmark^^        Register^^        Rectangle^^
-  --------------------------------------------------------
-        [_l_] List        [_v_] List        [_M_] Mark
-        [_m_] Mark        [_SPC_] Point     [_N_] Number
-        [_b_] Jump        [_s_] Text        [_t_] String
-        ^ ^               [_r_] Rectangle   [_o_] Space
-        ^ ^               [_W_] Window      [_c_] Clear
-        ^ ^               [_K_] Kmacro      [_k_] Kill
-        [_q_] Quit        ^ ^               [_y_] Yank
-  "
-  ("m" bookmark-set-no-overwrite)
-  ("b" bookmark-jump)
-  ("l" bookmark-bmenu-list)
-  ;; ("w" burly-bookmark-windows)
-
-  ("v" consult-register)
-  ("SPC" point-to-register)
-  ("s" copy-to-register)
-  ("r" copy-rectangle-to-register)
-  ("W" window-configuration-to-register)
-  ("K" kmacro-to-register)
-
-  ("M" rectangle-mark-mode :color red) ; red 执行完后不退出
-  ("N" rectangle-number-lines :color red)
-  ("t" string-rectangle :color red)
-  ("o" open-rectangle :color red)
-  ("c" clear-rectangle :color red)
-  ("k" kill-rectangle :color red)
-  ("y" yank-rectangle :color red)
-
-  ("q" nil))
-(global-set-key (kbd "C-x r") 'Cx-r/body)
-
 ;; 使 f2 为宏计数器
 (global-set-key (kbd "<f2>") 'kmacro-set-counter)
 

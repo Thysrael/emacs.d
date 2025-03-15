@@ -2,8 +2,9 @@
 
 ;;; 工具包
 ;; 更加方便的快捷键设置，放在所有包之前
-(use-package hydra
-  :straight t)
+(use-package transient
+  :straight t
+  :defer t)
 
 ;; 规范化 emacs.d 的结构，使得配置集中于 ~/.emacs.d/etc，临时数据集中于 ~/.emacs.d/var
 (use-package no-littering

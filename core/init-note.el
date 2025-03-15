@@ -9,7 +9,7 @@
   (org-roam-v2-ack t)
 
   :bind
-  ("C-c N" . hydra-roam/body)
+  ("C-c N" . transient-roam)
   ("C-c n" . org-roam-node-find)
   ("C-c K" . org-roam-capture)
   ("C-c I" . org-roam-node-insert)
@@ -17,34 +17,29 @@
   (setq org-roam-directory "~/roam/")
   (setq org-roam-db-location "~/roam/org-roam.db")
 
-  (defhydra hydra-roam (:hint nil :color blue :foreign-keys run)
-    "
-        Operate^^        Links^^                 Misc^^
-  --------------------------------------------------------------
-        [_f_] Find        [_b_] Backlinks        [_t_] Tag
-        [_i_] Insert      [_B_] BackRecursive    [_a_] Alias
-        [_S_] Search      [_s_] ForwardLinks     [_d_] Sync
-        ^ ^               ^ ^                    [_o_] Capture
-        [_q_] Quit        ^ ^
-  "
-    ("f" org-roam-node-find)
-    ("i" org-roam-node-insert)
-    ;; ("b" org-roam-buffer-toggle "Backlinks") ; 展示 backlinks
-    ("o" org-roam-capture) ; 在已有 node 内增加内容
-    ("S" consult-org-roam-search)
-    ("u" org-roam-ui-open)
+  (transient-define-prefix transient-roam ()
+    "transient for org roam"
+    [
+     ["Operate"
+      ("f" "Find" org-roam-node-find)
+      ("i" "Insert" org-roam-node-insert)
+      ("S" "Search" consult-org-roam-search)
+      ]
+     
+     ["Links"
+      ("b" "Back" consult-org-roam-backlinks)
+      ("B" "BackR"consult-org-roam-backlinks-recursive)
+      ("s" "Forward" consult-org-roam-forward-links)
+      ]
 
-    ("b" consult-org-roam-backlinks)
-    ("B" consult-org-roam-backlinks-recursive)
-    ("s" consult-org-roam-forward-links)
-    ("a" org-roam-alias-add)
-    ;; ("ar" org-roam-alias-remove "Alias Remove")
-    ("t" org-roam-tag-add)
-    ;; ("tr" org-roam-tag-remove "Tag Remove")
-    ("d" org-roam-db-sync)
-    ("q" nil)
+     ["Misc"
+      ("a" "Alias" org-roam-alias-add)
+      ("t" "Tag" org-roam-tag-add)
+      ("d" "Sync" org-roam-db-sync)
+      ("o" "Capture" org-roam-capture)
+      ]
+     ]
     )
-
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
   ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   (org-roam-db-autosync-mode)
