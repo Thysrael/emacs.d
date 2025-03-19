@@ -21,6 +21,7 @@
   (setq delete-by-moving-to-trash t)
   )
 
+;; 使用 `E` 可以用外部命令打开文件
 (use-package dirvish
   :straight t
   :init
@@ -57,9 +58,9 @@
   (dirvish-window-fringe 4)
   (dirvish-hide-cursor t)
   ;; (dirvish-hide-details '(dirvish-side))
-  (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
+  ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
   :bind
-  (("<f9>" . dirvish)
+  (
    ("<f6>" . dirvish-side)
    :map dirvish-mode-map          ; Dirvish inherits `dired-mode-map'
    ("?"   . dirvish-dispatch)     ; contains most of sub-menus in dirvish extensions

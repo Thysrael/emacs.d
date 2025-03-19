@@ -3,6 +3,7 @@
 ;; [tab-bar] Tab bar
 (use-package tab-bar
   :bind
+  ("<f9>"  . tab-previous)
   ("<f10>"  . tab-next)
   ("s-<right>" . tab-next)
   ("s-<left>" . tab-previous)

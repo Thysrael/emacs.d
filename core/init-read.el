@@ -162,13 +162,13 @@
 (use-package eaf
   :if (window-system)
   :straight (eaf
-               :type git
-               :host github
-               :repo "emacs-eaf/emacs-application-framework"
-               :files ("*.el" "*.py" "core" "app" "*.json")
-               :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
-               :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
-               )
+             :type git
+             :host github
+             :repo "emacs-eaf/emacs-application-framework"
+             :files ("*.el" "*.py" "core" "app" "*.json")
+             :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
+             :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
+             )
   :demand t
   :init
   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
@@ -221,6 +221,13 @@
   ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
   (setq eaf-pdf-inline-text-annot-fontsize 14)
   )
+
+;; 安装后运行 pdf-tools-install 即可
+(use-package pdf-tools
+  :if (window-system)
+  :straight t
+  :config
+  (pdf-tools-install :no-query))
 
 ;; (use-package nov
 ;;   :straight t
