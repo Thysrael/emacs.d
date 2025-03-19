@@ -122,6 +122,26 @@
   :straight t
   :hook
   ((prog-mode text-mode) . electric-pair-mode)
+  :custom
+  (electric-pair-pairs '(
+                         (?\" . ?\")
+                         (?\‘ . ?\’)
+                         (?\“  . ?\”)
+                         ;; WORKAROUND: 引入两个反扩号配对来解决中文引号问题
+                         (?\’ . ?\‘)
+                         (?\” . ?\“)
+                         ))
+  :config
+  ;; 修正中文引号问题：修正左右对调的补全
+  (define-advice electric-pair--insert (:around (orig-fn c) fix-curved-quotes)
+    (let* ((qpair (rassoc c electric-pair-pairs))
+           (reverse-p (and qpair (> (car qpair) (cdr qpair)))))
+      (if reverse-p
+          (run-with-timer 0 nil
+                          `(lambda ()
+                             (backward-char 1)
+                             (insert (char-to-string ,c))))
+        (funcall orig-fn c))))
   ;; 禁用 org-mode 的左尖括号
   ;; :config
   ;; (setq electric-pair-inhibit-predicate

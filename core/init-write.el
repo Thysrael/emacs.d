@@ -156,13 +156,12 @@
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
   (org-mode . (lambda () (setq-local electric-pair-pairs
-                                '((?\" . ?\")
+                                `(,@electric-pair-pairs
                                   (?\{ . ?\})
                                   (?\( . ?\))
                                   (?\[ . ?\])
-                                  (?\$ . ?\$)
-                                  (?\“  . ?\”)
-                                  ))))
+                                  (?\$ . ?\$))
+                                )))
   :config ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
@@ -564,7 +563,7 @@
 ;; 更好的 LaTeX 支持
 ;; emacs 内置的是 latex-mode, auctex 提供的是 LaTeX-mode
 ;; C-c ret 是插入命令
-;; C-c C-c 编译，C-c C-v 预览当前位置，C-c C-r 局部编译，C-c ` 跳转到编译错误位置
+;; C-c C-c 编译，选择 XeLaTex 命令，C-c C-v 预览当前位置，C-c C-r 局部编译，C-c ` 跳转到编译错误位置
 ;; C-c * 快速选择一章，C-c . 快速选择一个环境
 (use-package latex
   :straight auctex
