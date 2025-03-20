@@ -29,3 +29,6 @@ aspell-en
 * EAF
 python-sexpdata
 python-epc (after python-setuptools)
+
+* Dirvish
+libvips

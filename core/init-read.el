@@ -222,12 +222,14 @@
   (setq eaf-pdf-inline-text-annot-fontsize 14)
   )
 
-;; 安装后运行 pdf-tools-install 即可
-(use-package pdf-tools
-  :if (window-system)
-  :straight t
-  :config
-  (pdf-tools-install :no-query))
+;; 不需要在 OS 层上安装软件。
+;; 安装后运行 pdf-tools-install 即可，其实在配置里安装即可
+;; 为了 dirvish 的预览，但是如果只使用 pdf-preface 则不需要
+;; (use-package pdf-tools
+;;   :if (window-system)
+;;   :straight t
+;;   :config
+;;   (pdf-tools-install :no-query))
 
 ;; (use-package nov
 ;;   :straight t
