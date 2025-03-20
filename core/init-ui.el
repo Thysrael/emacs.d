@@ -233,5 +233,6 @@
  '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
  '(variable-pitch ((t (:height 0.9 :family "Sarasa Term SC LXGW WenKai")))) ;; SourceHanSerifCN
  ;; 设置加粗字体
- '(bold ((t (:inherit (font-lock-builtin-face) :weight bold :family "Sarasa Mono SC"))))
+ '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold))))
+ ;; '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold :family "Sarasa Mono SC"))))
  )

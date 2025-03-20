@@ -185,6 +185,25 @@
   ;; (with-eval-after-load 'org
   ;;   (plist-put org-format-latex-options :scale 1.0))
   (push '("jupyter-python" . python) org-src-lang-modes)
+  (defface org-bold
+    '((t :foreground "#d2268b"
+         :family "Sarasa Mono SC"
+         :weight bold
+         ;; :underline t
+         ;; :overline t
+         ))
+    "Face for org-mode bold."
+    :group 'org-faces )
+  (setq org-emphasis-alist
+        '(("*" org-bold)
+          ("/" italic)
+          ("_" underline)
+          ("=" ;; (:background "maroon" :foreground "white")
+           org-verbatim verbatim)
+          ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
+           org-code verbatim)
+          ("+" (:strike-through t))))
+
   :custom
   ;; 默认只展开标题行
   (org-startup-folded 'content)
