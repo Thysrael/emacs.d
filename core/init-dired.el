@@ -69,6 +69,7 @@
      ("Audio"         (extensions "mp3" "flac" "wav" "ape" "aac"))
      ("Archives"      (extensions "gz" "rar" "zip"))
      ("Office"        (extensions "doc" "docx" "xls" "xlsx" "ppt" "pptx"))))
+  (dirvish-default-layout '(0 0 0.5))
   ;; (dirvish-hide-details '(dirvish-side))
   ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
   :bind
@@ -106,11 +107,14 @@
   :config
   ;; 让 side-window 在 ace-window 表现的更自然
   (with-eval-after-load 'ace-window
-  (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)
-    (or (funcall orig-fn window)
-        (and (> (length (window-list)) 2) ;; Check if there are more than two windows
-             (functionp 'dirvish-side--session-visible-p)
-             (eq window (dirvish-side--session-visible-p))))))
+    (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)
+      (or (funcall orig-fn window)
+          (and (> (length (window-list)) 2) ;; Check if there are more than two windows
+               (functionp 'dirvish-side--session-visible-p)
+               (eq window (dirvish-side--session-visible-p)))))
+    ;; 让 ace  忽略 dirvish-misc-mode ，也就是 modeline 使用的 major-mode 
+    (push 'dirvish-misc-mode aw-ignored-buffers)
+    )
   )
 
 ;; [dired-x] Extra Dired functionality
