@@ -41,7 +41,7 @@
      ))
   ;; dirvish 底栏
   (dirvish-mode-line-format
-   '(:left (sort symlink) :right (file-time index)))
+   '(:left (sort omit symlink) :right (file-group ":" file-user " " file-time index)))
   (dirvish-side-mode-line-format
    '(:right (yank file-size index)))
   ;; dirvish 条目
@@ -56,7 +56,7 @@
    '(:left (path) :right (omit yank vc-info free-space)))
   (dirvish-path-separators '("~" "/" "/"))
   (dirvish-window-fringe 4)
-  (dirvish-hide-cursor t)
+  ;; (dirvish-hide-cursor t)
   ;; 将 pdf 预览换成 pdf-preface
   (dirvish-preview-dispatchers
    '(video image gif audio epub archive font pdf-preface))
@@ -112,7 +112,7 @@
           (and (> (length (window-list)) 2) ;; Check if there are more than two windows
                (functionp 'dirvish-side--session-visible-p)
                (eq window (dirvish-side--session-visible-p)))))
-    ;; 让 ace  忽略 dirvish-misc-mode ，也就是 modeline 使用的 major-mode 
+    ;; 让 ace  忽略 dirvish-misc-mode ，也就是 modeline 使用的 major-mode
     (push 'dirvish-misc-mode aw-ignored-buffers)
     )
   )
