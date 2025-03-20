@@ -3,7 +3,8 @@
 (use-package nerd-icons
   :straight t
   :custom
-  (nerd-icons-font-family "JetBrainsMono Nerd Font")
+  ;; 必须使用这个字体，字体显示才完全
+  (nerd-icons-font-family "Sarasa Gothic SC Nerd Font")
   ;; (nerd-icons-scale-factor 1.1)
   )
 
