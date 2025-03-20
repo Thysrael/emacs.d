@@ -33,7 +33,7 @@
   :custom
   (dirvish-quick-access-entries
    '(("h" "~/" "Home")
-     ("d" "~/Desktop/" "Desktop")
+     ("d" "~/desktop/" "Desktop")
      ("p" "~/project/" "Project")
      ("b" "~/blog/" "Blog")
      ("r" "~/roam/" "Roam")
