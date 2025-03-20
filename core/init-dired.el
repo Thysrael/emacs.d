@@ -14,7 +14,7 @@
   (dired-create-destination-dirs 'ask)
   ;; symlink
   (dired-hide-details-hide-symlink-targets nil)
-  (dired-listing-switches "-Bhl --group-directories-first --almost-all")
+  (dired-listing-switches "-Bhl --group-directories-first --almost-all --time-style=iso")
   (dired-vc-rename-file t)
   (dired-clean-confirm-killing-deleted-buffers nil)
   :config
@@ -57,6 +57,18 @@
   (dirvish-path-separators '("~" "/" "/"))
   (dirvish-window-fringe 4)
   (dirvish-hide-cursor t)
+  ;; 将 pdf 预览换成 pdf-preface
+  (dirvish-preview-dispatchers
+   '(video image gif audio epub archive font pdf-preface))
+  (dirvish-emerge-groups
+   '(
+     ;; ("Recent files"  (predicate . recent-files-2h))
+     ("Documents"     (extensions "pdf" "tex" "bib" "epub"))
+     ("Video"         (extensions "mp4" "mkv" "webm"))
+     ("Pictures"      (extensions "jpg" "png" "svg" "gif"))
+     ("Audio"         (extensions "mp3" "flac" "wav" "ape" "aac"))
+     ("Archives"      (extensions "gz" "rar" "zip"))
+     ("Office"        (extensions "doc" "docx" "xls" "xlsx" "ppt" "pptx"))))
   ;; (dirvish-hide-details '(dirvish-side))
   ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
   :bind
@@ -86,10 +98,11 @@
    ("TAB" . dirvish-subtree-toggle)
    ("M-t" . dirvish-layout-toggle)
    ("M-s" . dirvish-setup-menu)
-   ("M-e" . dirvish-emerge-menu)
+   ("M-e" . dirvish-emerge-mode)
    ("M-j" . dirvish-fd-jump))
   :hook
   (dirvish-mode . dired-omit-mode)
+  ;; (dirvish-setup . dirvish-emerge-mode)
   :config
   ;; 让 side-window 在 ace-window 表现的更自然
   (with-eval-after-load 'ace-window
