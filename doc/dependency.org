@@ -25,6 +25,7 @@ texlive-langchinese
 words
 aspell
 aspell-en
+xclip
 
 * EAF
 python-sexpdata

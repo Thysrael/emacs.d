@@ -2,8 +2,10 @@
 
 (use-package dired
   :straight nil
-  :bind (:map dired-mode-map
-              ("C-c C-p" . wdired-change-to-wdired-mode))
+  :bind
+  (:map dired-mode-map
+        ("C-c C-p" . wdired-change-to-wdired-mode)
+        ("W" . +dired-copy-filenames-to-clipboard))
   :custom
   ;; Always delete and copy recursively
   (dired-recursive-deletes 'top)
@@ -19,6 +21,27 @@
   (dired-clean-confirm-killing-deleted-buffers nil)
   :config
   (setq delete-by-moving-to-trash t)
+  (defun +dired-copy-filenames-to-clipboard ()
+    "Copy marked Dired file names to the clipboard in 'file://' URI format, abort if directories are present."
+    (interactive)
+    (let* ((files (or (dired-get-marked-files)
+                      (list (dired-get-filename))))
+           (dirs (seq-filter 'file-directory-p files)))
+      (if dirs
+          (user-error "Operation aborted: Directories are among the selected files.")
+        (let* ((uri-list (mapconcat (lambda (file)
+                                      (concat "file://" (expand-file-name file)))
+                                    files
+                                    "\n"))
+               (file-names (mapconcat 'file-name-nondirectory files ", ")))
+          ;; Use `xclip` to copy the file list to the clipboard as 'text/uri-list'.
+          (with-temp-buffer
+            (insert uri-list)
+            (call-process-region (point-min) (point-max) "xclip"
+                                 nil nil nil
+                                 "-i" "-selection" "clipboard" "-t" "text/uri-list"))
+          ;; Display the copied file paths.
+          (message "Copied files to clipboard:\n%s" file-names)))))
   )
 
 ;; 使用 `E` 可以用外部命令打开文件
@@ -56,7 +79,7 @@
    '(:left (path) :right (omit yank vc-info free-space)))
   (dirvish-path-separators '("~" "/" "/"))
   (dirvish-window-fringe 4)
-  ;; (dirvish-hide-cursor t)
+  (dirvish-hide-cursor t) ; 在 wired 下不方便
   ;; 将 pdf 预览换成 pdf-preface
   (dirvish-preview-dispatchers
    '(video image gif audio epub archive font pdf-preface))
@@ -94,7 +117,7 @@
    ("S"   . dirvish-quicksort)
    ;; 快速标记
    ("M" . dirvish-mark-menu)
-   ("W" . dirvish-copy-file-path)
+   ;; ("W" . dirvish-copy-file-path)
    ("v"   . dirvish-vc-menu)      ; remapped `dired-view-file'
    ("TAB" . dirvish-subtree-toggle)
    ("M-t" . dirvish-layout-toggle)
