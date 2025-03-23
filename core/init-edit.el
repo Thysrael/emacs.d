@@ -78,7 +78,10 @@
         ("N" . symbol-overlay-jump-next)
         ("P" . symbol-overlay-jump-prev)
         ("n" . nil)
-        ("p" . nil))
+        ("p" . nil)
+        ("e" . nil)
+        ("d" . nil)
+        ("s" . nil))
   :hook
   (((prog-mode yaml-mode) . symbol-overlay-mode))
   )
