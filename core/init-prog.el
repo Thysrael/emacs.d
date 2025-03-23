@@ -2,8 +2,10 @@
 
 (use-package prog-mode
   :straight nil
-  :hook ((prog-mode . prettify-symbols-mode)))
-
+  :hook
+  ((prog-mode . prettify-symbols-mode))
+  :custom
+  (prettify-symbols-unprettify-at-point t))
 
 ;; Cross reference, 是 emacs 的代码分析工具前端
 ;; 后端可以是基于 ctag 这种比较 fuzzy 的或者是基于 elgot 这种语义的
