@@ -2,12 +2,11 @@
 #+author: Thysrael
 
 * Font
-Jetbrain
+英文正文：Jetbrain
 仓耳今楷
-更纱黑体
-霞鹜文楷
-nerd fonts
-all the icon
+icon：Sarasa Gothic SC Nerd Font
+黑体：Sarasa Mono SC
+中文正文：霞鹜文楷
 
 * Program
 fd
