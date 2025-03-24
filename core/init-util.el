@@ -14,8 +14,8 @@
   )
 
 ; 使用 M-x esup 就可以显示关键路径
-(use-package esup
-  :straight t)
+;; (use-package esup
+;;   :straight t)
 
 ;; 展示颜色，用于 CSS 或者 HTML，当有 256 进制颜色的时候，可以 overlay 出颜色
 (use-package rainbow-mode
