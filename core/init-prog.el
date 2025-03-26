@@ -55,61 +55,61 @@
 ;; peek 是一个很舒服的前端
 ;; M-n, M-p 可以在小窗里移动，M-N, M-P 在多个搜索源中移动
 ;; M-p l 具有 chain 式查看功能，可以在小窗里嵌套调用
-(use-package citre
-  :straight t
-  :bind
-  ;; (:map prog-mode-map
-  ;;   ("C-t j" . +citre-jump)
-  ;;   ("C-t k" . +citre-jump-back)
-  ;;   ("C-t p" . citre-peek)
-  ;;   ("C-t h" . citre-ace-peek)
-  ;;   ("C-t u" . citre-update-this-tags-file)
-  ;;   ("C-t n" . citre-create-tags-file))
-  ("M-t" . transient-citre)
-  :init
-  (require 'citre-config)
-  :config
-  (setq citre-auto-enable-citre-mode-modes '(prog-mode)
-        ;; citre-default-create-tags-file-location 'global-cache
-        citre-use-project-root-when-creating-tags t
-        citre-prompt-language-for-ctags-command t
-        citre-enable-capf-integration t)
-
-  (defun +citre-jump ()
-    "Jump to the definition of the symbol at point. Fallback to `xref-find-definitions'."
-    (interactive)
-    (condition-case _
-        (citre-jump)
-      (error (call-interactively #'xref-find-definitions))))
-
-  (defun +citre-jump-back ()
-    "Go back to the position before last `citre-jump'. Fallback to `xref-go-back'."
-    (interactive)
-    (condition-case _
-        (citre-jump-back)
-      (error (call-interactively #'xref-go-back))))
-
-  ;; Use Citre xref backend as a [fallback]
-  (defadvice! +citre--xref-fallback-a (fn &rest args)
-    :around #'xref--create-fetcher
-    (let ((fetcher (apply fn args))
-          (citre-fetcher
-           (let ((xref-backend-functions '(citre-xref-backend t)))
-             (ignore xref-backend-functions)
-             (apply fn args))))
-      (lambda ()
-        (or (with-demoted-errors "%s, fallback to citre"
-              (funcall fetcher))
-            (funcall citre-fetcher)))))
-  (transient-define-prefix transient-citre ()
-    [
-     ("p" "Peek" citre-peek)
-     ("h" "Ace Peek"citre-ace-peek)
-     ("u" "Update Tags File" citre-update-this-tags-file)
-     ("n" "Create Tags File" citre-create-tags-file)
-     ]
-    )
-  )
+;; (use-package citre
+;;   :straight t
+;;   :bind
+;;   ;; (:map prog-mode-map
+;;   ;;   ("C-t j" . +citre-jump)
+;;   ;;   ("C-t k" . +citre-jump-back)
+;;   ;;   ("C-t p" . citre-peek)
+;;   ;;   ("C-t h" . citre-ace-peek)
+;;   ;;   ("C-t u" . citre-update-this-tags-file)
+;;   ;;   ("C-t n" . citre-create-tags-file))
+;;   ("M-t" . transient-citre)
+;;   :init
+;;   (require 'citre-config)
+;;   :config
+;;   (setq citre-auto-enable-citre-mode-modes '(prog-mode)
+;;         ;; citre-default-create-tags-file-location 'global-cache
+;;         citre-use-project-root-when-creating-tags t
+;;         citre-prompt-language-for-ctags-command t
+;;         citre-enable-capf-integration t)
+;;
+;;   (defun +citre-jump ()
+;;     "Jump to the definition of the symbol at point. Fallback to `xref-find-definitions'."
+;;     (interactive)
+;;     (condition-case _
+;;         (citre-jump)
+;;       (error (call-interactively #'xref-find-definitions))))
+;;
+;;   (defun +citre-jump-back ()
+;;     "Go back to the position before last `citre-jump'. Fallback to `xref-go-back'."
+;;     (interactive)
+;;     (condition-case _
+;;         (citre-jump-back)
+;;       (error (call-interactively #'xref-go-back))))
+;;
+;;   ;; Use Citre xref backend as a [fallback]
+;;   (defadvice! +citre--xref-fallback-a (fn &rest args)
+;;     :around #'xref--create-fetcher
+;;     (let ((fetcher (apply fn args))
+;;           (citre-fetcher
+;;            (let ((xref-backend-functions '(citre-xref-backend t)))
+;;              (ignore xref-backend-functions)
+;;              (apply fn args))))
+;;       (lambda ()
+;;         (or (with-demoted-errors "%s, fallback to citre"
+;;               (funcall fetcher))
+;;             (funcall citre-fetcher)))))
+;;   (transient-define-prefix transient-citre ()
+;;     [
+;;      ("p" "Peek" citre-peek)
+;;      ("h" "Ace Peek"citre-ace-peek)
+;;      ("u" "Update Tags File" citre-update-this-tags-file)
+;;      ("n" "Create Tags File" citre-create-tags-file)
+;;      ]
+;;     )
+;;   )
 
 (use-package eglot
   ;; :straight (eglot :type git
