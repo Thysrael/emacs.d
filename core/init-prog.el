@@ -133,24 +133,24 @@
         eglot-autoshutdown t
         ;; use global completion styles
         completion-category-defaults nil)
-  (transient-define-prefix transient-hydra ()
-    ["Eglot Menu"
-     [
-      ("f" "Format selection" eglot-format)
-      ("b" "Format buffer" eglot-format-buffer)
-      ("r" "Rename symbol at point" eglot-rename)
-      ]
-     [
-      ("d" "Find declaration" eglot-find-declaration)
-      ("i" "Find implementation" eglot-find-implementation)
-      ("t" "Find type definition" eglot-find-typeDefinition)
-      ]
-     [
-      ("s" "Shutdown eglot server" eglot-shutdown)
-      ("c" "Consult Eglot Symbols" consult-eglot-symbols)
-      ]
-     ]
-    )
+  ;; (transient-define-prefix transient-hydra ()
+  ;;   ["Eglot Menu"
+  ;;    [
+  ;;     ("f" "Format selection" eglot-format)
+  ;;     ("b" "Format buffer" eglot-format-buffer)
+  ;;     ("r" "Rename symbol at point" eglot-rename)
+  ;;     ]
+  ;;    [
+  ;;     ("d" "Find declaration" eglot-find-declaration)
+  ;;     ("i" "Find implementation" eglot-find-implementation)
+  ;;     ("t" "Find type definition" eglot-find-typeDefinition)
+  ;;     ]
+  ;;    [
+  ;;     ("s" "Shutdown eglot server" eglot-shutdown)
+  ;;     ("c" "Consult Eglot Symbols" consult-eglot-symbols)
+  ;;     ]
+  ;;    ]
+  ;;   )
   )
 
 ;; consult-eglot-symbols 可以提供一个具有所有 lsp symbol 的候选栏
