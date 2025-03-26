@@ -13,23 +13,10 @@
   )
 
 ;; 使用 M-x esup 就可以显示关键路径
-;; diff --git a/esup.el b/esup.el
-;; index 737b3aa..0b5fbe1 100644
-;; --- a/esup.el
-;; +++ b/esup.el
-;; @@ -592,7 +592,8 @@ current lexical context."
-;;        (message "at %s" esup-last-result-start-point)
-;;        (unless (eobp)
-;;          (while (setq sep-end-point (esup-next-separator-end-point))
-;; -          (setq results (cons (car (esup-read-result (point))) results))
-;; +          (when-let ((result (car (esup-read-result (point)))))
-;; +            (push result results))
-;;            (setq esup-last-result-start-point sep-end-point)
-;;            (goto-char esup-last-result-start-point))))
-;;      (nreverse results)))
 (use-package esup
   :straight t
   :config
+  ;; 需要修改这个函数才能确保正常工作
   (defun my-esup-read-results-advice (orig-fun &rest args)
     "My custom advice for `esup-read-results`."
     (let (results sep-end-point)

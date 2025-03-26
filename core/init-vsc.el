@@ -62,17 +62,13 @@
          ("C-c v" . magit)
          ("C-c V" . magit-blame-addition))
   :hook ((magit-process-mode . goto-address-mode))
+  :custom
+  (magit-diff-refine-hunk nil) ; word-granularity diff
+  (magit-diff-paint-whitespace nil) ; dont paint whitespace
+  (magit-save-repository-buffers nil) ; Don't autosave repo buffers. This is too magical
+  ;; Don't display parent/related refs in commit buffers; they are rarely helpful and only add to runtime costs.
+  (magit-revision-insert-related-refs nil)
   :config
-  (setq
-   ;; word-granularity diff
-   magit-diff-refine-hunk nil
-   ;; dont paint whitespace
-   magit-diff-paint-whitespace nil
-   ;; Don't autosave repo buffers. This is too magical
-   magit-save-repository-buffers nil
-   ;; Don't display parent/related refs in commit buffers; they are rarely helpful and only add to runtime costs.
-   magit-revision-insert-related-refs nil)
-
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) ; magit 全屏
   ;; Exterminate Magit buffers
   (defun +magit-kill-buffers (&rest _)
@@ -89,8 +85,6 @@
                     (kill-buffer buf))))
               buffers))))
   (setq magit-bury-buffer-function #'+magit-kill-buffers)
-  :custom-face
-  (treemacs-git-modified-face ((t (:inherit variable-pitch :foreground "#82aaff"))))
   )
 
 (use-package forge
