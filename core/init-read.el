@@ -170,10 +170,11 @@
              :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
              )
   :demand t
+  :custom
+  (eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+  (eaf-kill-process-after-last-buffer-closed t)
   :init
-  (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
   (setq eaf-buffer-title-format "EAF: %s")
-  (setq eaf-kill-process-after-last-buffer-closed t)
   )
 
 ;; ;; 按 F 会有 avy 类似的效果
@@ -209,9 +210,8 @@
 (use-package eaf-pdf-viewer
   :if (window-system)
   :demand t
-  :init
-  ;; (setq eaf-pdf-dark-mode "force")
-  (setq eaf-pdf-dark-mode nil)
+  :custom
+  (eaf-pdf-dark-mode nil)
   :config
   (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
   (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)

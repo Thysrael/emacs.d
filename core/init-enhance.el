@@ -71,7 +71,7 @@
 ;; 在 minibuffer 中提供补全支持，有多重风格
 (use-package orderless
   :straight t
-  :init (require 'orderless)
+  :demand t
   :config
   ;; 根据辅助字符来选择不同的补全风格
   (defun +vertico-orderless-dispatch (pattern _index _total)

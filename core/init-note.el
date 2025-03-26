@@ -111,11 +111,9 @@
 (use-package consult-org-roam
   :straight t
   :after org-roam
-  :init
-  (require 'consult-org-roam)
-  ;; Activate the minor mode
-  (consult-org-roam-mode 1)
   :custom
+  ;; Activate the minor mode
+  (consult-org-roam-mode t)
   ;; Use `ripgrep' for searching with `consult-org-roam-search'
   (consult-org-roam-grep-func #'consult-ripgrep)
   ;; Configure a custom narrow key for `consult-buffer'

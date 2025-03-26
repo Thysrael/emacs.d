@@ -78,8 +78,9 @@
   ;; :mode ("SConstruct\\'" . python-mode)
   ;; :mode ("SConscript\\'" . python-mode)
   ;; :mode ("SConsopts\\'" . python-mode)
-  :init
-  (setq python-indent-offset 4)
+  :custom
+  (python-indent-offset 4)
+  (python-indent-guess-indent-offset-verbose nil)
   )
 
 (use-package cuda-mode

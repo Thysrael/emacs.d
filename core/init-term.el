@@ -8,9 +8,9 @@
    ("M-y" . vterm-yank-pop)
    ("C-\\" . toggle-input-method)
    ("C-M-\\" . rime-force-enable)
-   :map vterm-copy-mode)
-  :init
-  (setq vterm-shell "zsh")
+   )
+  :custom
+  (vterm-shell "zsh")
   :config
   (setq vterm-tramp-shells '(("docker" "/bin/bash")
                              ("ssh" "'/bin/bash'")

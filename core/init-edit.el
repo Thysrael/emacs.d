@@ -323,11 +323,12 @@ begin and end of the block surrounding point."
   :straight t
   :hook
   ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
-  :init
-  (define-key puni-mode-map (kbd "C-w") nil)
-  (define-key puni-mode-map (kbd "C-d") nil)
-  (define-key puni-mode-map (kbd "<backspace>") nil)
-  (define-key puni-mode-map (kbd "<DEL>") nil))
+  :bind
+  (:map puni-mode-map
+        ("C-w" . nil)
+        ("C-d" . nil)
+        ("<backspace>" . nil)
+        ("<DEL>" . nil)))
 
 ;; 快速编辑成对出现的标点
 (use-package embrace

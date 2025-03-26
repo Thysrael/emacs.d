@@ -57,8 +57,8 @@
 ;; 存储原来的窗口布局
 (use-package winner
   :commands (winner-undo winner-redo)
-  :init
-  (setq winner-dont-bind-my-keys t)
+  :custom
+  (winner-dont-bind-my-keys t)
   :hook (after-init . winner-mode)
   :config
   (setq winner-boring-buffers
@@ -94,78 +94,79 @@
   ("C--"  . popper-cycle) ; 切换多个 popper, 也可用于 toggle 出 popper window
   :hook
   (emacs-startup . popper-mode)
-  :init
-  (setq popper-reference-buffers
-        '("\\*Messages\\*"
-          "\\*color-rg\\*"
-          "Output\\*$" "\\*Pp Eval Output\\*$"
-          "\\*Compile-Log\\*"
-          "\\*Completions\\*"
-          "\\*Warnings\\*"
-          "\\*Async Shell Command\\*"
-          "\\*Apropos\\*"
-          "\\*Backtrace\\*"
-          "\\*Calendar\\*"
-          ;; "\\*Embark Actions\\*"
-          "\\*Finder\\*"
-          "\\*Kill Ring\\*"
-          "\\*Go-Translate\\*"
-          "\\*maple-translate\\*"
-          "\\*eww bookmarks\\*"
-          "\\*Outline:.*\\*.*$" PDF-Outline-mode
-          ;; "Bookmark List" bookmark-bmenu-mode
-          "\\*toc\\*" toc-mode
-          comint-mode
-          compilation-mode
-          ibuffer-mode
-          help-mode
-          tabulated-list-mode
-          Buffer-menu-mode
-          "\\*esup\\*"
-          gnus-article-mode devdocs-mode
-          grep-mode occur-mode rg-mode ag-mode pt-mode
-          osx-dictionary-mode
+  :custom
+  (popper-window-height 18)
+  (popper-reference-buffers
+   '("\\*Messages\\*"
+     "\\*color-rg\\*"
+     "Output\\*$" "\\*Pp Eval Output\\*$"
+     "\\*Compile-Log\\*"
+     "\\*Completions\\*"
+     "\\*Warnings\\*"
+     "\\*Async Shell Command\\*"
+     "\\*Apropos\\*"
+     "\\*Backtrace\\*"
+     "\\*Calendar\\*"
+     ;; "\\*Embark Actions\\*"
+     "\\*Finder\\*"
+     "\\*Kill Ring\\*"
+     "\\*Go-Translate\\*"
+     "\\*maple-translate\\*"
+     "\\*eww bookmarks\\*"
+     "\\*Outline:.*\\*.*$" PDF-Outline-mode
+     ;; "Bookmark List" bookmark-bmenu-mode
+     "\\*toc\\*" toc-mode
+     comint-mode
+     compilation-mode
+     ibuffer-mode
+     help-mode
+     tabulated-list-mode
+     Buffer-menu-mode
+     "\\*esup\\*"
+     gnus-article-mode devdocs-mode
+     grep-mode occur-mode rg-mode ag-mode pt-mode
+     osx-dictionary-mode
 
-          "^\\*Process List\\*" process-menu-mode
-          list-environment-mode cargo-process-mode
+     "^\\*Process List\\*" process-menu-mode
+     list-environment-mode cargo-process-mode
 
-          "^\\*eshell.*\\*.*$" eshell-mode
-          "^\\*shell.*\\*.*$"  shell-mode
-          "^\\*terminal.*\\*.*$" term-mode
-          "^\\*vterm.*\\*.*$"  vterm-mode
-          "^\\*eldoc.*\\*.*$" eldoc-mode
-          ;; "^magit.*$" magit-mode
-          "\\*Flycheck errors\\*$" " \\*Flycheck checker\\*$"
-          "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
-          "\\*[Wo]*Man.*\\*$"
-          "\\*ert\\*$" overseer-buffer-mode
-          "\\*gud-debug\\*$"
-          "\\*lsp-help\\*$" "\\*lsp session\\*$"
-          "\\*quickrun\\*$"
-          "\\*tldr\\*$"
-          "\\*vc-.*\\*$"
-          "^\\*elfeed-entry\\*$"
-          "^\\*macro expansion\\**"
+     "^\\*eshell.*\\*.*$" eshell-mode
+     "^\\*shell.*\\*.*$"  shell-mode
+     "^\\*terminal.*\\*.*$" term-mode
+     "^\\*vterm.*\\*.*$"  vterm-mode
+     "^\\*eldoc.*\\*.*$" eldoc-mode
+     ;; "^magit.*$" magit-mode
+     "\\*Flycheck errors\\*$" " \\*Flycheck checker\\*$"
+     "\\*Paradox Report\\*$" "\\*package update results\\*$" "\\*Package-Lint\\*$"
+     "\\*[Wo]*Man.*\\*$"
+     "\\*ert\\*$" overseer-buffer-mode
+     "\\*gud-debug\\*$"
+     "\\*lsp-help\\*$" "\\*lsp session\\*$"
+     "\\*quickrun\\*$"
+     "\\*tldr\\*$"
+     "\\*vc-.*\\*$"
+     "^\\*elfeed-entry\\*$"
+     "^\\*macro expansion\\**"
 
-          "\\*Agenda Commands\\*"
-          "\\*Org Select\\*"
-          ;; "\\*org-roam\\*" ;; 因为 org9.7 报错 (setq warning-suppress-types '((org-element org-element-parser)))
-          "\\*Capture\\*"
-          "\\*ChatGPT\\*"
-          "\\*IPADS\\*"
-          "\\*chat.*"
-          ;; "\\*Org Agenda\\*"
-          "^CAPTURE-.*\\.org*"
+     "\\*Agenda Commands\\*"
+     "\\*Org Select\\*"
+     ;; "\\*org-roam\\*" ;; 因为 org9.7 报错 (setq warning-suppress-types '((org-element org-element-parser)))
+     "\\*Capture\\*"
+     "\\*ChatGPT\\*"
+     "\\*IPADS\\*"
+     "\\*chat.*"
+     ;; "\\*Org Agenda\\*"
+     "^CAPTURE-.*\\.org*"
 
-          image-mode
-          helpful-mode
-          "\\*docker-.+\\*"
-          "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
-          "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
-          rustic-cargo-outdated-mode rustic-cargo-test-mode
+     image-mode
+     helpful-mode
+     "\\*docker-.+\\*"
+     "\\*prolog\\*" inferior-python-mode inf-ruby-mode swift-repl-mode
+     "\\*rustfmt\\*$" rustic-compilation-mode rustic-cargo-clippy-mode
+     rustic-cargo-outdated-mode rustic-cargo-test-mode
 
-          chatgpt-shell-mode
-	      ))
+     chatgpt-shell-mode
+	 ))
 
   :config
   ;; mode-line indicator
@@ -188,8 +189,6 @@
         (when (window-live-p window)
           (delete-window window)))))
   (advice-add #'keyboard-quit :before #'+popper-close-window-hack)
-  :custom
-  (popper-window-height 18)
   )
 
 
@@ -265,5 +264,5 @@
                  compile-goto-error))
     (advice-add cmd :after #'+recenter-and-pulse-line))
   (setq pulse-delay 0.04
-      pulse-iterations 4)
+        pulse-iterations 4)
   )

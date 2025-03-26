@@ -198,15 +198,12 @@
 
 (use-package doom-themes
   :straight t
+  :custom
+  (doom-themes-enable-bold t)
+  (doom-themes-enable-italic t)
   :init
-  (setq doom-themes-enable-bold t
-        doom-themes-enable-italic t)
-
   (doom-themes-visual-bell-config)
   (doom-themes-org-config)
-
-  (setq doom-themes-treemacs-theme "doom-colors") ; use "doom-colors" for less minimal icon theme
-  (doom-themes-treemacs-config)
   )
 
 ;; (use-package modus-themes)
