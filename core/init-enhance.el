@@ -473,17 +473,16 @@
 ;; use xsel to copy/paste in emacs-nox
 (unless window-system
   (when (getenv "DISPLAY")
-    (defun xsel-cut-function (text &optional push)
+    (defun xclip-cut-function (text &optional push)
       (with-temp-buffer
         (insert text)
-        (call-process-region (point-min) (point-max) "xsel" nil 0 nil "--clipboard" "--input")))
-    (defun xsel-paste-function()
-      (let ((xsel-output (shell-command-to-string "xsel --clipboard --output")))
-        (unless (string= (car kill-ring) xsel-output)
-          xsel-output )))
-    (setq interprogram-cut-function 'xsel-cut-function)
-    (setq interprogram-paste-function 'xsel-paste-function)
-    ))
+        (call-process-region (point-min) (point-max) "xclip" nil 0 nil "-selection" "clipboard" "-i")))
+    (defun xclip-paste-function ()
+      (let ((xclip-output (shell-command-to-string "xclip -selection clipboard -o")))
+        (unless (string= (car kill-ring) xclip-output)
+          xclip-output)))
+    (setq interprogram-cut-function 'xclip-cut-function)
+    (setq interprogram-paste-function 'xclip-paste-function)))
 
 ;; remove `Indentation setup for shell type zsh`
 ;; https://emacs.stackexchange.com/questions/52846/how-to-remove-message-indentation-setup-for-shell-type-sh
