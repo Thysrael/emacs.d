@@ -4,7 +4,7 @@
 * Font
 英文正文：Jetbrain
 仓耳今楷
-icon：Sarasa Gothic SC Nerd Font
+icon：Symbols Nerd Font Mono
 黑体：Sarasa Mono SC
 中文正文：霞鹜文楷
 

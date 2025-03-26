@@ -4,7 +4,7 @@
   :straight t
   :custom
   ;; 必须使用这个字体，字体显示才完全
-  (nerd-icons-font-family "Sarasa Gothic SC Nerd Font")
+  (nerd-icons-font-family "Symbols Nerd Font Mono")
   ;; (nerd-icons-scale-factor 1.1)
   )
 
@@ -138,8 +138,8 @@
   (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
   (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
   (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
-  (set-fontset-font t 'cjk-misc (font-spec :family "Sarasa Gothic SC Nerd Font" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
-  (set-fontset-font t 'unicode (font-spec :family "Noto Color Emoji") nil 'append)
+  (set-fontset-font t 'cjk-misc (font-spec :family "Symbols Nerd Font Mono" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
+  (set-fontset-font t 'unicode (font-spec :family "Symbols Nerd Font Mono") nil 'append)
   ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
   )
 
@@ -231,7 +231,7 @@
  '(font-lock-regexp-grouping-backslash ((t (:foreground unspecified))))
  ;; 设置变宽字体和等宽字体，但是不知道为啥不能放到 UI 里
  '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
- '(variable-pitch ((t (:height 0.9 :family "Sarasa Gothic SC Nerd Font")))) ;; SourceHanSerifCN
+ '(variable-pitch ((t (:height 0.9 :family "Symbols Nerd Font Mono")))) ;; SourceHanSerifCN
  ;; 设置加粗字体
  '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold))))
  ;; '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold :family "Sarasa Mono SC"))))
