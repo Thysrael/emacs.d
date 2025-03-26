@@ -271,8 +271,8 @@
 (use-package meow-vterm
   :straight (meow-vterm :type git :host github :repo "accelbread/meow-vterm")
   :after vterm
+  :demand t
   :init
-  (setq vterm-keymap-exceptions '("C-c"))
   (meow-vterm-enable))
 
 ;; change the cursor color with the input-method changing
