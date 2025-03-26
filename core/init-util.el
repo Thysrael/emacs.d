@@ -28,7 +28,23 @@
 ;;            (goto-char esup-last-result-start-point))))
 ;;      (nreverse results)))
 (use-package esup
-  :straight t)
+  :straight t
+  :config
+  (defun my-esup-read-results-advice (orig-fun &rest args)
+    "My custom advice for `esup-read-results`."
+    (let (results sep-end-point)
+      (with-current-buffer (get-buffer esup-incoming-results-buffer)
+        (goto-char esup-last-result-start-point)
+        (message "at %s" esup-last-result-start-point)
+        (unless (eobp)
+          (while (setq sep-end-point (esup-next-separator-end-point))
+            (when-let ((result (car (esup-read-result (point)))))
+              (push result results))
+            (setq esup-last-result-start-point sep-end-point)
+            (goto-char esup-last-result-start-point))))
+      (nreverse results)))
+
+  (advice-add 'esup-read-results :around #'my-esup-read-results-advice))
 
 ;; 展示颜色，用于 CSS 或者 HTML，当有 256 进制颜色的时候，可以 overlay 出颜色
 (use-package rainbow-mode
