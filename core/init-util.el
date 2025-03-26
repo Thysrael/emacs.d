@@ -3,8 +3,7 @@
 ;;; 工具包
 ;; 更加方便的快捷键设置，放在所有包之前
 (use-package transient
-  :straight t
-  :defer t)
+  :straight t)
 
 ;; 规范化 emacs.d 的结构，使得配置集中于 ~/.emacs.d/etc，临时数据集中于 ~/.emacs.d/var
 (use-package no-littering
@@ -13,9 +12,23 @@
   (setq custom-file (no-littering-expand-etc-file-name "custom.el")) ; 设置 custom-file 路径
   )
 
-; 使用 M-x esup 就可以显示关键路径
-;; (use-package esup
-;;   :straight t)
+;; 使用 M-x esup 就可以显示关键路径
+;; diff --git a/esup.el b/esup.el
+;; index 737b3aa..0b5fbe1 100644
+;; --- a/esup.el
+;; +++ b/esup.el
+;; @@ -592,7 +592,8 @@ current lexical context."
+;;        (message "at %s" esup-last-result-start-point)
+;;        (unless (eobp)
+;;          (while (setq sep-end-point (esup-next-separator-end-point))
+;; -          (setq results (cons (car (esup-read-result (point))) results))
+;; +          (when-let ((result (car (esup-read-result (point)))))
+;; +            (push result results))
+;;            (setq esup-last-result-start-point sep-end-point)
+;;            (goto-char esup-last-result-start-point))))
+;;      (nreverse results)))
+(use-package esup
+  :straight t)
 
 ;; 展示颜色，用于 CSS 或者 HTML，当有 256 进制颜色的时候，可以 overlay 出颜色
 (use-package rainbow-mode
