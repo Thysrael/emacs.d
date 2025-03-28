@@ -46,48 +46,95 @@
         mouse-wheel-scroll-amount-horizontal 1
         mouse-wheel-progressive-speed nil))
 
-;; fringe 是 emacs window 侧边的“花边”
+
+(when (display-graphic-p)
+  ;; fringe 是 emacs window 侧边的“花边”
+  ;; make left-fringe half
+  (fringe-mode '(5 . 8))
+  ;; Better fringe symbol
+  (define-fringe-bitmap 'right-curly-arrow
+    [#b00110000
+     #b00110000
+     #b00000000
+     #b00110000
+     #b00110000
+     #b00000000
+     #b00110000
+     #b00110000])
+  (define-fringe-bitmap 'left-curly-arrow
+    [#b00110000
+     #b00110000
+     #b00000000
+     #b00110000
+     #b00110000
+     #b00000000
+     #b00110000
+     #b00110000])
+  (define-fringe-bitmap 'right-arrow
+    [#b00000000
+     #b00000000
+     #b00001110
+     #b00001110
+     #b00001110
+     #b00000000
+     #b00000000
+     #b00000000])
+  (define-fringe-bitmap 'left-arrow
+    [#b00000000
+     #b00000000
+     #b00000000
+     #b01110000
+     #b01110000
+     #b01110000
+     #b00000000
+     #b00000000])
+  ;; 字体，字体加载会花费大量时间
+  (defvar +font-en-size)
+  (defvar +font-han-size)
+  (defvar +font-emoji-size)
+
+  (let ((hostname (system-name)))
+    (if (string-equal hostname "banana")
+        (progn
+          ;; 当主机名为 banana 时
+          (setq +font-en-size 28)
+          (setq +font-han-size 28)
+          (setq +font-emoji-size 28))
+      (progn
+        ;; 当主机名不是 banana 时
+        (setq +font-en-size 18)
+        (setq +font-han-size 18)
+        (setq +font-emoji-size 18))))
+
+  (defun +setup-fonts ()
+    "Setup fonts."
+    ;; JetBrainsMono 这个字体并不支持一些字符，好像 Sarasa Term SC 支持得更多一些，但是不知道 vscode 为啥可以
+    (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
+    (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
+    (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
+    (set-fontset-font t 'cjk-misc (font-spec :family "TsangerJinKai05" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
+    (set-fontset-font t 'unicode (font-spec :family "Symbols Nerd Font Mono") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
+    )
+
+  ;; (defun +setup-fonts ()
+  ;;     "Setup fonts."
+  ;;     (set-face-attribute 'default nil :font (font-spec :family "Sarasa Term SC" :size +font-en-size))
+  ;;     (set-face-font 'fixed-pitch "Sarasa Term SC")
+  ;;     (set-face-font 'fixed-pitch-serif "Sarasa Term Slab SC")
+  ;;     (set-face-font 'variable-pitch "Sarasa UI SC")
+  ;;
+  ;;     (dolist (charset '(han cjk-misc))
+  ;;       (set-fontset-font t charset (font-spec :family "LXGW WenKai" :size +font-han-size)))
+  ;;     (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
+  ;;     )
+
+  (+setup-fonts)
+
+  (add-hook 'server-after-make-frame-hook #'+setup-fonts)  
+  )
 (setq indicate-buffer-boundaries nil
       indicate-empty-lines nil)
-;; make left-fringe half
-(fringe-mode '(5 . 8))
-;; Better fringe symbol
-(define-fringe-bitmap 'right-curly-arrow
-  [#b00110000
-   #b00110000
-   #b00000000
-   #b00110000
-   #b00110000
-   #b00000000
-   #b00110000
-   #b00110000])
-(define-fringe-bitmap 'left-curly-arrow
-  [#b00110000
-   #b00110000
-   #b00000000
-   #b00110000
-   #b00110000
-   #b00000000
-   #b00110000
-   #b00110000])
-(define-fringe-bitmap 'right-arrow
-  [#b00000000
-   #b00000000
-   #b00001110
-   #b00001110
-   #b00001110
-   #b00000000
-   #b00000000
-   #b00000000])
-(define-fringe-bitmap 'left-arrow
-  [#b00000000
-   #b00000000
-   #b00000000
-   #b01110000
-   #b01110000
-   #b01110000
-   #b00000000
-   #b00000000])
 
 ;; 窗口分割线
 (setq window-divider-default-places t
@@ -113,51 +160,6 @@
 (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
 ;; Allow emacs to query passphrase through minibuffer
 (setq epg-pinentry-mode 'loopback)
-
-;; 字体，字体加载会花费大量时间
-(defvar +font-en-size)
-(defvar +font-han-size)
-(defvar +font-emoji-size)
-
-(let ((hostname (system-name)))
-  (if (string-equal hostname "banana")
-      (progn
-        ;; 当主机名为 banana 时
-        (setq +font-en-size 28)
-        (setq +font-han-size 28)
-        (setq +font-emoji-size 28))
-    (progn
-      ;; 当主机名不是 banana 时
-      (setq +font-en-size 18)
-      (setq +font-han-size 18)
-      (setq +font-emoji-size 18))))
-
-(defun +setup-fonts ()
-  "Setup fonts."
-  ;; JetBrainsMono 这个字体并不支持一些字符，好像 Sarasa Term SC 支持得更多一些，但是不知道 vscode 为啥可以
-  (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
-  (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
-  (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
-  (set-fontset-font t 'cjk-misc (font-spec :family "TsangerJinKai05" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
-  (set-fontset-font t 'unicode (font-spec :family "Symbols Nerd Font Mono") nil 'append)
-  ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
-  )
-
-;; (defun +setup-fonts ()
-;;     "Setup fonts."
-;;     (set-face-attribute 'default nil :font (font-spec :family "Sarasa Term SC" :size +font-en-size))
-;;     (set-face-font 'fixed-pitch "Sarasa Term SC")
-;;     (set-face-font 'fixed-pitch-serif "Sarasa Term Slab SC")
-;;     (set-face-font 'variable-pitch "Sarasa UI SC")
-;;
-;;     (dolist (charset '(han cjk-misc))
-;;       (set-fontset-font t charset (font-spec :family "LXGW WenKai" :size +font-han-size)))
-;;     (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
-;;     )
-
-(+setup-fonts)
-
-(add-hook 'server-after-make-frame-hook #'+setup-fonts)
 
 ;; 光标
 ;; (blink-cursor-mode -1) ;; 阻止光标闪烁
