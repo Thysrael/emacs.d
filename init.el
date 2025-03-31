@@ -10,7 +10,7 @@
 
 ;; 根据是否在服务器上选择性加载文件
 (defvar +init-files nil)
-(if (not on-server)
+(if (not on-server) ; local
     (setq +init-files
           (list
            'init-package
@@ -44,7 +44,7 @@
            'init-export
            'init-ai
            ))
-  (setq +init-files
+  (setq +init-files ; remote
         (list
          'init-package
          'init-util

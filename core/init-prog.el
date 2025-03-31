@@ -166,6 +166,7 @@
 ;; 不知道为什么必须手动开启
 ;; TODO: eglot-booster 无法放到 local 下，是因为 exec-path 的问题
 (use-package eglot-booster
+  :unless on-server
   :vc (:url "https://github.com/jdtsmith/eglot-booster" :rev "main")
   :after eglot
   :demand t
