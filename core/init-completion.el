@@ -59,6 +59,12 @@
   :config
   (setq corfu-popupinfo-delay '(1.0 . 1.0)))
 
+(use-package corfu-terminal
+  :if (display-graphic-p)
+  :straight t
+  :custom
+  (corfu-terminal-mode 1))
+
 ;; 美化 corfu
 (use-package nerd-icons-corfu
   :ensure t

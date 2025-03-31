@@ -240,5 +240,5 @@
 ;;   :config
 ;;   (setq revert-without-query (list ".")))
 
-;; 只在有问题的时候 warning ，主要是配合 native comp 使用
-(setq warning-minimum-level :emergency)
+;; 禁用 native comp warning
+(setq native-comp-async-report-warnings-errors nil)
