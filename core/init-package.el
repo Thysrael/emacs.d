@@ -11,6 +11,8 @@
 (require 'package)
 (package-initialize)
 ;; add more archive: gnu, nongnu, melpa
+;; gnu elpha is offical but small
+;; melpha is large but unoffical
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (setq package-vc-allow-build-commands t)
 

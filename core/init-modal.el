@@ -268,8 +268,8 @@
 ;; vterm 会与 meow normal 键冲突
 ;; 使得 normal-mode 键绑定都可以正常使用
 (use-package meow-vterm
-  :ensure (:url "https://github.com/accelbread/meow-vterm")
-  :after vterm
+  :after (vterm meow)
+  :vc (meow-vterm :url "https://github.com/accelbread/meow-vterm" :rev "master")
   :demand t
   :init
   (meow-vterm-enable))

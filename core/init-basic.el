@@ -31,7 +31,7 @@
 
 ;; 开启视觉折行
 (use-package visual-line-mode
-  :ensure (:type built-in) ; 不要尝试从包管理器中安装 visual-line-mode
+  :ensure nil ; 不要尝试从包管理器中安装 visual-line-mode
   :hook (text-mode . visual-line-mode) ; 将 visual-line-mode 应用于 text 模式
   )
 

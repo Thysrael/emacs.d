@@ -516,9 +516,10 @@
 ;; An: 意义不明，应该是单词数
 ;; Ha: 中文字符数（字数）
 ;; Wc: An + Ha
-(use-package advance-words-count
-  :after (:any org markdown-mode)
-  :straight (:type git :host github :repo "LdBeth/advance-words-count.el"))
+;; (use-package advance-words-count
+;;   ;; :after (:any org markdown-mode)
+;;   :vc (advance-words-count :url "https://github.com/Thysrael/advance-words-count" :rev "master")
+;;   )
 
 ;; org 智能列表
 (use-package org-autolist
