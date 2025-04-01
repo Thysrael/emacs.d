@@ -61,7 +61,7 @@
 
 (use-package corfu-terminal
   :if (display-graphic-p)
-  :straight t
+  :ensure t
   :custom
   (corfu-terminal-mode 1))
 
