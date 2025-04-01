@@ -1,7 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package dired
-  :straight nil
   :bind
   (:map dired-mode-map
         ("C-c C-p" . wdired-change-to-wdired-mode)
@@ -46,7 +45,7 @@
 
 ;; 使用 `E` 可以用外部命令打开文件
 (use-package dirvish
-  :straight t
+  :ensure t
   :init
   (dirvish-override-dired-mode)
   :custom-face
@@ -182,7 +181,7 @@
 
 ;; dired more colorful
 (use-package diredfl
-  :straight t
+  :ensure t
   :hook
   ((dired-mode . diredfl-mode)
    ;; highlight parent and directory preview as well

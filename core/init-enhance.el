@@ -3,8 +3,8 @@
 ;;; minibuffer
 ;; minibuffer 垂直展示，或者严格意义上说，minibuffer 已经被 vertico 接管了
 (use-package vertico
-  :straight
-  (:files (:defaults "extensions/*.el")) ; 因为 vertico 本质是一堆包的集合，所以这里全部将他们加载
+  ;; :ensure (vertico :files ("extensions/*.el")) ; 因为 vertico 本质是一堆包的集合，所以这里全部将他们加载
+  :ensure t
   :bind
   (:map vertico-map
         ("TAB" . minibuffer-complete)
@@ -36,7 +36,7 @@
 
 ;; 在 minibuffer 输入路径时，可以以目录为单位进行删除（具体的键位绑定我看不懂）
 (use-package vertico-directory
-  :straight nil
+  :ensure nil
   :after vertico
   :bind
   (:map vertico-map
@@ -49,7 +49,7 @@
 
 ;; 记录有参数的命令历史
 (use-package vertico-repeat
-  :straight nil
+  :ensure nil
   :after vertico
   :hook (minibuffer-setup . vertico-repeat-save))
 
@@ -61,7 +61,7 @@
 ;;   )
 
 (use-package nerd-icons-completion
-  :straight t
+  :ensure t
   :after marginalia
   :hook
   ((after-init . nerd-icons-completion-mode)
@@ -70,7 +70,7 @@
 
 ;; 在 minibuffer 中提供补全支持，有多重风格
 (use-package orderless
-  :straight t
+  :ensure t
   :demand t
   :config
   ;; 根据辅助字符来选择不同的补全风格
@@ -139,7 +139,7 @@
 
 ;; 支持用中文拼音首字母缩写来搜索中文
 (use-package pinyinlib
-  :straight t
+  :ensure t
   :after orderless
   :autoload pinyinlib-build-regexp-string
   :init
@@ -149,7 +149,7 @@
 
 ;; 为 minibuffer 的选项提供更加详细的信息
 (use-package marginalia
-  :straight t
+  :ensure t
   :hook (vertico-mode . marginalia-mode))
 
 ;; 为 minibuffer 中出现的条目（不至于 minibuffer 条目）
@@ -157,7 +157,7 @@
 ;; 右键菜单，根据不同的对象提供不同的 map ，也就是不同的命令
 ;; embark 在 org-headline 上很好用
 (use-package embark
-  :straight t
+  :ensure t
   :bind (("C-;" . embark-act)
          ("C-c ; e" . embark-export)
          ("C-c ; c" . embark-collect)
@@ -210,14 +210,14 @@
 
 ;; 为 embark 和 consutl 配合提供支持，可能就是提供了 C 选项
 (use-package embark-consult
-  :straight t
+  :ensure t
   :after (embark consult)
   :hook (embark-collect-mode . consult-preview-at-point-mode)
   )
 
 ;; 使用 `C-u` 为前缀可以使得 consult-ripgrep 搜索 ignore 文件
 (use-package consult
-  :straight t
+  :ensure t
   :bind
   ([remap bookmark-jump]                 . consult-bookmark)
   ([remap list-registers]                . consult-register)
@@ -266,7 +266,7 @@
 
 ;; [consult-dir] Insert path quickly in minibuffer
 (use-package consult-dir
-  :straight t
+  :ensure t
   :bind (([remap list-directory] . consult-dir)
          :map minibuffer-local-completion-map
          ("C-x C-d" . consult-dir)
@@ -279,13 +279,13 @@
 ;;; misc
 ;; 地址跳转设置
 (use-package goto-addr
-  :straight nil
+  :ensure nil
   :hook ((text-mode . goto-address-mode)
          (prog-mode . goto-address-prog-mode)))
 
 ;; [ediff] Diff & patch
 (use-package ediff
-  :straight nil
+  :ensure nil
   :hook
   ((ediff-before-setup . +ediff-save-window-config)
    ((ediff-quit ediff-suspend) . +ediff-restore-window-config))
@@ -327,7 +327,7 @@
 
 ;; 使用 `ispell-buffer` 可以检查英文拼写
 (use-package ispell
-  :straight nil
+  :ensure nil
   :hook ((org-mode . org-skip-region-alist)
          (markdown-mode . markdown-skip-region-alist))
   :config

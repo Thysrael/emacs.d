@@ -1,7 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package cc-mode
-  :straight t
+  :ensure t
   :config
   (setq c-default-style "linux")
   (setq c-basic-offset 4)
@@ -25,7 +25,7 @@
         ("C-d" . nil)))
 
 (use-package c-ts-mode
-  :straight t
+  :ensure t
   :config
   (setq c-ts-mode-indent-offset 4)
   (setq c-ts-mode-indent-style 'linux)
@@ -38,7 +38,7 @@
   )
 
 (use-package js
-  :straight t
+  :ensure t
   :config
   (setq js-indent-level 2))
 
@@ -63,7 +63,7 @@
         verilog-tab-to-comment t))
 
 (use-package scala-mode
-  :straight t
+  :ensure t
   :config
   (setq
    scala-indent:align-parameters t
@@ -71,7 +71,6 @@
    scala-indent:use-javadoc-style t))
 
 (use-package python-mode
-  :straight nil
   :mode (("SConstruct\\'" . python-mode)
          ("SConscript\\'" . python-mode)
          ("SConsopts\\'" . python-mode))
@@ -84,32 +83,32 @@
   )
 
 (use-package cuda-mode
-  :straight t)
+  :ensure t)
 
 (use-package yaml-mode
-  :straight t)
+  :ensure t)
 
 (use-package typescript-mode
-  :straight t
+  :ensure t
   :config
   (setq typescript-indent-level 2))
 
 (use-package dts-mode
-  :straight t)
+  :ensure t)
 
 (use-package kconfig-mode
-  :straight t)
+  :ensure t)
 
 (use-package lua-mode
-  :straight t)
+  :ensure t)
 
 (use-package gnuplot-mode
-  :straight t
+  :ensure t
   :mode ("\\.gp$" . gnuplot-mode)
   )
 
 (use-package rust-mode
-  :straight t
+  :ensure t
   )
 
 ;; (use-package cargo
@@ -128,7 +127,7 @@
    ))
 
 (use-package code-cells
-  :straight t
+  :ensure t
   :custom
   (code-cells-convert-ipynb-style
    '(

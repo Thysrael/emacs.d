@@ -2,7 +2,6 @@
 
 ;; transient
 (use-package transient
-  :straight t
   :demand t
   :bind
   (
@@ -101,7 +100,7 @@
 ;;; 而 window 切换又是非常难按的 4 键，所以要特殊设计
 
 (use-package meow
-  :straight t
+  :ensure t
   :hook
   (after-init . meow-global-mode)
   ;; 改变 meow 的默认区域删除行为
@@ -269,7 +268,7 @@
 ;; vterm 会与 meow normal 键冲突
 ;; 使得 normal-mode 键绑定都可以正常使用
 (use-package meow-vterm
-  :straight (meow-vterm :type git :host github :repo "accelbread/meow-vterm")
+  :ensure (:url "https://github.com/accelbread/meow-vterm")
   :after vterm
   :demand t
   :init

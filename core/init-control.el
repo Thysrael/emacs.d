@@ -63,7 +63,6 @@
   )
 
 (use-package org-capture
-  :straight nil
   :bind
   ("C-c k" . org-capture)
   :config
@@ -129,7 +128,6 @@
   )
 
 (use-package org-agenda
-  :straight nil
   :bind
   ("C-c a" . org-agenda)
   :custom
@@ -223,7 +221,6 @@
 ;; g d 可以选择日期
 ;; C-<SPACE> 标记，用 M-= 来计算间隔
 (use-package calendar
-  :straight nil
   :bind
   ("C-c A" . calendar)
   :hook (calendar-today-visible . calendar-mark-today)
@@ -272,7 +269,7 @@
 
 ;; 中国节日设置
 (use-package cal-china-x
-  :straight t
+  :ensure t
   :commands cal-china-x-setup
   :hook (after-init . cal-china-x-setup)
   :custom-face

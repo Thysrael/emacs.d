@@ -83,12 +83,9 @@
 ;; :bind
 ;; ("C-c q" . gptel-send-with-options))
 
-(use-package shell-maker
-  :straight (:type git :host github :repo "xenodium/shell-maker" :files ("shell-maker*.el")))
-
 ;; chatgpt 支持
 (use-package chatgpt-shell
-  :straight (:type git :host github :repo "xenodium/chatgpt-shell" :files ("chatgpt-shell*.el"))
+  :ensure t
   :config
   (setq chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
   ;; 设置代理

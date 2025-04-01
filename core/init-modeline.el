@@ -262,12 +262,13 @@
 ;;      Maybe I will solve the problem in the future.
 ;; [breadcrumb] Add breadcrumb navigation in header-line
 (use-package breadcrumb
+  ;; :straight (:host github :repo "joaotavora/breadcrumb" :files ("*.el"))
+  :ensure t
   :custom-face
   (breadcrumb-project-base-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
   (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
   (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-  :straight (:host github :repo "joaotavora/breadcrumb" :files ("*.el"))
   :commands breadcrumb--header-line
   :config
   (setq breadcrumb-imenu-crumb-separator "▸"

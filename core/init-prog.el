@@ -1,7 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package prog-mode
-  :straight nil
   :hook
   ((prog-mode . prettify-symbols-mode))
   :custom
@@ -14,7 +13,7 @@
 ;; M-? 进行 grep 搜索，是最没有办法的办法
 ;; 可以用 xref-backend-functions 查看后端函数
 (use-package xref
-  :straight t
+  :ensure t
   :config
   (setq
    xref-search-program 'ripgrep ; 设置工具为 riggrep
@@ -41,7 +40,7 @@
 
 ;; 基于正则匹配的后端
 (use-package dumb-jump
-  :straight t
+  :ensure t
   :init
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate) ; 将后端设置为 dumpjump
   :config
@@ -116,8 +115,7 @@
   ;;                 :host github
   ;;                 :repo "AkibAzmain/eglot"
   ;;                 :branch "semantic-tokens")
-
-  :straight t
+  :ensure t
   :custom
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
   (eglot-events-buffer-config '(:size 0 :format full))
@@ -156,7 +154,7 @@
 ;; consult-eglot-symbols 可以提供一个具有所有 lsp symbol 的候选栏
 ;; C-M-., rember it!
 (use-package consult-eglot
-  :straight t
+  :ensure t
   :after consult eglot
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)
@@ -168,7 +166,7 @@
 ;; 不知道为什么必须手动开启
 ;; TODO: eglot-booster 无法放到 local 下，是因为 exec-path 的问题
 (use-package eglot-booster
-  :straight (eglot-booster :type git :host github :repo "jdtsmith/eglot-booster")
+  :vc (:url "https://github.com/jdtsmith/eglot-booster" :rev "main")
   :after eglot
   :demand t
   :config (eglot-booster-mode)
@@ -240,7 +238,7 @@
 
 ;; 文档信息展示
 (use-package eldoc
-  :straight t
+  :ensure t
   :config
   (setq eldoc-echo-area-display-truncation-message t
         eldoc-echo-area-prefer-doc-buffer t
@@ -269,7 +267,7 @@
 
 ;; 新的 ts 语法高亮支持
 (use-package treesit-auto
-  :straight t
+  :ensure t
   :demand t
   :custom
   (treesit-auto-install 'prompt)

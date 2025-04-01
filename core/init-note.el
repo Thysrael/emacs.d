@@ -3,8 +3,7 @@
 ;; delete 同样没有好的方式
 ;; 所以建议 rename 使用 alias ，delete 使用 deprecated
 (use-package org-roam
-  :straight (:host github :repo "org-roam/org-roam"
-                   :files (:defaults "extensions/*"))
+  :ensure t
   :custom
   (org-roam-v2-ack t)
 
@@ -109,7 +108,7 @@
 ;;   )
 
 (use-package consult-org-roam
-  :straight t
+  :ensure t
   :after org-roam
   :custom
   ;; Activate the minor mode

@@ -1,6 +1,5 @@
 ;; [tramp] Edit file remotely
 (use-package tramp
-  :straight nil
   :config
   (setq tramp-default-method "ssh"
         tramp-auto-save-directory (no-littering-expand-var-file-name "tramp-autosaves/")

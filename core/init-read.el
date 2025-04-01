@@ -27,7 +27,8 @@
 ;; 需要安装 sdcv 和 stardict 和字典
 ;; 字典在 https://github.com/colordict/colordict.github.io/tree/master 可下载
 (use-package sdcv
-  :straight (:host github :repo "manateelazycat/sdcv")
+  ;; :straight (:host github :repo "manateelazycat/sdcv")
+  :vc (:url "https://github.com/manateelazycat/sdcv" :rev "master")
   :commands (sdcv-search-pointer+)
   :bind ("C-," . sdcv-search-pointer+)
   :config
@@ -161,14 +162,18 @@
 
 (use-package eaf
   :if (display-graphic-p)
-  :straight (eaf
-             :type git
-             :host github
-             :repo "emacs-eaf/emacs-application-framework"
-             :files ("*.el" "*.py" "core" "app" "*.json")
-             :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
-             :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
-             )
+  :vc
+  (:url "https://github.com/emacs-eaf/emacs-application-framework"
+        :shell-command "python install-eaf.py --install pdf-viewer --ignore-sys-deps"
+        :rev "master")
+  ;; :straight (eaf
+  ;;            :type git
+  ;;            :host github
+  ;;            :repo "emacs-eaf/emacs-application-framework"
+  ;;            :files ("*.el" "*.py" "core" "app" "*.json")
+  ;;            :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
+  ;;            :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
+  ;;            )
   :demand t
   :custom
   (eaf-config-location (no-littering-expand-var-file-name "eaf/"))

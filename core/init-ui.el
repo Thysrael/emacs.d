@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 (use-package nerd-icons
-  :straight t
+  :ensure t
   :custom
   ;; 必须使用这个字体，字体显示才完全
   (nerd-icons-font-family "Symbols Nerd Font Mono")
@@ -199,7 +199,7 @@
 (setq custom-safe-themes t)
 
 (use-package doom-themes
-  :straight t
+  :ensure t
   :custom
   (doom-themes-enable-bold t)
   (doom-themes-enable-italic t)

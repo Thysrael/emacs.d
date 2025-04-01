@@ -2,14 +2,14 @@
 
 ;;; 代码补全
 (use-package dabbrev
-  :straight t
+  :ensure t
   :config
   (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'"))
   )
 
 ;;; corfu & tempel 方案
 (use-package tempel
-  :straight t
+  :ensure t
   :bind
   (:map tempel-map
         ("RET" . tempel-next)
@@ -25,7 +25,8 @@
   )
 
 (use-package corfu
-  :straight (:files (:defaults "extensions/*.el"))
+  ;; :straight (:files (:defaults "extensions/*.el"))
+  :ensure t
   :hook
   (((LaTeX-mode tex-mode prog-mode conf-mode yaml-mode shell-mode eshell-mode org-mode markdown-mode) . corfu-mode)
    ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil)))
@@ -60,14 +61,14 @@
 
 ;; 美化 corfu
 (use-package nerd-icons-corfu
-  :straight t
+  :ensure t
   :after corfu
   :init
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
 ;; 这是与补全前端 corfu 配合的补全后端 cape
 (use-package cape
-  :straight t
+  :ensure t
   :hook
   ((prog-mode . +corfu-add-cape-prog-backends)
    ((LaTeX-mode markdown-mode org-mode) . +corfu-add-cape-write-backends))

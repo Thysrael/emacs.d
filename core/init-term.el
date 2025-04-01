@@ -1,5 +1,5 @@
 (use-package vterm
-  :straight t
+  :ensure t
   :bind
   ;; 用 vterm-copy-mode 可以复制 vterm 输出
   (("C-t" . +start-vterm-in-project)

@@ -67,10 +67,7 @@
 ;;   )
 
 (use-package rime
-  :straight (rime :type git
-                  :host github
-                  :repo "DogLooksGood/emacs-rime"
-                  :files ("*.el" "Makefile" "lib.c"))
+  :ensure t
   :custom-face
   (rime-default-face ((t (:inherit hl-line
                                    :background unspecified :foreground unspecified))))
@@ -125,7 +122,7 @@
 
 ;; [sis] automatically switch input source
 (use-package sis
-  :straight t
+  :ensure t
   :hook
   (((text-mode prog-mode) . sis-context-mode)
    ((text-mode prog-mode) . sis-inline-mode)

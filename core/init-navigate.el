@@ -26,7 +26,7 @@
 
 ;; 字符跳转
 (use-package avy
-  :straight t
+  :ensure t
   :bind
   ("C-h" . avy-goto-char-2)
   :config
@@ -41,19 +41,19 @@
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mwim
-  :straight t
+  :ensure t
   :bind (([remap move-beginning-of-line] . mwim-beginning-of-code-or-line)
          ([remap move-end-of-line] . mwim-end-of-code-or-line)))
 
 
 ;; [beginend] Better M-< M-> for programming
 (use-package beginend
-  :straight t
+  :ensure t
   :hook (after-init . beginend-global-mode))
 
 ;; 结构化跳转
 (use-package imenu
-  :straight nil
+  :ensure nil
   :hook ((prog-mode conf-mode yaml-mode markdown-mode org-mode) . imenu-add-menubar-index)
   :config
   (setq imenu-auto-rescan t)
@@ -61,16 +61,16 @@
 
 ;; 中文分词跳转
 (use-package cns
-  :straight (
-             :host github
-             :repo "kanglmf/emacs-chinese-word-segmentation"
-             :pre-build ("make")
-             :files ("*.el" "cnws" "cppjieba/dict")
-             )
+  :vc (cns :url "https://github.com/kanglmf/emacs-chinese-word-segmentation.git"
+           :shell-command "git submodule update --init --recursive"
+           :make "all"
+           :rev "master")
   :config
-  (defvar cns-packages-path (expand-file-name "cns" (expand-file-name straight-build-dir (expand-file-name "straight" straight-base-dir))))
+  (defvar cns-packages-path
+    (expand-file-name "cns"
+                      (expand-file-name package-user-dir)))  
   (setq cns-prog (expand-file-name "cnws" cns-packages-path))
-  (setq cns-dict-directory (expand-file-name "dict" cns-packages-path))
+  (setq cns-dict-directory (expand-file-name "cppjieba/dict" cns-packages-path))
   (defun +cns-forward-word ()
     (interactive)
     (require 'org)

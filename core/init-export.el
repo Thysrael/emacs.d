@@ -68,7 +68,7 @@
   )
 
 (use-package engrave-faces
-  :straight t)
+  :ensure t)
 
 ;; need install `htmlize, mathjax`
 ;; reveal.js 目前不能轻松转换成 PDF

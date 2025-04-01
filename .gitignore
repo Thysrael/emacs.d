@@ -10,3 +10,4 @@ tree-sitter/
 !/straight/versions/default.el/
 .chatgpt-shell.el
 eln-cache
+elpa

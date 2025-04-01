@@ -2,7 +2,7 @@
 
 ;; git chunk
 (use-package diff-hl
-  :straight t
+  :ensure t
   :defines desktop-minor-mode-table
   :hook
   ; 在不同模式下挂在不同的高亮
@@ -57,7 +57,7 @@
 ;; [magit] Version control interface
 ;; magit-blame 后会进入一个特殊模式，按 q 退出
 (use-package magit
-  :straight t
+  :ensure t
   :bind (
          ("C-c v" . magit)
          ("C-c V" . magit-blame-addition))
@@ -88,7 +88,7 @@
   )
 
 (use-package forge
-  :straight t
+  :ensure t
   :after magit
   :custom-face
   (forge-topic-label ((t (:inherit variable-pitch :height 0.9 :width condensed :weight regular :underline nil))))
@@ -104,7 +104,7 @@
 ;; 可以用 C-c ^ 前缀来使用各种 merge 操作
 ;; 或许可以写一个 hydra 
 (use-package smerge-mode
-  :straight t
+  :ensure t
   :hook ((find-file . smerge-try-smerge))
   :config
   (defun smerge-try-smerge ()
@@ -119,7 +119,7 @@
 ;; show blame info in sidebar
 ;; 不常用，而且可以用 magit-blame 代替
 (use-package blamer
-  :straight (:host github :repo "artawower/blamer.el")
+  :ensure t
   :bind (("C-c G" . global-blamer-mode))
   :custom
   (blamer-idle-time 0.3)

@@ -3,7 +3,8 @@
 ;;; general
 ;; 让文本居中并限制宽度
 (use-package visual-fill-column
-  :straight (:protocol https)
+  ;; :straight (:protocol https)
+  :ensure t
   :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . +center-text)
   :config
   (defun +center-text ()
@@ -13,7 +14,7 @@
 
 ;; 可以给没有加空格的文本加上空格
 (use-package pangu-spacing
-  :straight t
+  :ensure t
   :hook
   (eww-mode . pangu-spacing-mode)
   (chatgpt-shell-mode . pangu-spacing-mode))
@@ -21,7 +22,7 @@
 ;;; markdown
 ;; markdown-mode
 (use-package markdown-mode
-  :straight t
+  :ensure t
   :custom-face
   ;; 这里是对于 org-mode level 的定义，可能在切换主题时出现错误
   (markdown-code-face ((t (:inherit nil))))
@@ -105,7 +106,7 @@
 ;; org-mode
 ;; org-link-preview 是 org-toggle-inline-image 的代替
 (use-package org
-  :straight t
+  :ensure t
   ;; :straight (:type built-in)
   ;; org latex preview https://abode.karthinks.com/org-latex-preview/
   ;; 原本的 org 的中英对齐功能有 bug
@@ -387,7 +388,7 @@
 
 ;; org-appear 可以实时渲染格式
 (use-package org-appear
-  :straight t
+  :ensure t
   :hook ((org-mode . org-appear-mode))
   :config
   (setq
@@ -521,15 +522,14 @@
 
 ;; org 智能列表
 (use-package org-autolist
-  :straight t
+  :ensure t
   :after org
   :hook (org-mode . org-autolist-mode))
 
 (use-package gnuplot
-  :straight t)
+  :ensure t)
 
 (use-package org-src
-  :straight nil
   :init
   ;; 设置代码块的默认头参数
   (setq org-babel-default-header-args
@@ -585,7 +585,7 @@
 ;; C-c C-c 编译，选择 XeLaTex 命令，C-c C-v 预览当前位置，C-c C-r 局部编译，C-c ` 跳转到编译错误位置
 ;; C-c * 快速选择一章，C-c . 快速选择一个环境
 (use-package latex
-  :straight auctex
+  :ensure auctex
   :hook ((TeX-mode . prettify-symbols-mode)
          (TeX-mode . (lambda ()
                        (push '("\\lnot" . ?¬) prettify-symbols-alist)
@@ -630,7 +630,7 @@
 ;; C-c { 是插入环境，也可以 env 后按 tab
 ;; tab 也可以用于快速跳转
 (use-package cdlatex
-  :straight t
+  :ensure t
   :hook
   (LaTeX-mode . cdlatex-mode))
 

@@ -16,7 +16,7 @@
 
 ;; 选择窗口
 (use-package ace-window
-  :straight t
+  :ensure t
   :custom-face
   (aw-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 3.0))))
   (aw-minibuffer-leading-char-face ((t (:inherit font-lock-keyword-face :bold t :height 1.0))))
@@ -70,7 +70,7 @@
 ;; 控制弹出窗口的行为
 ;; https://depp.brause.cc/shackle/
 (use-package shackle
-  :straight t
+  :ensure t
   :hook (after-init . shackle-mode)
   :init
   (setq shackle-lighter "")
@@ -88,7 +88,7 @@
 ;; popper 是一种特殊 buffer，所有的 popper 都只会占用同一个 window （出现在底部）
 ;; 利用这种机制可以使我们将许多临时的 buffer 都管理在一个窗口下
 (use-package popper
-  :straight t
+  :ensure t
   :bind
   ("C-=" . popper-toggle-type) ; 将 popper 转换为普通 buffer
   ("C--"  . popper-cycle) ; 切换多个 popper, 也可用于 toggle 出 popper window
@@ -205,7 +205,7 @@
 
 ;; 不活跃的 window 会变暗
 (use-package auto-dim-other-buffers
-  :straight t
+  :ensure t
   :hook ((after-init . auto-dim-other-buffers-mode)
          (auto-dim-other-buffers-mode . +auto-dim-other-buffers-auto-set-face))
   :config

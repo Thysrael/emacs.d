@@ -31,7 +31,7 @@
 
 ;; 开启视觉折行
 (use-package visual-line-mode
-  :straight nil ; 不要尝试从包管理器中安装 visual-line-mode
+  :ensure (:type built-in) ; 不要尝试从包管理器中安装 visual-line-mode
   :hook (text-mode . visual-line-mode) ; 将 visual-line-mode 应用于 text 模式
   )
 
@@ -132,7 +132,7 @@
 ;;; 历史信息记录
 ;; save-place-mode 可以保存文件的上次浏览位置，即使 emacs 关闭也可以保存
 (use-package saveplace
-  :straight t
+  :ensure t
   :hook
   (after-init . save-place-mode)
   :config
@@ -145,7 +145,7 @@
 
 ;; 调用最近的浏览文件记录
 (use-package recentf
-  :straight t
+  :ensure t
   :bind
   (("C-x C-r" . recentf-open-files))
   :hook
@@ -166,7 +166,7 @@
 
 ;; 用于保存和恢复 Emacs 会话期间的用户交互历史记录，包括命令历史、minibuffer 历史、搜索和替换历史等。
 (use-package savehist
-  :straight t
+  :ensure t
   :hook
   (after-init . savehist-mode)
   :config
@@ -219,7 +219,7 @@
 
 ;; 优化垃圾回收
 (use-package gcmh
-  :straight (:host github :repo "emacsmirror/gcmh")
+  :ensure t
   :hook
   (emacs-startup . gcmh-mode)
   :config
