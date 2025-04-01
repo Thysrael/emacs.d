@@ -517,7 +517,7 @@
 ;; Ha: 中文字符数（字数）
 ;; Wc: An + Ha
 (use-package advance-words-count
-  :load-path "~/.emacs.d/site-lisp/advance-words-count.el/"
+  :vc (advance-words-count :url "https://github.com/Thysrael/advance-words-count.el" :rev "master")
   :commands advance-words-count
   )
 
