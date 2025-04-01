@@ -111,7 +111,7 @@
     ;; JetBrainsMono 这个字体并不支持一些字符，好像 Sarasa Term SC 支持得更多一些，但是不知道 vscode 为啥可以
     (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
     (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
-    (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; 设置中文字体 Sarasa Term SC LXGW WenKai
+    (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; forbidden use backup font
     (set-fontset-font t 'cjk-misc (font-spec :family "TsangerJinKai05" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
     (set-fontset-font t 'unicode (font-spec :family "Symbols Nerd Font Mono") nil 'append)
     ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
