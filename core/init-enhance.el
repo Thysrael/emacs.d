@@ -467,6 +467,14 @@
                   for epunc in '("," "." "?" "!" ";" ":" "," "(" ")" "[" "]" "<" ">" "_")
                   do (define-key key-translation-map (kbd (concat prefix cpunc)) (kbd (concat prefix epunc)))))
 
+;; copy from remote emacs with osc52
+;; use system clipboard to replace the king ring of remote emacs
+(use-package clipetty
+  :if on-server
+  :ensure t
+  :hook (after-init . global-clipetty-mode)
+  )
+
 ;; 支持终端 emacs 和外部程序的粘贴
 (setq x-select-enable-clipboard t)
 
