@@ -81,7 +81,7 @@
   (dirvish-hide-cursor t) ; 在 wired 下不方便
   ;; 将 pdf 预览换成 pdf-preface
   (dirvish-preview-dispatchers
-   '(video image gif audio epub archive font pdf-preface))
+   '(video image gif audio epub archive font pdf))
   (dirvish-emerge-groups
    '(
      ;; ("Recent files"  (predicate . recent-files-2h))
