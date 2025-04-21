@@ -60,7 +60,7 @@
   (setq corfu-popupinfo-delay '(1.0 . 1.0)))
 
 (use-package corfu-terminal
-  :if (display-graphic-p)
+  :unless (display-graphic-p)
   :ensure t
   :custom
   (corfu-terminal-mode 1))
