@@ -327,7 +327,7 @@
 
 ;; 使用 `ispell-buffer` 可以检查英文拼写
 (use-package ispell
-  :ensure nil
+  :unless on-server
   :hook ((org-mode . org-skip-region-alist)
          (markdown-mode . markdown-skip-region-alist))
   :config
