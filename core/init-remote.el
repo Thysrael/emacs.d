@@ -9,8 +9,8 @@
         tramp-verbose 0 ; 加速，更少的 tramp 信息
         vc-handled-backends '(SVN Git) ; 加速，禁用一些版本控制后端
         )
-  (setq tramp-ssh-controlmaster-options
-        "-o ControlMaster=auto -o ControlPath=tramp.%%C -o ControlPersist=no -t")
+  ;; (setq tramp-ssh-controlmaster-options
+  ;;       "-o ControlMaster=auto -o ControlPath=tramp.%%C -o ControlPersist=no -t")
   ;; 只需要输入一次密码 https://www.reddit.com/r/emacs/comments/3liwm7/is_it_possible_to_configure_tramp_such_that_i/
   (setq tramp-use-ssh-controlmaster-options nil)
   (setq tramp-chunksize 2000)
