@@ -28,6 +28,11 @@
   ;; 我目前的理解是 tramp-own-remote-path 表示的是用 user 在登录后使用的环境变量
   ;; 而原本的 tramp-remote-path 是没有登录后的变量的
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+  :custom
+  ;; 禁用保存，提高速度
+  (remote-file-name-inhibit-auto-save t)
+  ;; 禁用 shell history 文件
+  (shell-history-file-name t)
   )
 
 ;; (use-package docker
