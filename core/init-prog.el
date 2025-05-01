@@ -165,6 +165,9 @@
 ;; 在使用 elgot 前先开启 eglot-booster
 ;; 不知道为什么必须手动开启
 ;; TODO: eglot-booster 无法放到 local 下，是因为 exec-path 的问题
+;; 使用 tramp 的时候，要求远端也需要 emacs-lsp-booster, 类似于 rg 了
+;; 否则就会导致 lsp server 无法启动
+;; pyright 和 pylsp 都没有 inlay hint
 (use-package eglot-booster
   :unless on-server
   :vc (:url "https://github.com/jdtsmith/eglot-booster" :rev "main")
