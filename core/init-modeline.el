@@ -196,8 +196,7 @@
 
 (defun +nerd-icons-icon-for-buffer ()
   (interactive)
-  (if (or (eq major-mode 'conf-space-mode)
-          (eq major-mode 'eaf-mode))
+  (if (or (eq major-mode 'eaf-mode))
       ;; WORKAROUND: eaf don't have `buffer-file-name`
       (nerd-icons-icon-for-file (buffer-name))
     (nerd-icons-icon-for-buffer)))

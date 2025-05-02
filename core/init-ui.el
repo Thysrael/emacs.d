@@ -6,6 +6,14 @@
   ;; 必须使用这个字体，字体显示才完全
   (nerd-icons-font-family "Symbols Nerd Font Mono")
   ;; (nerd-icons-scale-factor 1.1)
+  :config
+  ;; push 比 add-to-list 更高效，因为 add-to-list 要扫描整个 list 确保不重复
+  ;; 要指定后缀名、字体集、face
+  (push '("drawio" nerd-icons-mdicon "nf-md-drawing" :face nerd-icons-lpink) nerd-icons-extension-icon-alist)
+  (push '("rst" nerd-icons-mdicon "nf-md-file_document" :face nerd-icons-lpink) nerd-icons-extension-icon-alist)
+  (push '(conf-space-mode nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-mode-icon-alist)
+  ;; regexp 是在文件没有拓展名时，采用的匹配策略
+  (push '("^config$" nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-regexp-icon-alist)
   )
 
 ;; treemacs needed

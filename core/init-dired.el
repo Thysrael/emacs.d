@@ -82,6 +82,7 @@
   ;; 将 pdf 预览换成 pdf-preface
   (dirvish-preview-dispatchers
    '(video image gif audio epub archive font pdf))
+  ;; M-e
   (dirvish-emerge-groups
    '(
      ;; ("Recent files"  (predicate . recent-files-2h))
