@@ -249,6 +249,8 @@
    '("," . sdcv-search-pointer+)
    '("d" . chatgpt-shell)
    '("t" . +start-vterm-in-project)
+   '("!" . async-shell-command)
+   '("|" . shell-command-on-region)
    )
   ;; 在退出 insert 模式时自动退出 corfu 补全
   (with-eval-after-load 'corfu

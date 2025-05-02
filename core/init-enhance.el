@@ -498,3 +498,8 @@
             (lambda (orig-fun &rest args)
               (let ((inhibit-message t))
                 (apply orig-fun args))))
+
+;; shell 以交互方式工作（即会读取 `.bashrc`）
+;; 不知道为什么 zsh 不可以
+(setq shell-file-name "bash")
+(setq shell-command-switch "-ic")
