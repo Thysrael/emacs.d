@@ -32,7 +32,7 @@
   )
 
 ;; (use-package treemacs
-;;   :straight t
+;;   :ensure t
 ;;   :functions
 ;;   (treemacs-filewatch-mode treemacs-git-mode treemacs-delete-other-windows)
 ;;   :custom-face
@@ -92,6 +92,13 @@
 ;;    '(variable-pitch ((t (:height 0.9)))) ; 缩小默认字体
 ;;    )
 ;;   )
+;;
+;; (use-package treemacs-nerd-icons
+;;   :ensure t
+;;   :init
+;;   (require 'treemacs-nerd-icons)
+;;   :config
+;;   (treemacs-load-theme "nerd-icons"))
 
 ;; (use-package treemacs-magit
 ;;   :straight t

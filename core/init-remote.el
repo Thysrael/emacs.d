@@ -1,19 +1,6 @@
 ;; [tramp] Edit file remotely
 (use-package tramp
   :config
-  (setq tramp-default-method "ssh"
-        tramp-auto-save-directory (no-littering-expand-var-file-name "tramp-autosaves/")
-        tramp-backup-directory-alist backup-directory-alist
-        remote-file-name-inhibit-cache 60 ; 加速，允许 cache
-        remote-file-name-inhibit-locks t ; 加速，不会使用文件锁
-        tramp-verbose 0 ; 加速，更少的 tramp 信息
-        vc-handled-backends '(SVN Git) ; 加速，禁用一些版本控制后端
-        )
-  ;; (setq tramp-ssh-controlmaster-options
-  ;;       "-o ControlMaster=auto -o ControlPath=tramp.%%C -o ControlPersist=no -t")
-  ;; 只需要输入一次密码 https://www.reddit.com/r/emacs/comments/3liwm7/is_it_possible_to_configure_tramp_such_that_i/
-  (setq tramp-use-ssh-controlmaster-options nil)
-  (setq tramp-chunksize 2000)
   ;; 似乎是支持 remote 启动其他进程的
   (connection-local-set-profile-variables
    'remote-direct-async-process
@@ -28,11 +15,26 @@
   ;; 我目前的理解是 tramp-own-remote-path 表示的是用 user 在登录后使用的环境变量
   ;; 而原本的 tramp-remote-path 是没有登录后的变量的
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
+  ;; 加速，更少的 tramp 信息
+  (setq tramp-verbose 0)
   :custom
   ;; 禁用保存，提高速度
   (remote-file-name-inhibit-auto-save t)
+  (tramp-auto-save-directory (no-littering-expand-var-file-name "tramp-autosaves/"))
+  (tramp-backup-directory-alist backup-directory-alist)
   ;; 禁用 shell history 文件
   (shell-history-file-name t)
+  ;; tramp 的默认方法
+  (tramp-default-method "ssh")
+  ;; 加速，允许 cache 在 60s 内使用
+  (remote-file-name-inhibit-cache 60)
+  ;; 加速，不会使用文件锁
+  (remote-file-name-inhibit-locks t)
+  ;; 加速，禁用一些版本控制后端
+  (vc-handled-backends '(Git))
+  ;; 只需要输入一次密码 https://www.reddit.com/r/emacs/comments/3liwm7/is_it_possible_to_configure_tramp_such_that_i/
+  (tramp-use-ssh-controlmaster-options nil)
+  (tramp-chunksize 2000)
   )
 
 ;; (use-package docker
