@@ -14,6 +14,7 @@
   (push '(conf-space-mode nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-mode-icon-alist)
   ;; regexp 是在文件没有拓展名时，采用的匹配策略
   (push '("^config$" nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-regexp-icon-alist)
+  ;; (push '("rc$" nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-regexp-icon-alist)
   )
 
 ;; treemacs needed
@@ -117,7 +118,7 @@
   (defun +setup-fonts ()
     "Setup fonts."
     ;; JetBrainsMono 这个字体并不支持一些字符，好像 Sarasa Term SC 支持得更多一些，但是不知道 vscode 为啥可以
-    (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono Nerd Font" :size +font-en-size)) ; 设置英文字体
+    (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono" :size +font-en-size)) ; 设置英文字体
     (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
     (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; forbidden use backup font
     (set-fontset-font t 'cjk-misc (font-spec :family "TsangerJinKai05" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
@@ -234,10 +235,10 @@
  '(font-lock-property-name-face ((t (:inherit font-lock-variable-name-face :slant italic))))
  '(font-lock-property-use-face ((t (:inherit font-lock-value-use-face :slant italic))))
  '(font-lock-variable-use-face ((t (:inherit unspecified))))
- '(font-lock-preprocessor-face ((t (:foreground unspecified :family "JetBrainsMono Nerd Font"))))
+ '(font-lock-preprocessor-face ((t (:foreground unspecified :family "JetBrainsMono"))))
  '(font-lock-regexp-grouping-backslash ((t (:foreground unspecified))))
  ;; 设置变宽字体和等宽字体，但是不知道为啥不能放到 UI 里
- '(fixed-pitch ((t (:family "JetBrainsMono Nerd Font"))))
+ '(fixed-pitch ((t (:family "JetBrainsMono"))))
  '(variable-pitch ((t (:height 0.9 :family "Symbols Nerd Font Mono")))) ;; SourceHanSerifCN
  ;; 设置加粗字体
  '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold))))

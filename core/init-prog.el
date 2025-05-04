@@ -121,7 +121,7 @@
   (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-report-progress nil)
   ;; :custom-face
-  ;; (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono Nerd Font"))))
+  ;; (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono"))))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :bind
   ("C-c l" . transient-hydra)
