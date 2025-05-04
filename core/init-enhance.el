@@ -476,21 +476,24 @@
   )
 
 ;; 支持终端 emacs 和外部程序的粘贴
-(setq x-select-enable-clipboard t)
+(setq select-enable-clipboard t)
+;; (setq select-enable-primary t)
 
 ;; use xsel to copy/paste in emacs-nox
-(unless window-system
-  (when (getenv "DISPLAY")
-    (defun xclip-cut-function (text &optional push)
-      (with-temp-buffer
-        (insert text)
-        (call-process-region (point-min) (point-max) "xclip" nil 0 nil "-selection" "clipboard" "-i")))
-    (defun xclip-paste-function ()
-      (let ((xclip-output (shell-command-to-string "xclip -selection clipboard -o")))
-        (unless (string= (car kill-ring) xclip-output)
-          xclip-output)))
-    (setq interprogram-cut-function 'xclip-cut-function)
-    (setq interprogram-paste-function 'xclip-paste-function)))
+;; WORKAROUND: xwayland emacs cann't copy cjk char to native wayland electron
+;; (unless window-system
+(when (getenv "DISPLAY")
+  (defun xclip-cut-function (text &optional push)
+    (with-temp-buffer
+      (insert text)
+      (call-process-region (point-min) (point-max) "xclip" nil 0 nil "-selection" "clipboard" "-i")))
+  (defun xclip-paste-function ()
+    (let ((xclip-output (shell-command-to-string "xclip -selection clipboard -o")))
+      (unless (string= (car kill-ring) xclip-output)
+        xclip-output)))
+  (setq interprogram-cut-function 'xclip-cut-function)
+  (setq interprogram-paste-function 'xclip-paste-function))
+;; )
 
 ;; remove `Indentation setup for shell type zsh`
 ;; https://emacs.stackexchange.com/questions/52846/how-to-remove-message-indentation-setup-for-shell-type-sh
@@ -501,5 +504,5 @@
 
 ;; shell 以交互方式工作（即会读取 `.bashrc`）
 ;; 不知道为什么 zsh 不可以
-(setq shell-file-name "bash")
-(setq shell-command-switch "-ic")
+;; (setq shell-file-name "bash")
+;; (setq shell-command-switch "-ic")

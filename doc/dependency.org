@@ -2,7 +2,7 @@
 #+author: Thysrael
 
 * Font
-英文正文：Jetbrain
+英文正文：Jetbrain Mono
 仓耳今楷
 icon：Symbols Nerd Font Mono
 黑体：Sarasa Mono SC
