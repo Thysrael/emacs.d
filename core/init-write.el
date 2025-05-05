@@ -611,10 +611,10 @@
   (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' -shell-escape %t" TeX-run-TeX nil t))
 
   ;; 设置 eaf 为阅读器
-  (add-to-list 'TeX-view-program-list '("eaf" eaf-pdf-synctex-forward-view))
-  (add-to-list 'TeX-view-program-selection '(output-pdf "eaf"))
+  ;; (add-to-list 'TeX-view-program-list '("eaf" eaf-pdf-synctex-forward-view))
+  ;; (add-to-list 'TeX-view-program-selection '(output-pdf "eaf"))
   ;; Use pdf-tools to open PDF files
-  ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
   ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
   ;; (add-to-list 'font-latex-match-reference-keywords-local '("upcite" "*[[{"))
 

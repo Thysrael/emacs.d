@@ -138,16 +138,6 @@
         )
   )
 
-;; (use-package eaf
-;;   :straight nil
-;;   :init
-;;   (add-to-list 'load-path (expand-file-name "site-lisp/emacs-application-framework/" user-emacs-directory))
-;;   (require 'eaf)
-;;   (setq eaf-config-location (no-littering-expand-var-file-name "eaf/"))
-;;   (setq eaf-buffer-title-format "EAF: %s")
-;;   (setq eaf-kill-process-after-last-buffer-closed t)
-;;   )
-
 ;; (use-package image-slicing
 ;;   :straight (image-slicing :type git :host github :repo "ginqi7/image-slicing")
 ;;   :config
@@ -160,27 +150,27 @@
 ;;   :custom
 ;;   (org-sliced-images-round-image-height 40))
 
-(use-package eaf
-  :if (display-graphic-p)
-  :vc
-  (:url "https://github.com/emacs-eaf/emacs-application-framework"
-        :shell-command "python install-eaf.py --install pdf-viewer --ignore-sys-deps"
-        :rev "master")
-  ;; :straight (eaf
-  ;;            :type git
-  ;;            :host github
-  ;;            :repo "emacs-eaf/emacs-application-framework"
-  ;;            :files ("*.el" "*.py" "core" "app" "*.json")
-  ;;            :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
-  ;;            :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
-  ;;            )
-  :demand t
-  :custom
-  (eaf-config-location (no-littering-expand-var-file-name "eaf/"))
-  (eaf-kill-process-after-last-buffer-closed t)
-  :init
-  (setq eaf-buffer-title-format "EAF: %s")
-  )
+;; (use-package eaf
+;;   :if (display-graphic-p)
+;;   :vc
+;;   (:url "https://github.com/emacs-eaf/emacs-application-framework"
+;;         :shell-command "python install-eaf.py --install pdf-viewer --ignore-sys-deps"
+;;         :rev "master")
+;;   ;; :straight (eaf
+;;   ;;            :type git
+;;   ;;            :host github
+;;   ;;            :repo "emacs-eaf/emacs-application-framework"
+;;   ;;            :files ("*.el" "*.py" "core" "app" "*.json")
+;;   ;;            :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
+;;   ;;            :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
+;;   ;;            )
+;;   :demand t
+;;   :custom
+;;   (eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+;;   (eaf-kill-process-after-last-buffer-closed t)
+;;   :init
+;;   (setq eaf-buffer-title-format "EAF: %s")
+;;   )
 
 ;; ;; 按 F 会有 avy 类似的效果
 ;; ;; 按 N 会将其转换为 eww 界面，不过最近还需要按 g 刷新才能正常显示
@@ -212,29 +202,39 @@
 ;; M-d: delete annotation
 ;; f: jump to link
 ;; o: outline
-(use-package eaf-pdf-viewer
-  :if (display-graphic-p)
-  :demand t
-  :custom
-  (eaf-pdf-dark-mode nil)
-  :config
-  (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key gptel "d" eaf-pdf-viewer-keybinding)
-  ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
-  (setq eaf-pdf-inline-text-annot-fontsize 14)
-  )
+;; (use-package eaf-pdf-viewer
+;;   :if (display-graphic-p)
+;;   :demand t
+;;   :custom
+;;   (eaf-pdf-dark-mode nil)
+;;   :config
+;;   (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key gptel "d" eaf-pdf-viewer-keybinding)
+;;   ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
+;;   (setq eaf-pdf-inline-text-annot-fontsize 14)
+;;   )
 
 ;; 不需要在 OS 层上安装软件。
 ;; 安装后运行 pdf-tools-install 即可，其实在配置里安装即可
 ;; 为了 dirvish 的预览，但是如果只使用 pdf-preface 则不需要
-;; (use-package pdf-tools
-;;   :if (window-system)
-;;   :straight t
-;;   :config
-;;   (pdf-tools-install :no-query))
+(use-package pdf-tools
+  :ensure t
+  :mode  ("\\.pdf\\'" . pdf-view-mode)
+  :config
+  (pdf-tools-install :no-query)
+  :bind
+  (:map pdf-view-mode-map
+        ("n" . pdf-view-next-line-or-next-page)
+        ("p" . pdf-view-previous-line-or-previous-page)
+        ("C-s" . isearch-forward)
+        ("C-r" . isearch-backward)
+        ("s" . pdf-occur)
+        )
+  (:map pdf-occur-buffer-mode-map
+        ("M-<return>" . pdf-occur-view-occurrence)))
 
 ;; (use-package nov
 ;;   :straight t

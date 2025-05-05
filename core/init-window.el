@@ -113,7 +113,9 @@
      "\\*Go-Translate\\*"
      "\\*maple-translate\\*"
      "\\*eww bookmarks\\*"
-     "\\*Outline:.*\\*.*$" PDF-Outline-mode
+     "\\*Outline:.*\\*.*$"
+     pdf-outline-buffer-mode
+     pdf-occur-buffer-mode
      ;; "Bookmark List" bookmark-bmenu-mode
      "\\*toc\\*" toc-mode
      comint-mode
