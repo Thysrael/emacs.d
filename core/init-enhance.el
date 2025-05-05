@@ -480,8 +480,7 @@
 ;; (setq select-enable-primary t)
 
 ;; use xsel to copy/paste in emacs-nox
-;; WORKAROUND: xwayland emacs cann't copy cjk char to native wayland electron
-;; (unless window-system
+(unless window-system
 (when (getenv "DISPLAY")
   (defun xclip-cut-function (text &optional push)
     (with-temp-buffer
@@ -493,7 +492,7 @@
         xclip-output)))
   (setq interprogram-cut-function 'xclip-cut-function)
   (setq interprogram-paste-function 'xclip-paste-function))
-;; )
+)
 
 ;; remove `Indentation setup for shell type zsh`
 ;; https://emacs.stackexchange.com/questions/52846/how-to-remove-message-indentation-setup-for-shell-type-sh
