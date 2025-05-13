@@ -124,7 +124,7 @@
     (set-face-attribute 'default nil :font (font-spec :family "JetBrainsMono" :size +font-en-size)) ; 设置英文字体
     (set-fontset-font t 'han (font-spec :family "TsangerJinKai05" :size +font-han-size))
     (set-fontset-font t 'han (font-spec :script 'han) nil 'append) ; forbidden use backup font
-    (set-fontset-font t 'cjk-misc (font-spec :family "TsangerJinKai05" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
+    (set-fontset-font t 'cjk-misc (font-spec :family "Sarasa Mono SC" :size +font-han-size)) ; 设置全角标点，如果是仓耳有点丑，是半角的
     (set-fontset-font t 'unicode (font-spec :family "Symbols Nerd Font Mono") nil 'append)
     ;; (set-fontset-font t 'unicode (font-spec :family "Symbola") nil 'append)
     )
