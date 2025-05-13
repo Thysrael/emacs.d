@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; 临时文件设置
 (setq-default
  ;; 关闭锁文件，防止生成 file~#

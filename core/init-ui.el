@@ -109,9 +109,9 @@
     (if (string-equal hostname "banana")
         (progn
           ;; 当主机名为 banana 时
-          (setq +font-en-size 16)
-          (setq +font-han-size 16)
-          (setq +font-emoji-size 16))
+          (setq +font-en-size 28)
+          (setq +font-han-size 28)
+          (setq +font-emoji-size 28))
       (progn
         ;; 当主机名不是 banana 时
         (setq +font-en-size 18)

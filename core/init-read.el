@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;; 翻译
 ;; (use-package google-translate
 ;;   :straight t
@@ -150,27 +152,42 @@
 ;;   :custom
 ;;   (org-sliced-images-round-image-height 40))
 
-;; (use-package eaf
-;;   :if (display-graphic-p)
-;;   :vc
-;;   (:url "https://github.com/emacs-eaf/emacs-application-framework"
-;;         :shell-command "python install-eaf.py --install pdf-viewer --ignore-sys-deps"
-;;         :rev "master")
-;;   ;; :straight (eaf
-;;   ;;            :type git
-;;   ;;            :host github
-;;   ;;            :repo "emacs-eaf/emacs-application-framework"
-;;   ;;            :files ("*.el" "*.py" "core" "app" "*.json")
-;;   ;;            :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
-;;   ;;            :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
-;;   ;;            )
-;;   :demand t
-;;   :custom
-;;   (eaf-config-location (no-littering-expand-var-file-name "eaf/"))
-;;   (eaf-kill-process-after-last-buffer-closed t)
-;;   :init
-;;   (setq eaf-buffer-title-format "EAF: %s")
-;;   )
+(use-package eaf
+  :if (display-graphic-p)
+  :vc
+  (:url "https://github.com/emacs-eaf/emacs-application-framework"
+        :shell-command "python install-eaf.py --install pdf-viewer --ignore-sys-deps"
+        :rev "master")
+  ;; :straight (eaf
+  ;;            :type git
+  ;;            :host github
+  ;;            :repo "emacs-eaf/emacs-application-framework"
+  ;;            :files ("*.el" "*.py" "core" "app" "*.json")
+  ;;            :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
+  ;;            :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
+  ;;            )
+  :demand t
+  :custom
+  (eaf-config-location (no-littering-expand-var-file-name "eaf/"))
+  (eaf-kill-process-after-last-buffer-closed t)
+  :init
+  (setq eaf-buffer-title-format "EAF: %s")
+  )
+
+(use-package eaf-pdf-viewer
+  :if (display-graphic-p)
+  :demand t
+  :custom
+  (eaf-pdf-dark-mode nil)
+  :config
+  (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key gptel "d" eaf-pdf-viewer-keybinding)
+  ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
+  (setq eaf-pdf-inline-text-annot-fontsize 14)
+  )
 
 ;; ;; 按 F 会有 avy 类似的效果
 ;; ;; 按 N 会将其转换为 eww 界面，不过最近还需要按 g 刷新才能正常显示
@@ -217,24 +234,24 @@
 ;;   (setq eaf-pdf-inline-text-annot-fontsize 14)
 ;;   )
 
-;; 不需要在 OS 层上安装软件。
-;; 安装后运行 pdf-tools-install 即可，其实在配置里安装即可
-;; 为了 dirvish 的预览，但是如果只使用 pdf-preface 则不需要
-(use-package pdf-tools
-  :ensure t
-  :mode  ("\\.pdf\\'" . pdf-view-mode)
-  :config
-  (pdf-tools-install :no-query)
-  :bind
-  (:map pdf-view-mode-map
-        ("n" . pdf-view-next-line-or-next-page)
-        ("p" . pdf-view-previous-line-or-previous-page)
-        ("C-s" . isearch-forward)
-        ("C-r" . isearch-backward)
-        ("s" . pdf-occur)
-        )
-  (:map pdf-occur-buffer-mode-map
-        ("M-<return>" . pdf-occur-view-occurrence)))
+;; ;; 不需要在 OS 层上安装软件。
+;; ;; 安装后运行 pdf-tools-install 即可，其实在配置里安装即可
+;; ;; 为了 dirvish 的预览，但是如果只使用 pdf-preface 则不需要
+;; (use-package pdf-tools
+;;   :ensure t
+;;   :mode  ("\\.pdf\\'" . pdf-view-mode)
+;;   :config
+;;   (pdf-tools-install :no-query)
+;;   :bind
+;;   (:map pdf-view-mode-map
+;;         ("n" . pdf-view-next-line-or-next-page)
+;;         ("p" . pdf-view-previous-line-or-previous-page)
+;;         ("C-s" . isearch-forward)
+;;         ("C-r" . isearch-backward)
+;;         ("s" . pdf-occur)
+;;         )
+;;   (:map pdf-occur-buffer-mode-map
+;;         ("M-<return>" . pdf-occur-view-occurrence)))
 
 ;; (use-package nov
 ;;   :straight t
@@ -260,52 +277,10 @@
 ;;   :init
 ;;   (require 'eaf-image-viewer))
 
-;; (use-package imenu-list
-;;   :after imenu
+;; ;; W 和 H 可以分别按 width 和 height 适配图片
+;; (use-package doc-view
+;;   :ensure t
 ;;   :custom
-;;   (imenu-list-position 'left)
-;;   (imenu-list-size 0.2)
-;;   :config
-;;   (setq imenu-list-focus-after-activation t)
-;;   (setq imenu-list-auto-resize t)
-;;   :bind
-;;   ("C-c I" . imenu-list-smart-toggle)
-;;   ("<tab>" . hs-toggle-hiding)
-;;   ("TAB" . hs-toggle-hiding)
+;;   ;; 提高分辨率
+;;   (doc-view-resolution 200)
 ;;   )
-
-;; ;; 需要执行 `yay -S emacs-pdf-tools-git` 才可以正常使用
-;; (use-package pdf-tools
-;;   :straight t
-;;   :defines pdf-annot-activate-created-annotations
-;;   :hook ((pdf-tools-enabled . pdf-view-auto-slice-minor-mode))
-;;   :mode ("\\.[pP][dD][fF]\\'" . pdf-view-mode)
-;;   :bind (:map pdf-view-mode-map
-;;          ([remap scroll-up-command] . pdf-view-scroll-up-or-next-page)
-;;          ([remap scroll-down-command] . pdf-view-scroll-down-or-previous-page))
-;;   :init
-;;   (setq pdf-view-use-scaling t
-;;         pdf-view-use-imagemagick nil
-;;         pdf-annot-activate-created-annotations t)
-;;   (setq pdf-sync-backward-display-action t
-;;       pdf-sync-forward-display-action t)
-;;   :config
-;;   (pdf-tools-install t nil t nil)
-;;   )
-;;
-;; (use-package pdf-isearch
-;;   :after pdf-tools
-;;   :hook (pdf-tools-enabled . pdf-isearch-minor-mode))
-;;
-;; (use-package pdf-outline
-;;   :after pdf-tools
-;;   :hook (pdf-tools-enabled . pdf-outline-minor-mode))
-;;
-;; ;; [saveplace-pdf-view] Recover last viewed position
-;; (use-package saveplace-pdf-view
-;;   :straight t
-;;   :when (ignore-errors (pdf-info-check-epdfinfo) t)
-;;   :autoload (saveplace-pdf-view-find-file-advice saveplace-pdf-view-to-alist-advice)
-;;   :init
-;;   (advice-add 'save-place-find-file-hook :around #'saveplace-pdf-view-find-file-advice)
-;;   (advice-add 'save-place-to-alist :around #'saveplace-pdf-view-to-alist-advice))

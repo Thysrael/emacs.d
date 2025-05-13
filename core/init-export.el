@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (use-package ox
   :custom
   (org-export-with-toc nil)

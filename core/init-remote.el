@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;; [tramp] Edit file remotely
 (use-package tramp
   :config
@@ -32,6 +34,7 @@
   (remote-file-name-inhibit-locks t)
   ;; 加速，禁用一些版本控制后端
   (vc-handled-backends '(Git))
+  ;; (vc-handled-backends nil)
   ;; 只需要输入一次密码 https://www.reddit.com/r/emacs/comments/3liwm7/is_it_possible_to_configure_tramp_such_that_i/
   (tramp-use-ssh-controlmaster-options nil)
   (tramp-chunksize 2000)

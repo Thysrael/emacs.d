@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;; 提供 wiki 式自下而上的笔记系统
 ;; rename 似乎没有好的方式
 ;; delete 同样没有好的方式

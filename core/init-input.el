@@ -75,9 +75,9 @@
                                    :background unspecified
                                    :inverse-video unspecified :underline t))))
   :config
-  (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
+  ;; (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
   ;; https://manateelazycat.github.io/2023/04/05/emacs-rime-ice/
-  ;; (setq rime-user-data-dir "~/.local/share/fcitx5/rime/")
+  (setq rime-user-data-dir "~/.local/share/fcitx5/rime/")
   (setq rime-disable-predicates
         '(
           meow-normal-mode-p
