@@ -45,12 +45,9 @@
 
 ;; 使用 `E` 可以用外部命令打开文件
 (use-package dirvish
-  ;; :ensure t
-  :vc (:url "https://github.com/alexluigit/dirvish" :lisp-dir "extensions/")
-  :load-path "./elpa/dirvish/"
-  ;; :load-path "./elpa/dirvish"
+  :ensure t
+  ;; :vc (:url "https://github.com/alexluigit/dirvish" :lisp-dir "extensions/")
   :init
-  (require 'dirvish)
   (dirvish-override-dired-mode)
   :custom-face
   (dirvish-hl-line ((t (:inherit hl-line))))
