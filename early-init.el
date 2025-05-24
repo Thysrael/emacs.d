@@ -67,7 +67,4 @@
 ;; https://emacs-china.org/t/org-babel/18699/10
 (setq org-modules-loaded t)
 
-;; package.el 快速启动
-(setq package-quickstart t)
-
 ;; (setenv "LSP_USE_PLISTS" "true")

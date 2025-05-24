@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;; [zoom] Managing the window sizes automatically
 ;; (use-package zoom
 ;;   :hook (window-setup . zoom-mode)
