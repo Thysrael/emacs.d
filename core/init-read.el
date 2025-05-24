@@ -185,6 +185,7 @@
   (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
   (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
   (eaf-bind-key gptel "d" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key eaf-py-proxy-copy_select "w" eaf-pdf-viewer-keybinding)
   ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
   (setq eaf-pdf-inline-text-annot-fontsize 14)
   )

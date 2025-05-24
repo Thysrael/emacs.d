@@ -153,6 +153,16 @@
   (org-ellipsis "¶")
   (org-highlight-latex-and-related '(native))
   (org-startup-numerated t) ; 添加标题序号
+  ;; 默认只展开标题行
+  (org-startup-folded 'content)
+  ;; 列表的下一级设置
+  (org-list-demote-modify-bullet '(
+								   ("-"  . "+")
+                                   ("+"  . "1.")
+								   ("1." . "1)")
+								   ))
+  (org-preview-latex-image-directory "/tmp/ltximg/")
+  (org-latex-create-formula-image-program 'dvisvgm)
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
@@ -183,8 +193,8 @@
 
   ;;   (setq org-latex-create-formula-image-program 'dvisvgm
   ;;         org-startup-with-latex-preview nil)
-  ;; (with-eval-after-load 'org
-  ;;   (plist-put org-format-latex-options :scale 1.0))
+  (with-eval-after-load 'org
+    (plist-put org-format-latex-options :scale 0.6))
   (push '("jupyter-python" . python) org-src-lang-modes)
   (defface org-bold
     '((t :foreground "#d2268b"
@@ -204,16 +214,6 @@
           ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
            org-code verbatim)
           ("+" (:strike-through t))))
-
-  :custom
-  ;; 默认只展开标题行
-  (org-startup-folded 'content)
-  ;; 列表的下一级设置
-  (org-list-demote-modify-bullet '(
-								   ("-"  . "+")
-                                   ("+"  . "1.")
-								   ("1." . "1)")
-								   ))
   :bind
   (:map org-mode-map
         ;; ("C-c C-w" . org-copy-subtree)
@@ -612,9 +612,9 @@
 
   ;; 设置 eaf 为阅读器
   ;; (add-to-list 'TeX-view-program-list '("eaf" eaf-pdf-synctex-forward-view))
-  ;; (add-to-list 'TeX-view-program-selection '(output-pdf "eaf"))
+  (add-to-list 'TeX-view-program-selection '(output-pdf "eaf"))
   ;; Use pdf-tools to open PDF files
-  (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
+  ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
   ;; (setq TeX-view-program-selection '((output-pdf "PDF Tools")))
   ;; (add-to-list 'font-latex-match-reference-keywords-local '("upcite" "*[[{"))
 
