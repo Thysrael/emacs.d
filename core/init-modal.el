@@ -263,6 +263,7 @@
       (state
        '(
          (color-rg-mode . motion)
+         (help-mode . normal)
          ))
     (add-to-list 'meow-mode-state-list state))
   )
