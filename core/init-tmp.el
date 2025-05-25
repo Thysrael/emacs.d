@@ -1,5 +1,19 @@
 ;; -*- lexical-binding: t; -*-
 
+;; 都挺好，就是默认有些丑
+;; (use-package window-stool
+;;   :vc (:url "https://github.com/JasZhe/window-stool" :rev "main")
+;;   :hook prog-mode
+;;   :custom
+;;   (window-stool-n-from-top 2)
+;;   (window-stool-use-overlays nil)
+;;   :config
+;;   ;; 让 side-window 在 ace-window 表现的更自然
+;;   (with-eval-after-load 'ace-window
+;;     (push " \*Window Stool\*" aw-ignored-buffers)
+;;     )
+;;   )
+
 ;; [zoom] Managing the window sizes automatically
 ;; (use-package zoom
 ;;   :hook (window-setup . zoom-mode)
