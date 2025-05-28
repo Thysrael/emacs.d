@@ -87,19 +87,17 @@
 (use-package chatgpt-shell
   :ensure t
   :config
-  (setq chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
-  ;; 设置代理
-  ;; (setq chatgpt-shell-additional-curl-options '("-x" "http://127.0.0.1:7897"))
-  (setq chatgpt-shell-proxy "http://127.0.0.1:7897")
-
-  ;; (setq chatgpt-shell-api-url-path "")
   (require 'auth-source)
   (setq chatgpt-shell-openai-key (auth-source-pick-first-password :host "openai.api.key"))
-  (setq chatgpt-shell-prompt-query-response-style #'shell)
-  (setq chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
-  ;; (setq chatgpt-shell-model-versions '("gpt-4o" "gpt-4o-mini"))
-  (setq chatgpt-shell-model-version "gpt-4o")
-  (setq chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
+  (setq chatgpt-shell-deepseek-key (auth-source-pick-first-password :host "deepseek.api.key"))
+  :custom
+  ;; 设置代理
+  (chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
+  (chatgpt-shell-proxy "http://127.0.0.1:7897")
+  (chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
+  (chatgpt-shell-model-version "gpt-4o")
+  (chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
+  (chatgpt-shell-prompt-query-response-style #'shell)
   :bind
   ("C-c q" . chatgpt-shell-describe-code)
   ;; ("C-c q" . chatgpt-shell)
