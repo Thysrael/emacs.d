@@ -67,6 +67,7 @@
          'init-remote
          'init-dired
          'init-modal
+         'init-ai
          ))
   )
 

@@ -84,12 +84,16 @@
 ;; ("C-c q" . gptel-send-with-options))
 
 ;; chatgpt 支持
+;; C-c C-v 切换模型，C-c C-s 切换 prompt
 (use-package chatgpt-shell
   :ensure t
   :config
   (require 'auth-source)
   (setq chatgpt-shell-openai-key (auth-source-pick-first-password :host "openai.api.key"))
   (setq chatgpt-shell-deepseek-key (auth-source-pick-first-password :host "deepseek.api.key"))
+  (if on-server
+      (setq chatgpt-shell-model-version "gpt-4o")
+    (setq chatgpt-shell-model-version "deepseek-chat"))
   :custom
   ;; 设置代理
   (chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")

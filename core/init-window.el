@@ -208,6 +208,7 @@
 ;; 不活跃的 window 会变暗
 (use-package auto-dim-other-buffers
   :ensure t
+  :unless on-server
   :hook ((after-init . auto-dim-other-buffers-mode)
          (auto-dim-other-buffers-mode . +auto-dim-other-buffers-auto-set-face))
   :config
