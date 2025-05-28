@@ -92,12 +92,14 @@
   (setq chatgpt-shell-openai-key (auth-source-pick-first-password :host "openai.api.key"))
   (setq chatgpt-shell-deepseek-key (auth-source-pick-first-password :host "deepseek.api.key"))
   (if on-server
+      (setq chatgpt-shell-model-version "deepseek-chat")
+    (progn
       (setq chatgpt-shell-model-version "gpt-4o")
-    (setq chatgpt-shell-model-version "deepseek-chat"))
+      (chatgpt-shell-proxy "http://127.0.0.1:7897")
+      ))
   :custom
   ;; 设置代理
   (chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
-  (chatgpt-shell-proxy "http://127.0.0.1:7897")
   (chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
   (chatgpt-shell-model-version "gpt-4o")
   (chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
