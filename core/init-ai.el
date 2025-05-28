@@ -97,10 +97,11 @@
       (setq chatgpt-shell-model-version "gpt-4o")
       (setq chatgpt-shell-proxy "http://127.0.0.1:7897")
       ))
+  ;; can't be set in `custom`
+  (setq chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
   :custom
   ;; 设置代理
   (chatgpt-shell-api-url-base "http://ipads.chat.gpt:3006")
-  (chatgpt-shell-root-path (expand-file-name "var/" user-emacs-directory))
   (chatgpt-shell-model-version "gpt-4o")
   (chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
   (chatgpt-shell-prompt-query-response-style #'shell)
