@@ -95,7 +95,7 @@
       (setq chatgpt-shell-model-version "deepseek-chat")
     (progn
       (setq chatgpt-shell-model-version "gpt-4o")
-      (chatgpt-shell-proxy "http://127.0.0.1:7897")
+      (setq chatgpt-shell-proxy "http://127.0.0.1:7897")
       ))
   :custom
   ;; 设置代理
@@ -106,8 +106,6 @@
   (chatgpt-shell-prompt-query-response-style #'shell)
   :bind
   ("C-c q" . chatgpt-shell-describe-code)
-  ;; ("C-c q" . chatgpt-shell)
-  ;; (global-set-key (kbd "C-d") 'chatgpt-shell)
   ("C-d" . chatgpt-shell)
   ;; M-n/p 可以查询历史
   (:map chatgpt-shell-mode-map
