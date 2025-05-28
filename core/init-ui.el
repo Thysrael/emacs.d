@@ -11,6 +11,7 @@
   ;; 要指定后缀名、字体集、face
   (push '("drawio" nerd-icons-mdicon "nf-md-drawing" :face nerd-icons-lpink) nerd-icons-extension-icon-alist)
   (push '("rst" nerd-icons-mdicon "nf-md-file_document" :face nerd-icons-lpink) nerd-icons-extension-icon-alist)
+  (push '("ets" nerd-icons-sucicon "nf-seti-typescript" :face nerd-icons-blue-alt) nerd-icons-extension-icon-alist)
 
   (push '(conf-space-mode nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-mode-icon-alist)
   (push '(pdf-outline-buffer-mode nerd-icons-mdicon "nf-md-view_list" :face nerd-icons-dred) nerd-icons-mode-icon-alist)
@@ -109,9 +110,9 @@
     (if (string-equal hostname "banana")
         (progn
           ;; 当主机名为 banana 时
-          (setq +font-en-size 28)
-          (setq +font-han-size 28)
-          (setq +font-emoji-size 28))
+          (setq +font-en-size 30)
+          (setq +font-han-size 30)
+          (setq +font-emoji-size 30))
       (progn
         ;; 当主机名不是 banana 时
         (setq +font-en-size 18)

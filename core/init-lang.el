@@ -89,6 +89,7 @@
   :ensure t)
 
 (use-package typescript-mode
+  :mode (("\\.ets$" . typescript-mode))
   :ensure t
   :config
   (setq typescript-indent-level 2))
