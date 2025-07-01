@@ -105,6 +105,7 @@
   (chatgpt-shell-model-version "gpt-4o")
   (chatgpt-shell-prompt-header-describe-code "What does the following code do? Use chinese to answer it")
   (chatgpt-shell-prompt-query-response-style #'shell)
+  (chatgpt-shell-always-create-new nil)
   :bind
   ("C-c q" . chatgpt-shell-describe-code)
   ("C-d" . chatgpt-shell)
