@@ -166,13 +166,13 @@
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
-  (org-mode . (lambda () (setq-local electric-pair-pairs
-                                `(,@electric-pair-pairs
-                                  (?\{ . ?\})
-                                  (?\( . ?\))
-                                  (?\[ . ?\])
-                                  (?\$ . ?\$))
-                                )))
+  ;; (org-mode . (lambda () (setq-local electric-pair-pairs
+  ;;                               `(,@electric-pair-pairs
+  ;;                                 (?\{ . ?\})
+  ;;                                 (?\( . ?\))
+  ;;                                 (?\[ . ?\])
+  ;;                                 (?\$ . ?\$))
+  ;;                               )))
   :config ; 这里其实应该放到 custom 中，但是不能放到 config 中
   (setq org-startup-indented t) ; 设置缩进
   (setq org-fontify-quote-and-verse-blocks t) ; 高亮引用
@@ -194,7 +194,7 @@
   ;;   (setq org-latex-create-formula-image-program 'dvisvgm
   ;;         org-startup-with-latex-preview nil)
   (with-eval-after-load 'org
-    (plist-put org-format-latex-options :scale 0.6))
+    (plist-put org-format-latex-options :scale 1.0))
   (push '("jupyter-python" . python) org-src-lang-modes)
   (defface org-bold
     '((t :foreground "#d2268b"

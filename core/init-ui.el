@@ -16,6 +16,7 @@
   (push '(conf-space-mode nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-mode-icon-alist)
   (push '(pdf-outline-buffer-mode nerd-icons-mdicon "nf-md-view_list" :face nerd-icons-dred) nerd-icons-mode-icon-alist)
   (push '(pdf-occur-buffer-mode nerd-icons-mdicon "nf-md-view_list" :face nerd-icons-dred) nerd-icons-mode-icon-alist)
+  (push '(gfm-view-mode nerd-icons-octicon "nf-oct-markdown" :face nerd-icons-lblue) nerd-icons-mode-icon-alist)
   ;; regexp 是在文件没有拓展名时，采用的匹配策略
   (push '("^config$" nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-regexp-icon-alist)
   ;; (push '("rc$" nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow) nerd-icons-regexp-icon-alist)
