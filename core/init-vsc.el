@@ -46,6 +46,7 @@
 
   ;; WORKAROUND: Integration with ws-butler
   (advice-add #'ws-butler-after-save :after #'diff-hl-update-once)
+
   :bind
   ("C-c g" . diff-hl-show-hunk)
   :custom-face

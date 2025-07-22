@@ -178,59 +178,68 @@
 
 ;; 让 eglot 可以丰富 tempel, 使用中老报 warning
 ;; (use-package eglot-tempel
-;;   :straight t
+;;   :ensure t
 ;;   :after (eglot tempel)
 ;;   :init
 ;;   (eglot-tempel-mode)
 ;;   )
 
-
+;; 虽然有 breadcrumb ，但是需要 all-the-icon ，进而需要 treemacs 包
+;; 每个 buffer 都需要启动 lsp-mode ，太麻烦了
 ;; (use-package lsp-mode
-;;   :straight t
+;;   :ensure t
+;;   :init
+;;   (defun lsp-booster--advice-json-parse (old-fn &rest args)
+;;     "Try to parse bytecode instead of json."
+;;     (or
+;;      (when (equal (following-char) ?#)
+;;        (let ((bytecode (read (current-buffer))))
+;;          (when (byte-code-function-p bytecode)
+;;            (funcall bytecode))))
+;;      (apply old-fn args)))
+;;   (advice-add (if (progn (require 'json)
+;;                          (fboundp 'json-parse-buffer))
+;;                   'json-parse-buffer
+;;                 'json-read)
+;;               :around
+;;               #'lsp-booster--advice-json-parse)
+;;
+;;   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+;;     "Prepend emacs-lsp-booster command to lsp CMD."
+;;     (let ((orig-result (funcall old-fn cmd test?)))
+;;       (if (and (not test?)                             ;; for check lsp-server-present?
+;;                (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+;;                lsp-use-plists
+;;                (not (functionp 'json-rpc-connection))  ;; native json-rpc
+;;                (executable-find "emacs-lsp-booster"))
+;;           (progn
+;;             (message "Using emacs-lsp-booster for %s!" orig-result)
+;;             (cons "emacs-lsp-booster" orig-result))
+;;         orig-result)))
+;;   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 ;;   :custom-face
 ;;   (lsp-inlay-hint-face ((t (:inherit lsp-details-face))))
 ;;   :config
-;;   (setq lsp-headerline-arrow ":")
+;;   (setq lsp-headerline-arrow ">")
 ;;   :custom
-;;   (lsp-headerline-breadcrumb-icons-enable t)
+;;   (lsp-headerline-breadcrumb-icons-enable nil)
 ;;   (lsp-headerline-breadcrumb-segments '(symbols))
 ;;   (lsp-eldoc-render-all t)
+;;   (lsp-enable-snippet nil)
 ;;   :hook
 ;;   (lsp-mode . lsp-inlay-hints-mode))
-;;
-;; (defun lsp-booster--advice-json-parse (old-fn &rest args)
-;;   "Try to parse bytecode instead of json."
-;;   (or
-;;    (when (equal (following-char) ?#)
-;;      (let ((bytecode (read (current-buffer))))
-;;        (when (byte-code-function-p bytecode)
-;;          (funcall bytecode))))
-;;    (apply old-fn args)))
-;; (advice-add (if (progn (require 'json)
-;;                        (fboundp 'json-parse-buffer))
-;;                 'json-parse-buffer
-;;               'json-read)
-;;             :around
-;;             #'lsp-booster--advice-json-parse)
-;;
-;; (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-;;   "Prepend emacs-lsp-booster command to lsp CMD."
-;;   (let ((orig-result (funcall old-fn cmd test?)))
-;;     (if (and (not test?)                             ;; for check lsp-server-present?
-;;              (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-;;              lsp-use-plists
-;;              (not (functionp 'json-rpc-connection))  ;; native json-rpc
-;;              (executable-find "emacs-lsp-booster"))
-;;         (progn
-;;           (message "Using emacs-lsp-booster for %s!" orig-result)
-;;           (cons "emacs-lsp-booster" orig-result))
-;;       orig-result)))
-;; (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 ;;
 ;; (use-package lsp-imenu
 ;;   :init
 ;;   ;; 启用 lsp-imenu 集成
 ;;   (add-hook 'lsp-after-open-hook 'lsp-enable-imenu))
+;;
+;; (use-package lsp-pyright
+;;   :ensure t
+;;   :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
+;;   :hook (python-mode . (lambda ()
+;;                           (require 'lsp-pyright)
+;;                           (lsp))))
 
 ;; (use-package lsp-ui
 ;;   :straight t
