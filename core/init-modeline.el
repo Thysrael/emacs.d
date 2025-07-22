@@ -275,26 +275,33 @@
         breadcrumb-imenu-max-length 0.7
         breadcrumb-idle-time 1)
   (advice-add #'breadcrumb--format-ipath-node :around
-            (lambda (og p more &rest r)
-              "Icon for items"
-              (let ((string (string-trim (apply og p more r)))) ; 使用 string-trim 去掉两侧空格
-                (if (not more)
-                    (concat (nerd-icons-codicon
-                             "nf-cod-symbol_field"
-                             :face 'breadcrumb-imenu-leaf-face)
-                            " " string)
-                  (cond ((string= string "Packages")
-                         (concat (nerd-icons-codicon "nf-cod-package" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                        ((string= string "Requires")
-                         (concat (nerd-icons-codicon "nf-cod-file_submodule" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                        ((or (string= string "Variable") (string= string "Variables"))
-                         (concat (nerd-icons-codicon "nf-cod-symbol_variable" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                        ((string= string "Function")
-                         (concat (nerd-icons-mdicon "nf-md-function_variant" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                        (t ; 默认情况下，使用类图标
-                         (concat (nerd-icons-codicon "nf-cod-symbol_class" :face 'breadcrumb-imenu-crumbs-face) " " string)
-                         ))))))
+              (lambda (og p more &rest r)
+                "Icon for items"
+                (let ((string (string-trim (apply og p more r)))) ; 使用 string-trim 去掉两侧空格
+                  (if (not more)
+                      (concat (nerd-icons-codicon
+                               "nf-cod-symbol_field"
+                               :face 'breadcrumb-imenu-leaf-face)
+                              " " string)
+                    (cond ((string= string "Packages")
+                           (concat (nerd-icons-codicon "nf-cod-package" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                          ((string= string "Requires")
+                           (concat (nerd-icons-codicon "nf-cod-file_submodule" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                          ((or (string= string "Variable") (string= string "Variables"))
+                           (concat (nerd-icons-codicon "nf-cod-symbol_variable" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                          ((string= string "Function")
+                           (concat (nerd-icons-mdicon "nf-md-function_variant" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                          (t ; 默认情况下，使用类图标
+                           (concat (nerd-icons-codicon "nf-cod-symbol_class" :face 'breadcrumb-imenu-crumbs-face) " " string)
+                           ))))))
   )
 
-(setq-default header-line-format
-              '((:eval (propertize " " 'face 'font-lock-string-face)) ": " (:eval (breadcrumb-imenu-crumbs))))
+(setq-default header-line-format nil)
+
+(defun +enable-header-line ()
+  "Enable header line in the current buffer."
+  (setq header-line-format
+        '((:eval (propertize " " 'face 'font-lock-string-face)) ": " (:eval (breadcrumb-imenu-crumbs)))
+        ))
+
+(add-hook 'prog-mode-hook '+enable-header-line)
