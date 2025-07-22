@@ -69,6 +69,7 @@
   (magit-save-repository-buffers nil) ; Don't autosave repo buffers. This is too magical
   ;; Don't display parent/related refs in commit buffers; they are rarely helpful and only add to runtime costs.
   (magit-revision-insert-related-refs nil)
+  (magit-format-file-function #'magit-format-file-nerd-icons)
   :config
   (setq magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1) ; magit 全屏
   ;; Exterminate Magit buffers
@@ -87,6 +88,7 @@
               buffers))))
   (setq magit-bury-buffer-function #'+magit-kill-buffers)
   )
+
 
 ;; I don't know how to use it
 ;; (use-package forge
