@@ -1,31 +1,39 @@
 ;;; -*- lexical-binding: t -*-
 
+;; 配置不好 IPADS-GPT
+;; 理解不了 gpt buffer 的历史逻辑
 ;; (use-package gptel
-;;   :straight t
+;;   :ensure t
 ;;   :init
 ;;   (require 'auth-source)
 ;;   (let* (
-;;          (auth-info (car (auth-source-search :user "apikey")))
-;;          (host (plist-get auth-info :host))
-;;          (key (plist-get auth-info :secret))
+;;          (openai-auth-info (car (auth-source-search :host "openai.api.key")))
+;;          (openai-host (plist-get openai-auth-info :host))
+;;          (openai-key (plist-get openai-auth-info :secret))
+;;
+;;          (deepseek-auth-info (car (auth-source-search :host "deepseek.api.key")))
+;;          (deepseek-host (plist-get deepseek-auth-info :host))
+;;          (deepseek-key (plist-get deepseek-auth-info :secret))
 ;;          )
 ;;     (setq-default gptel-backend
-;;                   (gptel-make-openai "IPADS"
-;;                     :protocol "http"
-;;                     :host host
-;;                     :stream t
-;;                     :key key
-;;                     :models '(gpt-4o))
+;;                   ;; (gptel-make-openai "IPADS-GPT"
+;;                   ;;                    :protocol "http"
+;;                   ;;                    :host openai-host
+;;                   ;;                    :stream t
+;;                   ;;                    :key openai-key
+;;                   ;;                    :models '(gpt-4o))
+;;                   (gptel-make-deepseek "DeepSeek"
+;;                                        :key deepseek-key)
 ;;                   )
 ;;     )
 ;;   :custom
 ;;   (gptel-default-mode 'org-mode)
-;;   (gptel-proxy "http://127.0.0.1:7897")
-;;   (gptel-model 'gpt-4o)
-;;   (gptel-org-branching-context t)
+;;   ;; (gptel-proxy "http://127.0.0.1:7897")
+;;   (gptel-model 'deepseek-chat)
+;;   (gptel-org-branching-context nil)
 ;;   (gptel-prompt-prefix-alist
 ;;    '((markdown-mode . "# ")
-;;      (org-mode . "")
+;;      (org-mode . "* ")
 ;;      (text-mode . "# ")))
 ;;   (gptel-response-prefix-alist
 ;;    '((markdown-mode . "**Response:**\n")
@@ -69,7 +77,7 @@
 ;;   :bind
 ;;   ("C-c Q" . gptel-menu)
 ;;   )
-;;
+
 ;; (use-package gptel-transient
 ;;   :commands gptel--suffix-send
 ;;   :config
