@@ -231,7 +231,7 @@
                              face +mode-line-host-name-active-face)
                 ;; (:eval ,(when-let ((imenu (and +mode-line-enough-width-p
                 ;;                                (breadcrumb-imenu-crumbs))))
-                ;;          (concat "▸" imenu)))
+                ;;           (concat ": " imenu)))
                 ))
          (rhs `(
                 (,active-p ,(+nerd-icons-icon-for-buffer) ; 选中时使用彩色 icon
@@ -270,9 +270,31 @@
   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
   :commands breadcrumb--header-line
   :config
-  (setq breadcrumb-imenu-crumb-separator "▸"
-        breadcrumb-project-max-length 0.7 ; 用当前 window 的 70% 来显示 breadcrumb
-        breadcrumb-imenu-max-length 0.3
-        breadcrumb-idle-time 10))
+  (setq breadcrumb-imenu-crumb-separator " > "
+        breadcrumb-project-max-length 0.6 ; 用当前 window 的 70% 来显示 breadcrumb project
+        breadcrumb-imenu-max-length 0.7
+        breadcrumb-idle-time 1)
+  (advice-add #'breadcrumb--format-ipath-node :around
+            (lambda (og p more &rest r)
+              "Icon for items"
+              (let ((string (string-trim (apply og p more r)))) ; 使用 string-trim 去掉两侧空格
+                (if (not more)
+                    (concat (nerd-icons-codicon
+                             "nf-cod-symbol_field"
+                             :face 'breadcrumb-imenu-leaf-face)
+                            " " string)
+                  (cond ((string= string "Packages")
+                         (concat (nerd-icons-codicon "nf-cod-package" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                        ((string= string "Requires")
+                         (concat (nerd-icons-codicon "nf-cod-file_submodule" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                        ((or (string= string "Variable") (string= string "Variables"))
+                         (concat (nerd-icons-codicon "nf-cod-symbol_variable" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                        ((string= string "Function")
+                         (concat (nerd-icons-mdicon "nf-md-function_variant" :face 'breadcrumb-imenu-crumbs-face) " " string))
+                        (t ; 默认情况下，使用类图标
+                         (concat (nerd-icons-codicon "nf-cod-symbol_class" :face 'breadcrumb-imenu-crumbs-face) " " string)
+                         ))))))
+  )
 
-(setq-default header-line-format nil)
+(setq-default header-line-format
+              '((:eval (propertize " " 'face 'font-lock-string-face)) ": " (:eval (breadcrumb-imenu-crumbs))))
