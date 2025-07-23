@@ -166,6 +166,8 @@
   :hook
   (org-mode . (lambda () (setq line-spacing 0.25)))
   (org-mode . (lambda () (electric-indent-local-mode 0))) ; 可以解决列表空一行莫名其妙的缩进问题
+  (org-mode . +org-icons)
+
   ;; (org-mode . (lambda () (setq-local electric-pair-pairs
   ;;                               `(,@electric-pair-pairs
   ;;                                 (?\{ . ?\})
@@ -214,6 +216,42 @@
           ("~" ;; (:background "deep sky blue" :foreground "MidnightBlue")
            org-code verbatim)
           ("+" (:strike-through t))))
+
+  (defun +org-icons ()
+    "Beautify org mode keywords."
+    ;; mdicon 很好，其他 nerd-icon 在 GUI 下显示会吞掉后面的字
+    (setq prettify-symbols-alist '(
+                                   ("TODO" . "󰐍")
+	                               ("PEND" . "󰙧")
+   				                   ("ABRT" . "󱃓")
+				                   ("DONE" . "󰄴")
+				                   ("[#A]" . "󰗶")
+				                   ("[#B]" . "󰉀")
+ 				                   ("[#C]" . "󰅶")
+				                   ;; ("[ ]" . "")
+				                   ;; ("[X]" . "")
+				                   ;; ("[-]" . "")
+				                   ("#+begin_src" . "󰗀")
+				                   ("#+end_src" . "󰗀")
+                                   ("#+begin_quote" . "󰝗")
+				                   ("#+end_quote" . "󰉾")
+				                   (":PROPERTIES:" . "󰓻")
+                                   ("#+BEGIN:" . "󰢶")
+				                   (":END:" . "󰇘")
+				                   ("#+STARTUP" . "󰕮") ;󰽲, 󰽷, 󰽵, 󰽱, 󰽶
+				                   ("#+TITLE" . "󰑕")
+                                   ("#+title" . "󰑕")
+				                   ("#+RESULTS" . "󰐪")
+				                   ;; ("#+FILETAGS" . "")
+				                   ("#+AUTHOR" . "󰙄")
+                                   ("#+LANGUAGE" . "󱌲")
+				                   ("SCHEDULED" . "󰸗")
+				                   ("DEADLINE" . "󰃰")
+                                   (":LOGBOOK:" . "󰗚")
+                                   ("CLOCK" . "󰥔")
+                                   ("CREATE" . "󱓞")
+                                   ))
+    (prettify-symbols-mode))
   :bind
   (:map org-mode-map
         ;; ("C-c C-w" . org-copy-subtree)
