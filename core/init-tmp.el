@@ -64,3 +64,20 @@
 ;;   :init
 ;;   (setq org-analyzer-org-directory "~/learn/org/")
 ;;   (setq org-analyzer-process-buffer "~/learn/org/agenda.org_archive"))
+;; (use-package org-modern
+;;   :ensure t
+;;   :custom
+;;   (org-modern-tag nil)
+;;   (org-modern-checkbox nil)
+;;   (org-modern-list nil)
+;;   (org-modern-table nil)
+;;   (org-modern-keyword nil)
+;;   (org-modern-timestamp nil)
+;;   (org-modern-todo nil)
+;;   (org-modern-priority nil)
+;;   (org-modern-fold-stars '(("󰎉" . "󰽲") ("󰎋" . "󰽵") ("󰎇" . "󰽱") ("󰎌" . "󰽶") ("󰎍" . "󰽷")))
+;;   (org-modern-block-name nil)
+;;   (org-modern-block-fringe 0)
+;;   :hook
+;;   (org-mode . org-modern-mode)
+;;   )
