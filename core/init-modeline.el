@@ -301,7 +301,7 @@
 (defun +enable-header-line ()
   "Enable header line in the current buffer."
   (setq header-line-format
-        '((:eval (propertize " " 'face 'font-lock-string-face)) ": " (:eval (breadcrumb-imenu-crumbs)))
+        '((:eval (propertize "󰽰" 'face 'font-lock-string-face)) ": " (:eval (breadcrumb-imenu-crumbs)))
         ))
 
 (add-hook 'prog-mode-hook '+enable-header-line)
