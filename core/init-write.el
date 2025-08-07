@@ -221,10 +221,10 @@
     "Beautify org mode keywords."
     ;; mdicon 很好，其他 nerd-icon 在 GUI 下显示会吞掉后面的字
     (setq prettify-symbols-alist '(
-                                   ("TODO" . "󰐍")
-	                               ("PEND" . "󰙧")
-   				                   ("ABRT" . "󱃓")
-				                   ("DONE" . "󰄴")
+                                   ;; ("TODO" . "󰐍")
+	                               ;; ("PEND" . "󰙧")
+   				                   ;; ("ABRT" . "󱃓")
+				                   ;; ("DONE" . "󰄴")
 				                   ;; ("[#A]" . "󰗶")
 				                   ;; ("[#B]" . "󰉀")
  				                   ;; ("[#C]" . "󰅶")
