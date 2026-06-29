@@ -8,7 +8,7 @@
 
 (defvar thy/local-init-files
   '(
-    ;; 'init-package
+    init-package
     ;; 'init-util
     ;; 'init-tmp
     ;; 'init-basic
