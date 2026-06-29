@@ -1,246 +1,214 @@
-;; -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t -*-
 
-;;; 临时文件设置
-(setq-default
- ;; 关闭锁文件，防止生成 file~#
- create-lockfiles nil
- ;; 关闭备份文件，防止生成 file~
- make-backup-files nil
- ;; 自动保存功能，#file#
- auto-save-default t ; 开启自动保存功能
- auto-save-include-big-deletions t  ; 自动保存较大的删除
- auto-save-file-name-transforms `((".*" ,(no-littering-expand-var-file-name "autosaves/") t)) ; 指定保存位置
- auto-save-file-name-transforms (list (list "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
-                                            (concat auto-save-list-file-prefix "tramp-\\2") t)
-                                      (list ".*" auto-save-list-file-prefix t)) ; 避免 tramp 和 local 的冲突
- )
-;; 设置自动恢复数据
-(advice-add #'after-find-file :around
-            (lambda (fn &rest args) (cl-letf (((symbol-function #'sit-for) #'ignore))
-                                 (apply fn args))))
+;; Basic Emacs behavior, editing defaults, history, and runtime tuning.
 
-
-;;; 过长文本的显示问题
-;; 折行和截断
-(setq-default
- word-wrap t ; 会按照单词进行折行
- word-wrap-by-category t ; 对中文折行的支持
- fill-column 100 ; 设置 fill-column 为 80，这个变量会影响其他变量
- truncate-lines t ; truncate 会将超出部分的文本截断
- truncate-partial-width-windows nil
- truncate-string-ellipsis "..." ; 文本截断的省略符为 ...
- )
-
-;; 开启视觉折行
-(use-package visual-line-mode
-  :ensure nil ; 不要尝试从包管理器中安装 visual-line-mode
-  :hook (text-mode . visual-line-mode) ; 将 visual-line-mode 应用于 text 模式
-  )
-
-;; 用于单行长文件
-(use-package so-long
-  :hook
-  (after-init . global-so-long-mode)
-  :config
-  (add-to-list 'so-long-variable-overrides '(save-place-alist . nil)) ; saveplace 不会对其使用
-  )
-
-
-;;; 用户界面基础设置
-(setq-default
- ;; 没有客户端启动信息
- server-client-instructions nil
-
- ;; 禁止双向文本（类似阿拉伯语或者希伯来语）
- bidi-inhibit-bpa t
- bidi-paragraph-direction 'left-to-right
- bidi-display-reordering 'left-to-right
-
- ;; 关闭响铃
- ring-bell-function 'ignore
-
- ;; 缩进设置
- tabify-regexp "^\t* [ \t]+" ; 将缩进用的空格转变成制表符的命令
- indent-tabs-mode nil ; 使用空格而不是制表符
- tab-always-indent t
- tab-width 4 ; 默认宽度为 4
-
- ;; 用 y-or-n to 代替 yes-or-no
- use-short-answers t
-
- ;; 避免文件重名警告
- find-file-suppress-same-file-warnings t
-
- ;; 文件在最后一行之后会自动添加一个换行符，符合 POSIX 规范
- require-final-newline t
-
- ;;避免在创建文件时提示不存在文件
- confirm-nonexistent-file-or-buffer nil
-
- ;; 如果 buffer 名字相同，则会显示 path/name
- uniquify-buffer-name-style 'forward
- )
-
-;;; 基础键位绑定
-;; 强化复制和粘贴功能
-(defun my-kill-region-or-line ()
-  "Kill the region or the current line if no region is active, and keep the cursor at its original position."
-  (interactive)
-  (if (region-active-p)
-      (progn
+(use-package emacs
+  :ensure nil
+  :demand t
+  :preface
+  (defun thy/kill-region-or-line ()
+    "Kill the active region, or the current line when no region is active."
+    (interactive)
+    (if (use-region-p)
         (let ((start (region-beginning)))
-          (kill-region (region-beginning) (region-end))
-          (goto-char start)
-          ))
-    (progn
-        (kill-whole-line)
-        (previous-line)
-        (end-of-line))
-    ))
+          (kill-region start (region-end))
+          (goto-char start))
+      (kill-whole-line)
+      (forward-line -1)
+      (end-of-line)))
 
-(defun my-copy-region-or-line ()
-  "Save the region to the kill ring or the current line if no region is active, and keep the cursor at its original position."
-  (interactive)
-  (let ((start (point)))
-    (if (region-active-p)
-        (kill-ring-save (region-beginning) (region-end))
-      (kill-ring-save (line-beginning-position) (line-end-position)))
-    (goto-char start)))
+  (defun thy/copy-region-or-line ()
+    "Save the active region, or the current line, to the kill ring."
+    (interactive)
+    (let ((start (point)))
+      (if (use-region-p)
+          (kill-ring-save (region-beginning) (region-end))
+        (kill-ring-save (line-beginning-position) (line-end-position)))
+      (goto-char start)))
 
-;; 绑定新的复制和剪切函数
-(global-set-key (kbd "C-q") 'my-kill-region-or-line)
-(global-set-key (kbd "C-w") 'my-copy-region-or-line)
-
-;; 剪切粘贴行为修正
-(setq kill-do-not-save-duplicates t) ; 不重复增加 kill ring 内容
-(setq save-interprogram-paste-before-kill t) ; 在 replace 将替换内容存入 kill ring
-
-;; 模仿 CUA 模式
-(global-set-key (kbd "C-S-v") 'yank)
-(global-set-key (kbd "C-S-x") 'my-kill-region-or-line)
-(global-set-key (kbd "C-S-c") 'my-copy-region-or-line)
-
-;; 将关键命令移动到右手核心区
-(define-key key-translation-map (kbd "C-j") (kbd "C-x"))
-;; (global-set-key (kbd "C-k") 'execute-extended-command)
-;; (define-key key-translation-map (kbd "C-k") (kbd "M-x"))
-
-;; 绑定恢复 buffer 函数
-(global-set-key (kbd "<f5>") 'revert-buffer) ; 撤销所有没有保存的更改
-;; (global-set-key (kbd "<f6>") 'recover-file) ; 利用 autosave 完成更新
-
-(global-set-key (kbd "C-z") 'undo)
-
-;;; 历史信息记录
-;; save-place-mode 可以保存文件的上次浏览位置，即使 emacs 关闭也可以保存
-(use-package saveplace
-  :ensure t
-  :hook
-  (after-init . save-place-mode)
-  :config
-  ;; HACK: `save-place-alist-to-file' uses `pp' to prettify the contents of its cache, which is expensive and useless.
-  ;; replace it with `prin1'
-  (advice-add #'save-place-alist-to-file :around
-              (lambda (fn) (cl-letf (((symbol-function #'pp) #'prin1))
-                        (funcall fn))))
-  )
-
-;; 调用最近的浏览文件记录
-(use-package recentf
-  :ensure t
+  (defun thy/after-find-file-without-sit-for (fn &rest args)
+    "Call FN with ARGS while suppressing `sit-for' delays."
+    (cl-letf (((symbol-function #'sit-for) #'ignore))
+      (apply fn args)))
   :bind
-  (("C-x C-r" . recentf-open-files))
+  (("C-q" . thy/kill-region-or-line)
+   ("C-w" . thy/copy-region-or-line)
+   ("C-S-v" . yank)
+   ("C-S-x" . thy/kill-region-or-line)
+   ("C-S-c" . thy/copy-region-or-line)
+   ("<f5>" . revert-buffer)
+  ("C-z" . undo))
+  :hook
+  ;; Let typed text replace the active region.
+  (after-init . delete-selection-mode)
+  ;; Wrap long lines visually in prose buffers.
+  (text-mode . visual-line-mode)
+  :custom
+  ;; Use autosave files so recovery remains possible after crashes.
+  (auto-save-default t)
+  ;; Kill subprocesses directly when quitting Emacs.
+  (confirm-kill-processes nil)
+  ;; Do not prompt when visiting a new file path.
+  (confirm-nonexistent-file-or-buffer nil)
+  ;; Do not create .# lock files next to visited files.
+  (create-lockfiles nil)
+  (file-name-shadow-mode t)
+  ;; Avoid noisy warnings when the same file is opened via another path.
+  (find-file-suppress-same-file-warnings t)
+  ;; Follow symlinks to the real file path.
+  (find-file-visit-truename t)
+  ;; Avoid duplicate kill-ring entries.
+  (kill-do-not-save-duplicates t)
+  ;; Do not create file~ backup files next to visited files.
+  (make-backup-files nil)
+  ;; Make completion ignore case for buffer and file names.
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  ;; Ensure saved files end with a final newline.
+  (require-final-newline t)
+  ;; Disable the audible and visible bell.
+  (ring-bell-function #'ignore)
+  ;; Keep replaced external clipboard text in the kill ring.
+  (save-interprogram-paste-before-kill t)
+  ;; Treat Chinese punctuation as sentence endings.
+  (sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
+  (sentence-end-double-space nil)
+  ;; Make Tab indent the current line or active region.
+  (tab-always-indent t)
+  ;; Disambiguate buffers with the same file name using path components.
+  (uniquify-buffer-name-style 'forward)
+  ;; Prefer y-or-n prompts over yes-or-no prompts.
+  (use-short-answers t)
+  (vc-follow-symlinks t)
+  :config
+  ;; Preserve large deletions in autosave data.
+  (setq auto-save-include-big-deletions t)
+
+  ;; Reject remote host probing in file-at-point helpers.
+  (setq ffap-machine-p-known 'reject)
+
+  ;; Use a larger process read chunk for LSPs and other external tools.
+  (setq read-process-output-max (* 3 1024 1024))
+
+  ;; Hide server client instructions in client frames.
+  (setq server-client-instructions nil)
+
+  ;; `tabify' should only convert indentation spaces.
+  (setq tabify-regexp "^\t* [ \t]+")
+
+  ;; Use a simple ASCII ellipsis for truncated text.
+  (setq truncate-string-ellipsis "...")
+
+  ;; Keep autosaves under the no-littering autosave directory, with a TRAMP-safe
+  ;; name so remote and local autosave files do not conflict.
+  (setq auto-save-file-name-transforms
+        `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+           ,(concat auto-save-list-file-prefix "tramp-\\2") t)
+          (".*" ,auto-save-list-file-prefix t)))
+
+  ;; Prefer left-to-right layout and skip bidirectional text scanning for speed.
+  (setq-default bidi-display-reordering t)
+  (setq-default bidi-inhibit-bpa t)
+  (setq-default bidi-paragraph-direction 'left-to-right)
+
+  ;; Default editing behavior for new buffers.
+  (setq-default fill-column 100)
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 4)
+
+  ;; Default long-line display behavior for new buffers.
+  (setq-default truncate-lines t)
+  (setq-default truncate-partial-width-windows nil)
+  (setq-default word-wrap t)
+  (setq-default word-wrap-by-category t)
+
+  (set-language-environment "UTF-8")
+
+  (when (eq system-type 'darwin)
+    ;; Use Command as Meta in macOS GUI frames.
+    (setq ns-command-modifier 'meta)
+    (setq ns-option-modifier 'alt))
+
+  ;; Speed up auto-save recovery prompts by avoiding `sit-for' delays.
+  (advice-add #'after-find-file :around #'thy/after-find-file-without-sit-for))
+;; Improve behavior for files that contain extremely long lines.
+(use-package so-long
+  :ensure nil
+  :hook (after-init . global-so-long-mode)
+  :config
+  ;; Do not persist cursor positions for very long files.
+  (add-to-list 'so-long-variable-overrides '(save-place-alist . nil)))
+
+;; Remember the last visited position in files across Emacs sessions.
+(use-package saveplace
+  :ensure nil
+  :preface
+  (defun thy/save-place-alist-to-file-with-prin1 (fn)
+    "Call FN while using `prin1' instead of `pp' for save-place state."
+    (cl-letf (((symbol-function #'pp) #'prin1))
+      (funcall fn)))
+  :hook (after-init . save-place-mode)
+  :config
+  ;; `save-place-alist-to-file' pretty-prints its cache with `pp', which is
+  ;; expensive and unnecessary for machine-written state.
+  (advice-add #'save-place-alist-to-file :around #'thy/save-place-alist-to-file-with-prin1))
+
+;; Open recently visited files with C-x C-r.
+(use-package recentf
+  :ensure nil
+  :preface
+  (defun thy/recentf-add-dired-directory ()
+    "Add the current Dired directory to `recentf'."
+    (recentf-add-file default-directory))
+  :bind ("C-x C-r" . recentf-open-files)
   :hook
   (after-init . recentf-mode)
+  (dired-mode . thy/recentf-add-dired-directory)
+  :custom
+  (recentf-auto-cleanup 'never)
+  (recentf-keep nil)
+  (recentf-max-saved-items 200)
   :config
-  (setq recentf-auto-cleanup 'never ; 不自动清理
-        recentf-max-saved-items 200 ; 最大记录数是 200
-        recentf-keep nil) ; 不会刻意保留任何文件
+  ;; Keep generated state out of the recent file list.
+  (add-to-list 'recentf-exclude (recentf-expand-file-name no-littering-var-directory))
 
-  (add-to-list 'recentf-exclude
-               (recentf-expand-file-name no-littering-var-directory)) ; ~/.emacs/var 排除
-  ;; (add-to-list 'recentf-exclude
-  ;;              (recentf-expand-file-name no-littering-etc-directory)) ; ~/.emacs/etc 排除
-  (add-to-list 'recentf-filename-handlers #'abbreviate-file-name) ; 展示时使用相对路径
-  (add-to-list 'recentf-filename-handlers #'substring-no-properties) ; 移除文件名中的文本属性
-  (add-hook 'dired-mode-hook (lambda () (recentf-add-file default-directory))) ; 加入 dired
-  )
+  ;; Store shorter, property-free file names.
+  (add-to-list 'recentf-filename-handlers #'abbreviate-file-name)
+  (add-to-list 'recentf-filename-handlers #'substring-no-properties))
 
-;; 用于保存和恢复 Emacs 会话期间的用户交互历史记录，包括命令历史、minibuffer 历史、搜索和替换历史等。
+;; Save minibuffer, command, search, mark, and kill-ring history across sessions.
 (use-package savehist
-  :ensure t
-  :hook
-  (after-init . savehist-mode)
+  :ensure nil
+  :preface
+  (defun thy/savehist-strip-text-properties ()
+    "Remove text properties from saved kill-ring and register strings."
+    (setq kill-ring
+          (mapcar #'substring-no-properties
+                  (cl-remove-if-not #'stringp kill-ring)))
+    (setq register-alist
+          (cl-loop for (reg . item) in register-alist
+                   if (stringp item)
+                   collect (cons reg (substring-no-properties item))
+                   else collect (cons reg item))))
+  :hook (after-init . savehist-mode)
+  :custom
+  (savehist-additional-variables '(mark-ring
+                                   global-mark-ring
+                                   search-ring
+                                   regexp-search-ring
+                                   winner-ring
+                                   kill-ring))
+  (savehist-autosave-interval 300)
   :config
-  (setq savehist-additional-variables '(mark-ring
-                                        global-mark-ring
-                                        search-ring
-                                        regexp-search-ring
-                                        winner-ring
-                                        kill-ring) ; 要保存的列表
-        savehist-autosave-interval 300) ; 每 300s 保存一次
-  ;; 移除了 kill-ring 中的文本属性，以减小 savehist 缓存的大小
-  (add-hook 'savehist-save-hook
-            (lambda () (setq kill-ring
-                        (mapcar #'substring-no-properties
-                                (cl-remove-if-not #'stringp kill-ring))
-                        register-alist
-                        (cl-loop for (reg . item) in register-alist
-                                 if (stringp item)
-                                 collect (cons reg (substring-no-properties item))
-                                 else collect (cons reg item)))))
+  ;; Reduce savehist cache size by dropping text properties from large saved values.
+  (add-hook 'savehist-save-hook #'thy/savehist-strip-text-properties)
   (with-eval-after-load 'vertico
-    (add-to-list 'savehist-additional-variables 'vertico-repeat-history)) ; 记录 vertico repeat 信息
-  )
+    (add-to-list 'savehist-additional-variables 'vertico-repeat-history)))
 
-
-;;; misc 杂项设置
-;; setq-default 中的设置会对所有的 buffer 生效
-(setq-default
- ;; 使得读取外部程序的输出增大，可以提高效率
- read-process-output-max (* 3 1024 1024)
-
- ;; 对于符号链接永远直接跳转
- find-file-visit-truename t
- vc-follow-symlinks t
-
- ;; 在补全的时候忽略大小写
- read-buffer-completion-ignore-case t
- read-file-name-completion-ignore-case t
-
- ;; 设置句子结尾
- sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*"
- sentence-end-double-space nil
-
- ;; emacs 不会自动解析域名
- ffap-machine-p-known 'reject
- )
-
-;; 设置编码方式
-(set-language-environment "UTF-8")
-
-;; 优化垃圾回收
 (use-package gcmh
   :ensure t
-  :hook
-  (emacs-startup . gcmh-mode)
-  :config
-  (setq gcmh-idle-delay 'auto
-        gcmh-auto-idle-delay-factor 10
-        gcmh-high-cons-threshold #x64000000)
-  )
-
-;; 开启删除所选区域模式
-(add-hook 'after-init-hook 'delete-selection-mode)
-
-;; 退出 emacs 时并直接杀死进程
-(setq confirm-kill-processes nil)
-;; 当其他编辑器也更改某个 buffer 时，会自动更新
-;; (use-package autorevert
-;;   :hook
-;;   (after-init . global-auto-revert-mode)
-;;   :config
-;;   (setq revert-without-query (list ".")))
-
-;; 禁用 native comp warning
-(setq native-comp-async-report-warnings-errors nil)
+  :hook (emacs-startup . gcmh-mode)
+  :custom
+  (gcmh-auto-idle-delay-factor 10)
+  (gcmh-high-cons-threshold #x64000000)
+  (gcmh-idle-delay 'auto))

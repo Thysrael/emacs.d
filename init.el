@@ -10,8 +10,8 @@
   '(
     init-package
     init-util
-    ;; 'init-tmp
-    ;; 'init-basic
+    init-tmp
+    init-basic
     ;; 'init-enhance
     ;; 'init-window
     ;; 'init-workspace
