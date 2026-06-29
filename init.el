@@ -4,8 +4,8 @@
 (defvar on-server
   (let ((hostname (system-name)))
     (not (or (string= hostname "banana")
-             (string= hostname "pitch")
              (string= hostname "thysrael-82av")
+             (string= hostname "jujube.local")
              ))))
 
 ;; 根据是否在服务器上选择性加载文件
@@ -13,36 +13,36 @@
 (if (not on-server) ; local
     (setq +init-files
           (list
-           'init-package
-           'init-util
-           'init-tmp
-           'init-basic
-           'init-enhance
-           'init-window
+           ;; 'init-package
+           ;; 'init-util
+           ;; 'init-tmp
+           ;; 'init-basic
+           ;; 'init-enhance
+           ;; 'init-window
            ;; 'init-workspace
-           'init-tabbar
-           'init-navigate
-           'init-ui
-           'init-modeline
-           'init-input
-           'init-edit
-           'init-completion
-           'init-prog
-           'init-lang
-           'init-project
-           'init-vsc
-           'init-debug
-           'init-write
+           ;; 'init-tabbar
+           ;; 'init-navigate
+           ;; 'init-ui
+           ;; 'init-modeline
+           ;; 'init-input
+           ;; 'init-edit
+           ;; 'init-completion
+           ;; 'init-prog
+           ;; 'init-lang
+           ;; 'init-project
+           ;; 'init-vsc
+           ;; 'init-debug
+           ;; 'init-write
            ;; 'init-shell
-           'init-term
-           'init-remote
-           'init-read
-           'init-dired
-           'init-control
-           'init-note
-           'init-modal
-           'init-export
-           'init-ai
+           ;; 'init-term
+           ;; 'init-remote
+           ;; 'init-read
+           ;; 'init-dired
+           ;; 'init-control
+           ;; 'init-note
+           ;; 'init-modal
+           ;; 'init-export
+           ;; 'init-ai
            ))
   (setq +init-files ; remote
         (list
