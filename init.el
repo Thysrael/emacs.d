@@ -1,76 +1,75 @@
 ;;; -*- lexical-binding: t -*-
 
-;; 判断当前是否在服务器上
-(defvar on-server
-  (let ((hostname (system-name)))
-    (not (or (string= hostname "banana")
-             (string= hostname "thysrael-82av")
-             (string= hostname "jujube.local")
-             ))))
+;; Modules can use this to skip local-only or remote-only packages.
+(defvar thy/on-server
+  (not (member (system-name)
+               '("banana" "thysrael-82av" "jujube.local")))
+  "Non-nil when this Emacs session is running on a remote/server host.")
 
-;; 根据是否在服务器上选择性加载文件
-(defvar +init-files nil)
-(if (not on-server) ; local
-    (setq +init-files
-          (list
-           ;; 'init-package
-           ;; 'init-util
-           ;; 'init-tmp
-           ;; 'init-basic
-           ;; 'init-enhance
-           ;; 'init-window
-           ;; 'init-workspace
-           ;; 'init-tabbar
-           ;; 'init-navigate
-           ;; 'init-ui
-           ;; 'init-modeline
-           ;; 'init-input
-           ;; 'init-edit
-           ;; 'init-completion
-           ;; 'init-prog
-           ;; 'init-lang
-           ;; 'init-project
-           ;; 'init-vsc
-           ;; 'init-debug
-           ;; 'init-write
-           ;; 'init-shell
-           ;; 'init-term
-           ;; 'init-remote
-           ;; 'init-read
-           ;; 'init-dired
-           ;; 'init-control
-           ;; 'init-note
-           ;; 'init-modal
-           ;; 'init-export
-           ;; 'init-ai
-           ))
-  (setq +init-files ; remote
-        (list
-         'init-package
-         'init-util
-         'init-tmp
-         'init-basic
-         'init-enhance
-         'init-window
-         'init-tabbar
-         'init-navigate
-         'init-ui
-         'init-modeline
-         'init-edit
-         'init-completion
-         'init-prog
-         'init-lang
-         'init-project
-         'init-vsc
-         'init-debug
-         'init-write
-         'init-remote
-         'init-dired
-         'init-modal
-         'init-ai
-         ))
-  )
+(defvar thy/local-init-files
+  '(
+    ;; 'init-package
+    ;; 'init-util
+    ;; 'init-tmp
+    ;; 'init-basic
+    ;; 'init-enhance
+    ;; 'init-window
+    ;; 'init-workspace
+    ;; 'init-tabbar
+    ;; 'init-navigate
+    ;; 'init-ui
+    ;; 'init-modeline
+    ;; 'init-input
+    ;; 'init-edit
+    ;; 'init-completion
+    ;; 'init-prog
+    ;; 'init-lang
+    ;; 'init-project
+    ;; 'init-vsc
+    ;; 'init-debug
+    ;; 'init-write
+    ;; 'init-shell
+    ;; 'init-term
+    ;; 'init-remote
+    ;; 'init-read
+    ;; 'init-dired
+    ;; 'init-control
+    ;; 'init-note
+    ;; 'init-modal
+    ;; 'init-export
+    ;; 'init-ai
+    )
+  "Core modules loaded on local machines.")
+
+(defvar thy/remote-init-files
+  '(init-package
+    init-util
+    init-tmp
+    init-basic
+    init-enhance
+    init-window
+    init-tabbar
+    init-navigate
+    init-ui
+    init-modeline
+    init-edit
+    init-completion
+    init-prog
+    init-lang
+    init-project
+    init-vsc
+    init-debug
+    init-write
+    init-remote
+    init-dired
+    init-modal
+    init-ai)
+  "Core modules loaded on remote/server hosts.")
+
+(defvar thy/init-files
+  (if thy/on-server thy/remote-init-files thy/local-init-files)
+  "Core modules selected for the current host.")
 
 (let ((init-directory (expand-file-name "core/" user-emacs-directory)))
-  (dolist (file +init-files)
+  (dolist (file thy/init-files)
     (load-file (concat init-directory (symbol-name file) ".el"))))

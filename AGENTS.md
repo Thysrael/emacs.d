@@ -4,8 +4,8 @@ This is a personal Emacs configuration, not an application project. Keep changes
 
 ## Entry Points
 - `early-init.el` contains startup-only optimizations; keep it small and avoid package setup there.
-- `init.el` decides what loads through `+init-files`, then `load-file`s matching `core/init-*.el` files.
-- Do not assume a module is active just because it exists; check `+init-files` first. The local-machine branch currently has all modules commented out.
+- `init.el` decides what loads through `thy/init-files`, then `load-file`s matching `core/init-*.el` files.
+- Do not assume a module is active just because it exists; check `thy/init-files` first. The local-machine module list is currently empty.
 
 ## Package Conventions
 - Package setup uses built-in `package.el`, `package-vc`, and `use-package`; do not introduce straight.el/elpaca without an explicit request.
