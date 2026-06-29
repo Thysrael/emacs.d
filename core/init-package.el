@@ -36,5 +36,6 @@
 (advice-add 'vc-git-clone :around 'thy/vc-git-clone)
 
 ;; use-package settings.
+(setq use-package-always-defer t)
 (setq use-package-expand-minimally t)
 (setq use-package-enable-imenu-support t)
