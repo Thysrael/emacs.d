@@ -3,7 +3,7 @@
 (use-package nerd-icons
   :ensure t
   :custom
-  (nerd-icons-font-family "Maple Mono NF CN")
+  (nerd-icons-font-family "Symbols Nerd Font Mono")
   :config
   (dolist (icon '(("drawio" nerd-icons-mdicon "nf-md-drawing" :face nerd-icons-lpink)
                   ("rst" nerd-icons-mdicon "nf-md-file_document" :face nerd-icons-lpink)
@@ -96,8 +96,8 @@
       (set-fontset-font t 'han (font-spec :family "Maple Mono NF CN" :size font-size))
       (set-fontset-font t 'han (font-spec :script 'han) nil 'append)
       (set-fontset-font t 'cjk-misc (font-spec :family "Maple Mono NF CN" :size font-size))
-      (set-fontset-font t '(#xe000 . #xf8ff) (font-spec :family "Maple Mono NF CN") nil 'prepend)
-      (set-fontset-font t '(#xf0000 . #xffffd) (font-spec :family "Maple Mono NF CN") nil 'prepend))))
+      (set-fontset-font t '(#xe000 . #xf8ff) (font-spec :family "Symbols Nerd Font Mono") nil 'prepend)
+      (set-fontset-font t '(#xf0000 . #xffffd) (font-spec :family "Symbols Nerd Font Mono") nil 'prepend))))
 
 (thy/setup-fonts)
 (add-hook 'server-after-make-frame-hook #'thy/setup-fonts)
@@ -154,5 +154,5 @@
  '(font-lock-preprocessor-face ((t (:foreground unspecified :family "Maple Mono NF CN"))))
  '(font-lock-regexp-grouping-backslash ((t (:foreground unspecified))))
  '(fixed-pitch ((t (:family "Maple Mono NF CN"))))
- '(variable-pitch ((t (:height 0.9 :family "Maple Mono NF CN"))))
+ '(variable-pitch ((t (:height 0.9 :family "Symbols Nerd Font Mono"))))
  '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold)))))
