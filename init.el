@@ -17,7 +17,7 @@
     init-workspace
     init-navigate
     init-ui
-    ;; init-modeline
+    init-modeline
     ;; 'init-input
     ;; 'init-edit
     ;; 'init-completion

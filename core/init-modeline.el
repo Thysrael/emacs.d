@@ -11,10 +11,11 @@
 ;;; Check whether `window-total-width' is larger than the limit
 (defconst +mode-line-window-width-limit 90)
 (defvar-local +mode-line-enough-width-p nil)
-(add-hook! (after-revert-hook buffer-list-update-hook window-size-change-functions)
-  (defun +mode-line-window-size-change-function (&rest _)
-    (setq +mode-line-enough-width-p
-          (> (window-total-width) +mode-line-window-width-limit))))
+(defun +mode-line-window-size-change-function (&rest _)
+  (setq +mode-line-enough-width-p
+        (> (window-total-width) +mode-line-window-width-limit)))
+(dolist (hook '(after-revert-hook buffer-list-update-hook window-size-change-functions))
+  (add-hook hook #'+mode-line-window-size-change-function))
 
 ;;; face
 (defgroup +mode-line nil
@@ -94,104 +95,109 @@
                    " sym "
                    (and (cadr keyword) "in scope "))))))
 
+;;; [project-crumb] Cache project path info.
+(defvar-local +mode-line-project-crumb nil)
+
+(defun +mode-line-update-project-crumb (&rest _)
+  "Cache breadcrumb project crumbs for the mode-line."
+  (setq +mode-line-project-crumb
+        (when (fboundp 'breadcrumb-project-crumbs)
+          (breadcrumb-project-crumbs))))
+
+(dolist (hook '(find-file-hook after-save-hook clone-indirect-buffer-hook
+                               Info-selection-hook window-configuration-change-hook))
+  (add-hook hook #'+mode-line-update-project-crumb))
+
+(dolist (fn '(rename-buffer set-visited-file-name pop-to-buffer popup-create popup-delete))
+  (advice-add fn :after #'+mode-line-update-project-crumb))
+
 
 ;;; Cache remote host name
 (defvar-local +mode-line-remote-host-name nil)
-(add-hook! find-file-hook
-  (defun +mode-line-update-remote-host-name ()
-    "Hostname for remote buffers."
-    (setq +mode-line-remote-host-name
-          (when-let ((hostname (and default-directory
-                                    (file-remote-p default-directory 'host))))
-            (when (not (string-equal hostname "localhost"))
-              (concat "@" hostname)))
-          )))
+(defun +mode-line-update-remote-host-name ()
+  "Hostname for remote buffers."
+  (setq +mode-line-remote-host-name
+        (when-let ((hostname (and default-directory
+                                  (file-remote-p default-directory 'host))))
+          (when (not (string-equal hostname "localhost"))
+            (concat "@" hostname)))))
+(add-hook 'find-file-hook #'+mode-line-update-remote-host-name)
 
 ;;; Cache flymake report
 (defvar-local +mode-line-flymake-indicator nil)
-(add-hook! flymake-mode-hook
-  (defun +mode-line-update-flymake (&rest _)
-    "Display flymake info for current buffer."
-    (setq +mode-line-flymake-indicator
-          (when (and flymake-mode (flymake-running-backends))
-            (let* ((err-count (cadadr (flymake--mode-line-counter :error)))
-                   (warning-count (cadadr (flymake--mode-line-counter :warning)))
-                   (note-count (cadadr (flymake--mode-line-counter :note)))
-                   (err (when (and err-count (not (string= err-count "0")))
-                          (propertize err-count 'face '(:inherit compilation-error))))
-                   (warning (when (and warning-count (not (string= warning-count "0")))
-                              (propertize warning-count 'face '(:inherit compilation-warning))))
-                   (note (when (and note-count (not (string= note-count "0")))
-                           (propertize note-count 'face '(:inherit compilation-info))))
-                   (info (string-join (remove nil (list err warning note)) "/")))
-              (when (not (string-empty-p info)) (concat " " info)))))))
-(advice-add #'flymake--handle-report :after #'+mode-line-update-flymake)
+(defun +mode-line-update-flymake (&rest _)
+  "Display flymake info for current buffer."
+  (setq +mode-line-flymake-indicator
+        (when (and flymake-mode (flymake-running-backends))
+          (let* ((err-count (cadadr (flymake--mode-line-counter :error)))
+                 (warning-count (cadadr (flymake--mode-line-counter :warning)))
+                 (note-count (cadadr (flymake--mode-line-counter :note)))
+                 (err (when (and err-count (not (string= err-count "0")))
+                        (propertize err-count 'face '(:inherit compilation-error))))
+                 (warning (when (and warning-count (not (string= warning-count "0")))
+                            (propertize warning-count 'face '(:inherit compilation-warning))))
+                 (note (when (and note-count (not (string= note-count "0")))
+                         (propertize note-count 'face '(:inherit compilation-info))))
+                 (info (string-join (remove nil (list err warning note)) "/")))
+            (when (not (string-empty-p info)) (concat " " info))))))
+(add-hook 'flymake-mode-hook #'+mode-line-update-flymake)
+(with-eval-after-load 'flymake
+  (advice-add #'flymake--handle-report :after #'+mode-line-update-flymake))
 
 ;;; Cache encoding info
+(setq eol-mnemonic-unix "LF"
+      eol-mnemonic-dos "CRLF"
+      eol-mnemonic-mac "CR"
+      eol-mnemonic-undecided "?")
+
 (defvar-local +mode-line-encoding nil)
-(add-hook! find-file-hook
-  (defun +mode-line-update-encoding (&rest _)
-    "Get encoding and EOL type of current buffer."
-    (setq +mode-line-encoding
-          `(,(if (memq (coding-system-category buffer-file-coding-system)
-                       '(coding-category-undecided coding-category-utf-8))
-                 (when +mode-line-show-common-encodings "UTF-8 ")
-               (let ((name (coding-system-get buffer-file-coding-system :name)))
-                 (concat (if (eq name 'no-conversion) "NO-CONV" (upcase (symbol-name name)))
-                         " ")))
-            ,(pcase (coding-system-eol-type buffer-file-coding-system)
-               (0 (when +mode-line-show-common-encodings "LF "))
-               (1 "CRLF ")
-               (2 "CR ")
-               (_ "UNK "))))))
+(defun +mode-line-update-encoding (&rest _)
+  "Get encoding and EOL type of current buffer."
+  (setq +mode-line-encoding
+        (unless (and (memq (coding-system-category buffer-file-coding-system)
+                           '(coding-category-undecided coding-category-utf-8))
+                     (eq (coding-system-eol-type buffer-file-coding-system) 0))
+          "%Z")))
+(add-hook 'find-file-hook #'+mode-line-update-encoding)
 (advice-add #'after-insert-file-set-coding :after #'+mode-line-update-encoding)
 (advice-add #'set-buffer-file-coding-system :after #'+mode-line-update-encoding)
-
-;;; Cache pdf-tools info
-(defvar-local +mode-line-pdf-pages nil)
-(add-hook! pdf-view-change-page-hook
-  (defun +mode-line-update-pdf-pages ()
-    "Update PDF pages."
-    (when (eq major-mode 'pdf-view-mode)
-      (setq +mode-line-pdf-pages
-            (format "p%d/%d "
-                    (or (eval `(pdf-view-current-page)) 0)
-                    (pdf-cache-number-of-pages))))))
 
 
 ;;; [vcs-info] cache for vcs
 (defvar-local +mode-line-vcs-info nil)
-(add-hook! (find-file-hook after-save-hook)
-  (defun +mode-line-update-vcs-info ()
-    (when (and vc-mode buffer-file-name)
-      (setq +mode-line-vcs-info
-            (let* ((backend (vc-backend buffer-file-name))
-                   (state   (vc-state buffer-file-name backend))
-                   (rev     (if +mode-line-show-common-vc-tools-name
-                                (substring-no-properties vc-mode 1)
-                              (substring-no-properties vc-mode (+ (if (eq backend 'Hg) 2 3) 2))))
-                   (face (cond ((eq state 'up-to-date) 'vc-dir-status-up-to-date)
-                               ((eq state 'ignored) 'vc-dir-status-ignored)
-                               ((memq state '(needs-update needs-merge conflict missing)) 'vc-dir-status-warning)
-                               (t 'vc-dir-status-edited)))
-                   (state-symbol (cond ((eq state 'up-to-date) "√")
-                                       ((eq state 'edited) "*")
-                                       ((eq state 'added) "@")
-                                       ((eq state 'needs-update) "￬")
-                                       ((eq state 'needs-merge) "&")
-                                       ((eq state 'unlocked-changes) "")
-                                       ((eq state 'removed) "×")
-                                       ((eq state 'conflict) "!")
-                                       ((eq state 'missing) "?")
-                                       ((eq state 'ignored) "-")
-                                       ((eq state 'unregistered) "+")
-                                       ((stringp state) (concat "#" state ":"))
-                                       (t " "))))
-              (concat " "
-                      (propertize (concat rev state-symbol)
-                                  'face face
-                                  'help-echo (get-text-property 1 'help-echo vc-mode))))))))
-(advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info)
+(defun +mode-line-update-vcs-info ()
+  (when (and vc-mode buffer-file-name)
+    (setq +mode-line-vcs-info
+          (let* ((backend (vc-backend buffer-file-name))
+                 (state   (vc-state buffer-file-name backend))
+                 (rev     (if +mode-line-show-common-vc-tools-name
+                              (substring-no-properties vc-mode 1)
+                            (substring-no-properties vc-mode (+ (if (eq backend 'Hg) 2 3) 2))))
+                 (face (cond ((eq state 'up-to-date) 'vc-dir-status-up-to-date)
+                             ((eq state 'ignored) 'vc-dir-status-ignored)
+                             ((memq state '(needs-update needs-merge conflict missing)) 'vc-dir-status-warning)
+                             (t 'vc-dir-status-edited)))
+                 (state-symbol (cond ((eq state 'up-to-date) "√")
+                                     ((eq state 'edited) "*")
+                                     ((eq state 'added) "@")
+                                     ((eq state 'needs-update) "￬")
+                                     ((eq state 'needs-merge) "&")
+                                     ((eq state 'unlocked-changes) "")
+                                     ((eq state 'removed) "×")
+                                     ((eq state 'conflict) "!")
+                                     ((eq state 'missing) "?")
+                                     ((eq state 'ignored) "-")
+                                     ((eq state 'unregistered) "+")
+                                     ((stringp state) (concat "#" state ":"))
+                                     (t " "))))
+            (concat " "
+                    (propertize (concat rev state-symbol)
+                                'face face
+                                'help-echo (get-text-property 1 'help-echo vc-mode)))))))
+(dolist (hook '(find-file-hook after-save-hook))
+  (add-hook hook #'+mode-line-update-vcs-info))
+(with-eval-after-load 'vc
+  (advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info))
 
 
 (defun +nerd-icons-icon-for-buffer ()
@@ -215,7 +221,8 @@
   (let* ((meta-face (+mode-line-get-window-name-face))
          (active-p (mode-line-window-selected-p))
          (panel-face `(:inherit ,meta-face :inverse-video ,active-p))
-         (lhs `((:propertize ,(+mode-line-get-window-name)
+         (lhs `(
+         (:propertize ,(+mode-line-get-window-name)
                              face ,panel-face)
                 (:propertize ,(+mode-line-overwrite-readonly-indicator)
                              face ,panel-face)
@@ -225,17 +232,15 @@
                                      (+mode-line-use-region-indicator))
                             face ,panel-face))
                 " "
-                ;; (:propertize "%b" face ,meta-face)
-                (:eval (breadcrumb-project-crumbs))
+               ,(or +mode-line-project-crumb
+                     `(:propertize "%b" face ,meta-face))
+                " "
                 (:propertize +mode-line-remote-host-name
-                             face +mode-line-host-name-active-face)
-                ;; (:eval ,(when-let ((imenu (and +mode-line-enough-width-p
-                ;;                                (breadcrumb-imenu-crumbs))))
-                ;;           (concat ": " imenu)))
+                          face +mode-line-host-name-active-face)
                 ))
          (rhs `(
                 (,active-p ,(+nerd-icons-icon-for-buffer) ; 选中时使用彩色 icon
-                           (:propertize ,(+nerd-icons-icon-for-buffer) face nil)); 非选中的时候选用无色 icon
+                         (:propertize ,(+nerd-icons-icon-for-buffer) face nil)); 非选中的时候选用无色 icon
                 "  "
                 (:propertize mode-name face ,(when active-p '+mode-line-mode-name-active-face))
                 (,active-p ,+mode-line-vcs-info
@@ -243,8 +248,8 @@
                 (,active-p ,+mode-line-flymake-indicator)
                 " "
                 (:eval +mode-line-encoding)
-                ,(or +mode-line-pdf-pages
-                     (list "%l:" '(:eval (+mode-line-buffer-position))))
+                "%l:"
+                ;; (:eval (+mode-line-buffer-position))
                 " "
                 ))
          (rhs-str (format-mode-line rhs))
@@ -254,54 +259,17 @@
       ,rhs-str)))
 
 (setq-default mode-line-format
-              '((:eval (+mode-line-compute))))
+               '((:eval (+mode-line-compute)))
+               header-line-format nil)
 
-;;; Header Line
-;; TODO: The performance of bc is a little bad, so I disable it for now.
-;;      Maybe I will solve the problem in the future.
-;; [breadcrumb] Add breadcrumb navigation in header-line
+;;; Breadcrumb project/imenu crumbs for the mode-line.
 (use-package breadcrumb
-  ;; :straight (:host github :repo "joaotavora/breadcrumb" :files ("*.el"))
   :ensure t
   :custom-face
-  (breadcrumb-project-base-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-  (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-  (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :bold t :italic t))))
-  :commands breadcrumb--header-line
+  (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t))))
+  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t))))
+  (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :foreground unspecified))))
   :config
-  (setq breadcrumb-imenu-crumb-separator " > "
-        breadcrumb-project-max-length 0.6 ; 用当前 window 的 70% 来显示 breadcrumb project
-        breadcrumb-imenu-max-length 0.7
-        breadcrumb-idle-time 1)
-  (advice-add #'breadcrumb--format-ipath-node :around
-              (lambda (og p more &rest r)
-                "Icon for items"
-                (let ((string (string-trim (apply og p more r)))) ; 使用 string-trim 去掉两侧空格
-                  (if (not more)
-                      (concat (nerd-icons-codicon
-                               "nf-cod-symbol_field"
-                               :face 'breadcrumb-imenu-leaf-face)
-                              " " string)
-                    (cond ((string= string "Packages")
-                           (concat (nerd-icons-codicon "nf-cod-package" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                          ((string= string "Requires")
-                           (concat (nerd-icons-codicon "nf-cod-file_submodule" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                          ((or (string= string "Variable") (string= string "Variables"))
-                           (concat (nerd-icons-codicon "nf-cod-symbol_variable" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                          ((string= string "Function")
-                           (concat (nerd-icons-mdicon "nf-md-function_variant" :face 'breadcrumb-imenu-crumbs-face) " " string))
-                          (t ; 默认情况下，使用类图标
-                           (concat (nerd-icons-codicon "nf-cod-symbol_class" :face 'breadcrumb-imenu-crumbs-face) " " string)
-                           ))))))
-  )
-
-(setq-default header-line-format nil)
-
-(defun +enable-header-line ()
-  "Enable header line in the current buffer."
-  (setq header-line-format
-        '((:eval (propertize "󰽰" 'face 'font-lock-string-face)) ": " (:eval (breadcrumb-imenu-crumbs)))
-        ))
-
-(add-hook 'prog-mode-hook '+enable-header-line)
+  (setq breadcrumb-imenu-crumb-separator " ⋅ "
+        breadcrumb-project-max-length 0.55
+        breadcrumb-idle-time 10))
