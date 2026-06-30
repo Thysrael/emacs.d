@@ -21,7 +21,7 @@ This is a personal Emacs configuration, not an application project. Keep changes
 - Prefix custom functions and macros with `thy/`; do not introduce new `+` or `my/` names.
 - Add docstrings to custom functions unless the function is purely local and trivial.
 - Keep comments in English and only where they explain non-obvious behavior.
-- Use `;` for end-of-line comments and `;;` for standalone comments. Avoid `;;;` section comments except for conventional file headers such as `;;; -*- lexical-binding: t -*-`.
+- Use `;` for end-of-line comments and `;;` for standalone comments.
 - Keep related settings in the module that owns the feature; avoid duplicating package config across modules.
 - In `early-init.el`, keep `setq` forms to one variable per form.
 

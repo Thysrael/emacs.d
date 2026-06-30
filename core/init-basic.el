@@ -37,7 +37,8 @@
    ("C-S-x" . thy/kill-region-or-line)
    ("C-S-c" . thy/copy-region-or-line)
    ("<f5>" . revert-buffer)
-  ("C-z" . undo))
+   ("<f2>" . kmacro-set-counter)
+   ("C-z" . undo))
   :hook
   ;; Let typed text replace the active region.
   (after-init . delete-selection-mode)
@@ -70,6 +71,8 @@
   (ring-bell-function #'ignore)
   ;; Keep replaced external clipboard text in the kill ring.
   (save-interprogram-paste-before-kill t)
+  ;; Share the clipboard with terminal Emacs and external programs.
+  (select-enable-clipboard t)
   ;; Treat Chinese punctuation as sentence endings.
   (sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
   (sentence-end-double-space nil)
@@ -123,6 +126,19 @@
   (setq-default word-wrap-by-category t)
 
   (set-language-environment "UTF-8")
+
+  ;; Put the command prefix on the right-hand home row.
+  (define-key key-translation-map (kbd "C-j") (kbd "C-x"))
+
+  ;; Translate modified Chinese punctuation to ASCII punctuation.
+  (cl-loop for prefix in '("C-" "M-" "s-" "H-")
+           do (cl-loop for cpunc in '("，" "。" "？" "！" "；" "：" "、"
+                                      "（" "）" "【" "】" "《" "》" "—")
+                       for epunc in '("," "." "?" "!" ";" ":" ","
+                                      "(" ")" "[" "]" "<" ">" "_")
+                       do (define-key key-translation-map
+                            (kbd (concat prefix cpunc))
+                            (kbd (concat prefix epunc)))))
 
   (when (eq system-type 'darwin)
     ;; Use Command as Meta in macOS GUI frames.

@@ -12,7 +12,7 @@
     init-util
     init-tmp
     init-basic
-    ;; 'init-enhance
+    init-enhance
     ;; 'init-window
     ;; 'init-workspace
     ;; 'init-tabbar

@@ -2,6 +2,7 @@
 #+author: Thysrael
 
 * Font
+
 英文正文：Jetbrain Mono
 仓耳今楷
 icon：Symbols Nerd Font Mono
@@ -9,6 +10,7 @@ icon：Symbols Nerd Font Mono
 中文正文：霞鹜文楷
 
 * Program
+
 fd
 ripgrep
 libvterm
@@ -16,19 +18,17 @@ aspell
 sdcv
 stardict
 cmake
-ctags
 gnuplot
 emacs-lsp-booster
 texlive
 texlive-langchinese
 words
-aspell
-aspell-en
-xclip
 
 * EAF
+
 python-sexpdata
 python-epc (after python-setuptools)
 
 * Dirvish
+
 libvips
