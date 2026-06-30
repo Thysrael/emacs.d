@@ -7,22 +7,8 @@
   (interactive)
   (cond
    ((looking-at "\\w") (forward-word 1))
-   ((looking-at "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
+   ((looking-t "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
    (t (forward-char))))
-
-;; (global-set-key (kbd "C-b") 'backward-word)
-
-;; (defun +smart-backword ()
-;;   "Move cursor based on its position in a word."
-;;   (interactive)
-;;   (cond
-;;     ((looking-at "\\w") (backward-word)) ; 如果在单词中部，移动到单词头部
-;;     ((looking-back "\\b" 1) (backward-word) (forward-word)) ; 如果在单词头部，移动到前一个单词的尾部
-;;     ((looking-at "\\s-") (backward-word))
-;;     (t (backward-char)))) ; 如果不在单词中，显示消息
-
-;; (global-set-key (kbd "C-l") 'forward-char)
-;; (global-set-key (kbd "C-h") 'backward-char)
 
 ;; 字符跳转
 (use-package avy
@@ -33,11 +19,6 @@
   (setq avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
   (setq avy-background t) ; 在跳转时背景变黑
   )
-
-;; (use-package ace-pinyin
-;;   :straight (:host github :repo "yangsheng6810/ace-pinyin")
-;;   :after avy
-;;   :init (ace-pinyin-global-mode t))
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mwim
@@ -68,7 +49,7 @@
   :config
   (defvar cns-packages-path
     (expand-file-name "cns"
-                      (expand-file-name package-user-dir)))  
+                      (expand-file-name package-user-dir)))
   (setq cns-prog (expand-file-name "cnws" cns-packages-path))
   (setq cns-dict-directory (expand-file-name "cppjieba/dict" cns-packages-path))
   (defun +cns-forward-word ()

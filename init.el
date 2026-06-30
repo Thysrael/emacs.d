@@ -14,9 +14,8 @@
     init-basic
     init-enhance
     init-window
-    ;; 'init-workspace
-    ;; 'init-tabbar
-    ;; 'init-navigate
+    init-workspace
+    init-navigate
     ;; 'init-ui
     ;; 'init-modeline
     ;; 'init-input
@@ -48,7 +47,7 @@
     init-basic
     init-enhance
     init-window
-    init-tabbar
+    init-workspace
     init-navigate
     init-ui
     init-modeline

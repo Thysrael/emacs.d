@@ -1,10 +1,12 @@
 ;;; -*- lexical-binding: t -*-
 
-;;; Utilities
+;; Useful functions and macros shared by multiple modules.
+(require 'cl-lib)
 
 ;; Keep generated files out of the main configuration.
 (use-package no-littering
   :ensure t
+  :demand t
   :config
   ;; Ignore Customize output instead of writing custom-set-* forms anywhere.
   (setq custom-file null-device))
