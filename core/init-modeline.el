@@ -4,7 +4,7 @@
 (eval-when-compile (require 'cl-lib))
 
 ;; show encodings for UTF-8:LF
-(defvar +mode-line-show-common-encodings nil)
+(defvar +mode-line-show-common-encodings t)
 ;; show VC tools name for Git
 (defvar +mode-line-show-common-vc-tools-name nil)
 
@@ -207,15 +207,6 @@
       (nerd-icons-icon-for-file (buffer-name))
     (nerd-icons-icon-for-buffer)))
 
-;; [buffer position]
-(defsubst +mode-line-buffer-position ()
-  (let ((pos (format-mode-line '(-3 "%p"))))
-    (pcase pos
-      ("Top" "⊤")
-      ("Bot" "⊥")
-      ("All" "∀")
-      (_ "%p%%"))))
-
 (defsubst +mode-line-compute ()
   "Formatting active-long mode-line."
   (let* ((meta-face (+mode-line-get-window-name-face))
@@ -248,8 +239,7 @@
                 (,active-p ,+mode-line-flymake-indicator)
                 " "
                 (:eval +mode-line-encoding)
-                "%l:"
-                ;; (:eval (+mode-line-buffer-position))
+                "%l:%p%%"
                 " "
                 ))
          (rhs-str (format-mode-line rhs))
