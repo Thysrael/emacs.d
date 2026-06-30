@@ -10,6 +10,7 @@ This is a personal Emacs configuration, not an application project. Keep changes
 ## Package Conventions
 - Package setup uses built-in `package.el`, `package-vc`, and `use-package`; do not introduce straight.el/elpaca without an explicit request.
 - Prefer `use-package` with `:ensure`, `:hook`, `:bind`, `:commands`, `:custom`, and minimal `:config`.
+- If a package is clearly legacy or can be replaced well by built-in Emacs features, point it out and recommend removal.
 - Avoid broad eager loading. Use `:demand t` only when a package must be active immediately.
 - Built-in packages should use `:ensure nil` when configured with `use-package`.
 - `no-littering` is configured in `core/init-util.el`; generated/cache files should go through its `no-littering-expand-*` helpers when possible.
