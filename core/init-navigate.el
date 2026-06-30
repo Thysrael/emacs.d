@@ -2,12 +2,16 @@
 
 ;; 改变光标移动绑定，使其更加方便
 (global-set-key (kbd "C-f") '+smart-forward)
+(defun thy/forward-word (&optional arg)
+  "Move forward by word using the active `forward-word' remapping."
+  (funcall (or (command-remapping 'forward-word) #'forward-word) (or arg 1)))
+
 (defun +smart-forward ()
   "Move cursor based on its position in a word."
   (interactive)
   (cond
-   ((looking-at "\\w") (forward-word 1))
-   ((looking-t "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
+   ((looking-at "\\w") (thy/forward-word 1))
+   ((looking-at-p "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
    (t (forward-char))))
 
 ;; 字符跳转
@@ -41,43 +45,9 @@
   )
 
 ;; 中文分词跳转
-(use-package cns
-  :vc (cns :url "https://github.com/kanglmf/emacs-chinese-word-segmentation.git"
-           :shell-command "git submodule update --init --recursive"
-           :make "all"
+(use-package emt
+  :if (eq system-type 'darwin)
+  :vc (emt :url "https://github.com/roife/emt.git"
            :rev "master")
-  :config
-  (defvar cns-packages-path
-    (expand-file-name "cns"
-                      (expand-file-name package-user-dir)))
-  (setq cns-prog (expand-file-name "cnws" cns-packages-path))
-  (setq cns-dict-directory (expand-file-name "cppjieba/dict" cns-packages-path))
-  (defun +cns-forward-word ()
-    (interactive)
-    (require 'org)
-    (if (org-at-table-p)
-        (+smart-forward)
-      (cns-forward-word)))
-
-  (defun +smart-forward-cn ()
-    "Move forward one word or to the end of line."
-    (interactive)
-    (let ((current-line (line-number-at-pos))
-          (current-point (point)))
-      (if (eolp)
-          (+cns-forward-word)
-        (progn
-          (+cns-forward-word)
-          (when (/= current-line (line-number-at-pos))
-            (progn
-              (goto-char current-point)
-              (end-of-line)))))))
-  :hook
-  (org-mode . cns-mode)
-  (gfm-mode . cns-mode)
-  (markdown-mode .cns-mode)
-  (eww-mode . cns-mode)
-  :bind
-  (:map cns-mode-map
-        ("C-f" . +smart-forward-cn))
-  )
+  :commands (emt-mode emt-forward-word emt-backward-word emt-download-module)
+  :hook (after-init . emt-mode))

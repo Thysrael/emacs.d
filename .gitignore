@@ -12,3 +12,4 @@ tree-sitter/
 eln-cache
 elpa
 etc/custom.el
+modules/

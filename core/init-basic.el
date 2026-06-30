@@ -36,6 +36,7 @@
    ("C-S-v" . yank)
    ("C-S-x" . thy/kill-region-or-line)
    ("C-S-c" . thy/copy-region-or-line)
+   ("C-x C-b" . switch-to-buffer)
    ("<f5>" . revert-buffer)
    ("<f2>" . kmacro-set-counter)
    ("C-z" . undo))
