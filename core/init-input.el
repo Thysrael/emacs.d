@@ -1,158 +1,57 @@
 ;; -*- lexical-binding: t; -*-
 
-;; ;; 为 rime 的提示框做准备
-;; (use-package posframe)
-;;
-;; ;; emacs rime 输入法前端
-;; (use-package rime
-;;   :custom
-;;   (default-input-method "rime")
-;;   :config
-;;   (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
-;;   (setq rime-show-candidate 'posframe) ; 设置候选框展示风格
-;;   (setq rime-disable-predicates
-;;         '(rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
-;;           rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
-;;           rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
-;;           rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
-;;           rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
-;;           rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
-;;           ;; rime-predicate-after-ascii-char-p ; 任意英文字符后
-;;           ))
-;;   :hook
-;;   (after-init . toggle-input-method)
-;;   (kill-emacs . rime-lib-finalize) ; hack，修正 rime 的关闭问题
-;;   )
-;;
-;; 在 emacs 状态下不使用搜狗输入法，进而使用 emacs 内的 rime 输入法
-;; (defvar input-toggle nil "Toggle variable for input method, when nil means English, true means Chinese.")
-;;
-;; (defun fcitx2en ()
-;;   "Change to the English input."
-;;   (let ((input-status (process-lines "fcitx-remote")))
-;;     (when (= (string-to-number (car input-status)) 1) ; input status == 1 时表示搜狗输入法
-;;       (setq input-toggle nil)
-;;       (start-process "fcitx-remote-process" nil "fcitx-remote" "-o")
-;;       (message ""))))
-;;
-;; (defun fcitx2zh ()
-;;   "Change to the Chinese input."
-;;   (let ((input-status (process-lines "fcitx-remote")))
-;;     (unless (and (not (= (string-to-number (car input-status)) 1)) input-toggle)
-;;       (start-process "fcitx-remote-process" nil "fcitx-remote" "-c")
-;;       (setq input-toggle t))))
-;;
-;; (setq focus-in-hook 'fcitx2en)
-;; (setq focus-out-hook 'fcitx2zh)
-;; (add-hook 'kill-emacs-hook 'fcitx2zh)
+(use-package macim
+  :if (eq system-type 'darwin)
+  :vc (macim :url "https://github.com/roife/macim.el"
+             :rev "master")
+  :commands (macim-mode macim-select-ascii macim-select-other)
+  :hook (after-init . macim-mode)
+  :preface
+  (defvar thy/macim-chinese-punc-chars nil
+    "Chinese punctuation characters used by `macim' inline cleanup.")
 
+  (defvar-local thy/macim-inline-english-last-space-pos nil
+    "Last inserted space position in `macim' inline mode.")
 
-;; 这个方案比 emacs rime 提供的中英文 inline 方便
-;; (use-package sis
-;;   :hook
-;;   (((text-mode prog-mode) . sis-context-mode)
-;;    ((text-mode prog-mode) . sis-inline-mode))
-;;   :config
-;;   (sis-ism-lazyman-config "1" "2" 'fcitx)
-;;   ;; enable the /cursor color/ mode
-;;   (sis-global-cursor-color-mode t)
-;;   ;; enable the /respect/ mode
-;;   (sis-global-respect-mode t)
-;;   ;; enable the /context/ mode for all buffers
-;;   (sis-global-context-mode t)
-;;   ;; enable the /inline english/ mode for all buffers
-;;   (sis-global-inline-mode t)
-;;   :custom
-;;   (sis-other-cursor-color "#c3e88d")
-;;   )
+  (defun thy/macim-remove-head-space-after-chinese-punc (_)
+    "Remove leading inline space after Chinese punctuation."
+    (when (or (bolp)
+              (memq (char-before) thy/macim-chinese-punc-chars))
+      (delete-char 1)))
 
-(use-package rime
-  :ensure t
-  :custom-face
-  (rime-default-face ((t (:inherit hl-line
-                                   :background unspecified :foreground unspecified))))
-  (rime-preedit-face ((t (:inherit hl-line
-                                   :background unspecified
-                                   :inverse-video unspecified :underline t))))
+  (defun thy/macim-remove-tail-space-before-chinese-punc (tighten-back-to)
+    "Remove trailing inline space before Chinese punctuation back to TIGHTEN-BACK-TO."
+    (when (> (point) tighten-back-to)
+      (backward-delete-char (1- (- (point) tighten-back-to))))
+    (when (and (eq (char-before) ?\s)
+               (memq (char-after) thy/macim-chinese-punc-chars))
+      (backward-delete-char 1)))
+
+  (defun thy/macim-record-inline-english-space ()
+    "Remember the last space inserted by `macim' inline mode."
+    (when (eq (char-before) ?\s)
+      (setq thy/macim-inline-english-last-space-pos (point))))
+
+  (defun thy/macim-remove-redundant-inline-space ()
+    "Remove the extra inline space before Chinese punctuation."
+    (when (and (eq thy/macim-inline-english-last-space-pos (1- (point)))
+               (memq (char-before) thy/macim-chinese-punc-chars)
+               (eq (char-before (1- (point))) ?\s))
+      (save-excursion
+        (backward-char 2)
+        (delete-char 1)
+        (setq thy/macim-inline-english-last-space-pos nil)))
+    (remove-hook 'post-self-insert-hook #'thy/macim-remove-redundant-inline-space t))
+
+  (defun thy/macim-add-inline-space-cleanup ()
+    "Clean one redundant inline space after `macim' switches back to other input."
+    (add-hook 'post-self-insert-hook #'thy/macim-remove-redundant-inline-space nil t))
   :config
-  ;; (setq rime-user-data-dir (no-littering-expand-etc-file-name "rime/"))
-  ;; https://manateelazycat.github.io/2023/04/05/emacs-rime-ice/
-  (setq rime-user-data-dir "~/.local/share/fcitx5/rime/")
-  (setq rime-disable-predicates
-        '(
-          meow-normal-mode-p
-          meow-motion-mode-p
-          meow-keypad-mode-p
-          rime-predicate-after-alphabet-char-p ; 在英文字符串之后（必须为以字母开头的英文字符串）
-          rime-predicate-prog-in-code-p ; 在 prog-mode 和 conf-mode 中除了注释和引号内字符串之外的区域
-          rime-predicate-space-after-cc-p ; 在中文字符且有空格之后
-          rime-predicate-current-uppercase-letter-p ; 将要输入的为大写字母时
-          ;; rime-predicate-tex-math-or-command-p ; 在 (La)TeX 数学环境中或者输入 (La)TeX 命令时
-          rime-predicate-punctuation-line-begin-p ; 在行首要输入符号时
-          rime-predicate-after-ascii-char-p ; 任意英文字符后
-          rime-predicate-org-latex-mode-p
-          ))
-
-  (setq rime-show-candidate 'posframe
-        rime-show-preedit 'inline
-        rime-posframe-properties '(:internal-border-width 7))
-
-  (defadvice! +rime-do-finalize-after-loading-module (&rest _)
-    :after #'rime--load-dynamic-module
-    (add-hook! kill-emacs-hook #'rime-lib-finalize))
-  :bind
-  ("C-M-\\" . rime-force-enable)
-  )
-
-;; (use-package key-echo
-;;   :straight nil
-;;   :after rime
-;;   :init
-;;   (add-to-list 'load-path "~/.emacs.d/site-lisp/key-echo/")
-;;   (require 'key-echo)
-;;   (key-echo-enable)
-;;   (defun key-echo-shift-to-switch-input-method (key)
-;;     (interactive)
-;;     (when (string-equal key "Key.shift")
-;;       (toggle-input-method)
-;;       ))
-;;   (setq key-echo-single-key-trigger-func 'key-echo-shift-to-switch-input-method)
-;;   ;; WORKAROUND: I don't know why I have to add this
-;;   (key-echo-restart-process)
-;;   )
-
-;; [sis] automatically switch input source
-(use-package sis
-  :ensure t
-  :hook
-  (((text-mode prog-mode) . sis-context-mode)
-   ((text-mode prog-mode) . sis-inline-mode)
-   )
-  :demand t
-  ;; :custom
-  ;; (sis-other-cursor-color (face-foreground 'error nil t))
-  :config
-  ;; (add-hook! (+theme-changed-hook server-after-make-frame-hook) :call-immediately
-  ;;   (defun +sis-set-other-cursor-color ()
-  ;;     (setq sis-other-cursor-color (face-foreground 'error nil t))))
-  ;; Use emacs-rime as default
-  (sis-ism-lazyman-config nil "rime" 'native)
-  ;; enable the /cursor color/ mode
-  ;; (sis-global-cursor-color-mode t)
-  ;; enable the /respect/ mode
-  ;; (sis-global-respect-mode t)
-  ;; enable the /context/ mode for all buffers
-  ;; (sis-global-context-mode t)
-  ;; enable the /inline english/ mode for all buffers
-  ;; (sis-global-inline-mode t)
-
-  ;; Context mode
-  ;; (add-hook 'meow-insert-exit-hook #'sis-set-english)
-  ;; (add-to-list 'sis-context-hooks 'meow-insert-enter-hook)
-  ;; 这里的缩进有问题，不要在意
-  ;; (defun +sis-remove-head-space-after-cc-punc (_)
-  ;;   (when (or (memq (char-before) '(?， ?。 ?？ ?！ ?； ?： ?（ ?【 ?「 ?“))
-  ;;                                                               (bolp))
-  ;;                                       (delete-char 1)))
-  ;;             (setq sis-inline-tighten-head-rule #'+sis-remove-head-space-after-cc-punc)
-              )
+  (setq thy/macim-chinese-punc-chars
+        (mapcar #'string-to-char macim--chinese-punc-list))
+  (setq macim-inline-head-handler #'thy/macim-remove-head-space-after-chinese-punc)
+  (setq macim-inline-tail-handler #'thy/macim-remove-tail-space-before-chinese-punc)
+  (add-hook 'macim-inline-deactivated-hook #'thy/macim-record-inline-english-space)
+  (add-hook 'macim-inline-deactivated-hook #'thy/macim-add-inline-space-cleanup)
+  (setq macim-ascii "com.apple.keylayout.ABC"
+        macim-other "im.rime.inputmethod.Squirrel.Hans"))
