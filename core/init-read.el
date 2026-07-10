@@ -1,287 +1,42 @@
 ;; -*- lexical-binding: t; -*-
 
-;;; 翻译
-;; (use-package google-translate
-;;   :straight t
-;;   :defines (google-translate-translation-directions-alist)
-;;   :bind
-;;   ("C-c j" . google-translate-at-point) ; 会询问一下是否是要查这个词
-;;   ("C-c J" . google-translate-at-point-reverse)
-;;   (:map org-mode-map
-;;         ("C-," . nil)) ; conflict with sdcv
-;;   :init
-;;   (setq google-translate-translation-directions-alist '(("en" . "zh-CN")))) ; 用于设置 `smooth-translate`
-;;
-;; (use-package google-translate-default-ui
-;;   :straight nil
-;;   :custom
-;;   (google-translate-default-source-language "en") ; 用于设置 `at-point-reverse`
-;;   (google-translate-default-target-language "zh-CN"))
-
-;; (use-package maple-translate
-;;   :straight (maple-translate :type git :host github :repo "honmaple/emacs-maple-translate")
-;;   :bind
-;;   ("C-c j" . maple-translate+)
-;;   :custom
-;;   (maple-translate-engine 'youdao))
-
-;; 离线翻译
-;; 需要安装 sdcv 和 stardict 和字典
-;; 字典在 https://github.com/colordict/colordict.github.io/tree/master 可下载
-(use-package sdcv
-  ;; :straight (:host github :repo "manateelazycat/sdcv")
-  :vc (:url "https://github.com/manateelazycat/sdcv" :rev "master")
-  :commands (sdcv-search-pointer+)
-  :bind ("C-," . sdcv-search-pointer+)
-  :config
-  (setq sdcv-say-word-p t)
-  (setq sdcv-dictionary-data-dir "/usr/share/stardict")
-  (setq sdcv-dictionary-simple-list
-        '("懒虫简明英汉词典"
-          "懒虫简明汉英词典"))
-  (setq sdcv-dictionary-complete-list
-        '("朗道英汉字典5.0"
-          "牛津英汉双解美化版"
-          "21世纪双语科技词典"
-          "quick_eng-zh_CN"
-          "新世纪英汉科技大词典"))
-  (setq sdcv-tooltip-timeout 10)
-  (setq sdcv-fail-notify-string "没找到释义")
-  (setq sdcv-tooltip-border-width 0)
-  :custom-face
-  ;; TODO: why can't just inherit font-lock
-  (sdcv-tooltip-face ((t (:background "#1E2029" :foreground "#ffc9e8"))))
-  )
-
-;;; 浏览器
-;; 内置浏览器
 (use-package eww
-  ;; :init
-  ;; (add-hook 'eww-after-render-hook #'shrface-mode)
-  :config
-  ;; (require 'shrface)
-  (setq eww-retrieve-command '("readable") ; 只提取页面的可阅读部分
-        shr-max-image-proportion 0.6)
-  (defun +toggle-eww ()
-    "Open eww if not already open, and switch to the *eww* buffer."
+  :ensure nil
+  :preface
+  (defun thy/toggle-eww ()
+    "Switch to an existing EWW buffer, or prompt for a URL."
     (interactive)
-    ;; Check if eww is already open
-    (if (get-buffer "*eww*")
-        ;; If *eww* buffer exists, switch to it
-        (switch-to-buffer "*eww*")
-      ;; If *eww* buffer doesn't exist, open eww
-      (let ((url (read-string "Enter URL: ")))
-        (eww url))))
+    (if-let ((buffer (get-buffer "*eww*")))
+        (switch-to-buffer buffer)
+      (eww (read-string "Enter URL: "))))
   :hook
-  (eww-mode . (lambda () (progn
-                      (setq line-spacing 0.15) ; 行间距扩大
-                      (setq fill-column 140) ; 更宽的阅读视界
-                      (setq truncate-lines nil) ; 自动折行
-                      (setq scroll-margin 2) ; 使滚动更平滑
-                      )
-                ))
+  (eww-mode . thy/setup-eww-buffer)
   :bind
-  ("C-c w" . +toggle-eww)
-  ("C-c W" . eww-list-bookmarks)
-  (:map eww-mode-map
-        ("n" . next-line)
-        ("p" . previous-line)
-        ("f" . +smart-forward)
-        ("b" . backward-char)
-        ("a" . move-beginning-of-line)
-        ("e" . move-end-of-line)
-        ("o" . eww-toggle-images)
-        ("v" . set-mark-command)
-        ("q" . my-kill-region-or-line)
-        ("w" . my-copy-region-or-line)
-        ("," . sdcv-search-pointer+)
-        ("l" . er/expand-region)
-        ("L" . er/contract-region)
-        ("g" . keyboard-quit)
-        ("[" . eww-back-url)
-        ("]" . eww-forward-url))
-  )
-
-;; ;; 将页面渲染成 org-mode
-;; (use-package shrface
-;;   :straight t
-;;   :config
-;;   (shrface-basic)
-;;   (shrface-trial)
-;;   (shrface-default-keybindings) ; setup default keybindings
-;;   (setq shrface-href-versatile t)
-;;   (setq shrface-toggle-bullets t)
-;;   :bind
-;;   (:map shrface-mode-map
-;;         ;; ("n" . shrface-next-headline)
-;;         ;; ("p" . shrface-previous-headline)
-;;         ("C-c i" . shrface-headline-consult)))
-;; ;; 设置代码字体，不知道为什么不能写进去
-;; (custom-set-faces '(shrface-code ((t (:inherit org-code :family "JetBrainsMono")))))
-;;
-;; ;; 渲染 eww 内的代码高亮
-;; (use-package shr-tag-pre-highlight
-;;   :straight t
-;;   :after shr
-;;   :init
-;;   (require 'shr-tag-pre-highlight)
-;;   (add-to-list 'shr-external-rendering-functions
-;;                '(pre . shr-tag-pre-highlight))
-;;   (define-advice shr-tag-pre-highlight-guess-language-attr (:filter-return (&rest r) fallback-to-cpp)
-;;     "如果检测不出来哪种语言，默认 C++."
-;;     (or (car r) "c++"))
-;;   )
+  ("C-c r e" . thy/toggle-eww)
+  :custom
+  (eww-retrieve-command '("readable"))
+  (shr-max-image-proportion 0.6)
+  :config
+  (defun thy/setup-eww-buffer ()
+    "Apply buffer-local reading settings for EWW."
+    (setq-local fill-column 140)
+    (setq-local line-spacing 0.15)
+    (setq-local scroll-margin 2)
+    (setq-local truncate-lines nil)))
 
 (use-package image-mode
+  :ensure nil
   :bind
   (:map image-mode-map
         ("=" . image-increase-size)
-        ("-" . image-decrease-size)
-        )
-  )
+        ("-" . image-decrease-size)))
 
-;; (use-package image-slicing
-;;   :straight (image-slicing :type git :host github :repo "ginqi7/image-slicing")
-;;   :config
-;;   (require 'image-slicing)
-;;   )
-
-
-;; (use-package org-sliced-images
-;;   :straight t
-;;   :custom
-;;   (org-sliced-images-round-image-height 40))
-
-(use-package eaf
-  :if (display-graphic-p)
-  :vc
-  (:url "https://github.com/emacs-eaf/emacs-application-framework"
-        :shell-command "python install-eaf.py --install pdf-viewer --ignore-sys-deps"
-        :rev "master")
-  ;; :straight (eaf
-  ;;            :type git
-  ;;            :host github
-  ;;            :repo "emacs-eaf/emacs-application-framework"
-  ;;            :files ("*.el" "*.py" "core" "app" "*.json")
-  ;;            :includes (eaf-pdf-viewer) ; Straight won't try to search for these packages when we make further use-package invocations for them
-  ;;            :pre-build (("python" "install-eaf.py" "--install" "pdf-viewer" "--ignore-sys-deps"))
-  ;;            )
-  :demand t
+(use-package doc-view
+  :ensure nil
+  :bind
+  (:map doc-view-mode-map
+        ("=" . doc-view-enlarge)
+        ("-" . doc-view-shrink))
   :custom
-  (eaf-config-location (no-littering-expand-var-file-name "eaf/"))
-  (eaf-kill-process-after-last-buffer-closed t)
-  :init
-  (setq eaf-buffer-title-format "EAF: %s")
-  )
-
-(use-package eaf-pdf-viewer
-  :if (display-graphic-p)
-  :demand t
-  :custom
-  (eaf-pdf-dark-mode nil)
-  :config
-  (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key chatgpt-shell "d" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key eaf-py-proxy-copy_select "w" eaf-pdf-viewer-keybinding)
-  ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
-  (setq eaf-pdf-inline-text-annot-fontsize 14)
-  )
-
-;; ;; 按 F 会有 avy 类似的效果
-;; ;; 按 N 会将其转换为 eww 界面，不过最近还需要按 g 刷新才能正常显示
-;; (use-package eaf-browser
-;;   :straight nil
-;;   :init
-;;   (require 'eaf-browser)
-;;   (setq eaf-browser-dark-mode "follow")
-;;   (setq eaf-webengine-default-zoom 1.0)
-;;   (setq eaf-webengine-font-size 24)
-;;   (setq eaf-webengine-fixed-font-size 24)
-;;   (setq eaf-webengine-pc-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15")
-;;   :bind
-;;   ("C-c Q" . eaf-open-browser-with-history)
-;;   :config
-;;   ;; 用 eaf-bind-key 进行快捷键绑定，同时不能直接绑定命令，要绑定去掉 `eaf-proxy` 后的命令
-;;   (eaf-bind-key copy_text "C-w" eaf-browser-keybinding)
-;;   (eaf-bind-key kill_text "C-q" eaf-browser-keybinding)
-;;   (eaf-bind-key nil "C-d" eaf-browser-keybinding)
-;;   (eaf-bind-key nil "C-t" eaf-browser-keybinding)
-;;   (eaf-bind-key refresh_page "g" eaf-browser-keybinding)
-;;   (eaf-bind-key insert_or_new_blank_page "s" eaf-browser-keybinding)
-;;   (eaf-bind-key insert_or_scroll_up "n" eaf-browser-keybinding)
-;;   (eaf-bind-key insert_or_toggle_device "p" eaf-browser-keybinding)
-;;   )
-
-;; M-h: add annotation
-;; M-e: edit annotation
-;; M-d: delete annotation
-;; f: jump to link
-;; o: outline
-;; (use-package eaf-pdf-viewer
-;;   :if (display-graphic-p)
-;;   :demand t
-;;   :custom
-;;   (eaf-pdf-dark-mode nil)
-;;   :config
-;;   (eaf-bind-key nil "i" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key scroll_up "n" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key scroll_down "p" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key eaf-pdf-outline "C-c o" eaf-pdf-viewer-keybinding)
-;;   (eaf-bind-key gptel "d" eaf-pdf-viewer-keybinding)
-;;   ;; (setq eaf-pdf-text-highlight-annot-color "#edd389")
-;;   (setq eaf-pdf-inline-text-annot-fontsize 14)
-;;   )
-
-;; ;; 不需要在 OS 层上安装软件。
-;; ;; 安装后运行 pdf-tools-install 即可，其实在配置里安装即可
-;; ;; 为了 dirvish 的预览，但是如果只使用 pdf-preface 则不需要
-;; (use-package pdf-tools
-;;   :ensure t
-;;   :mode  ("\\.pdf\\'" . pdf-view-mode)
-;;   :config
-;;   (pdf-tools-install :no-query)
-;;   :bind
-;;   (:map pdf-view-mode-map
-;;         ("n" . pdf-view-next-line-or-next-page)
-;;         ("p" . pdf-view-previous-line-or-previous-page)
-;;         ("C-s" . isearch-forward)
-;;         ("C-r" . isearch-backward)
-;;         ("s" . pdf-occur)
-;;         )
-;;   (:map pdf-occur-buffer-mode-map
-;;         ("M-<return>" . pdf-occur-view-occurrence)))
-
-;; (use-package nov
-;;   :straight t
-;;   :bind
-;;   (:map nov-mode-map
-;;         ("n" . next-line)
-;;         ("p" . previous-line)
-;;         ("f" . +smart-forward-cn)
-;;         ("b" . backward-char)
-;;         ("a" . mwim-beginning-of-code-or-line)
-;;         ("e" . mwim-end-of-code-or-line)
-;;         ("v" . set-mark-command)
-;;         ("g" . keyboard-quit))
-;;   :config
-;;   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode)))
-
-;; n, p: next, before iamge
-;; j, k, h, l: move focus
-;; -, =. 0: in, out, reset
-;; y, u, i, o: flip, rotate
-;; (use-package eaf-image-viewer
-;;   :straight nil
-;;   :init
-;;   (require 'eaf-image-viewer))
-
-;; ;; W 和 H 可以分别按 width 和 height 适配图片
-;; (use-package doc-view
-;;   :ensure t
-;;   :custom
-;;   ;; 提高分辨率
-;;   (doc-view-resolution 200)
-;;   )
+  (doc-view-cache-directory (no-littering-expand-var-file-name "doc-view/"))
+  (doc-view-resolution 200))

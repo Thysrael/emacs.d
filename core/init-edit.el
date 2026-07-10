@@ -3,14 +3,14 @@
 ;;; 高亮设置
 ;; 高亮当前行
 (use-package hl-line
-  :ensure t
+  :ensure nil
   :hook ((prog-mode text-mode
                     yaml-mode conf-mode
                     special-mode org-agenda-mode dired-mode) . hl-line-mode))
 
 ;; 显示配对扩号
 (use-package paren
-  :ensure t
+  :ensure nil
   :custom-face (show-paren-match ((t (:underline t))))
   :config
   (setq show-paren-when-point-inside-paren t
@@ -37,18 +37,18 @@
   (setq hl-todo-require-punctuation t
         hl-todo-highlight-punctuation ":")
 
-  (defun +hl-todo-add-keywords (keys color)
+  (defun thy/hl-todo-add-keywords (keys color)
     (dolist (keyword keys)
-      (if-let ((item (assoc keyword hl-todo-keyword-faces)))
+      (if-let* ((item (assoc keyword hl-todo-keyword-faces)))
           (setf (cdr item) color)
         (push `(,keyword . ,color) hl-todo-keyword-faces))))
 
   ;; HACK: `hl-todo' won't update face when changing theme, so we must add a hook for it
-  (defun +hl-update-keyword-faces (&rest _)
-    (+hl-todo-add-keywords '("BUG" "DEFECT" "ISSUE") (face-foreground 'error))
-    (+hl-todo-add-keywords '("WORKAROUND" "HACK" "TRICK") (face-foreground 'warning)))
-  (+hl-update-keyword-faces)
-  (advice-add #'enable-theme :after #'+hl-update-keyword-faces)
+  (defun thy/hl-update-keyword-faces (&rest _)
+    (thy/hl-todo-add-keywords '("BUG" "DEFECT" "ISSUE") (face-foreground 'error))
+    (thy/hl-todo-add-keywords '("WORKAROUND" "HACK" "TRICK") (face-foreground 'warning)))
+  (thy/hl-update-keyword-faces)
+  (advice-add #'enable-theme :after #'thy/hl-update-keyword-faces)
   )
 
 ;; 缩进虚线
@@ -62,10 +62,10 @@
 
   ;; HACK: `indent-bars' calculates its faces from the current theme,
   ;; but is unable to do so properly in terminal Emacs
-  (defun +indent-bars-auto-set-faces (&rest _)
+  (defun thy/indent-bars-auto-set-faces (&rest _)
     (when indent-bars-mode
       (indent-bars-reset)))
-  (advice-add #'enable-theme :after #'+indent-bars-auto-set-faces)
+  (advice-add #'enable-theme :after #'thy/indent-bars-auto-set-faces)
   )
 
 ;;; 重构设置
@@ -97,17 +97,17 @@
   )
 
 ;; 智能注释
-(defun +smart-comment (&optional arg)
+(defun thy/smart-comment (&optional arg)
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
       (comment-or-uncomment-region (line-beginning-position) (line-end-position))
     (comment-dwim arg)))
-(global-set-key (kbd "C-/") '+smart-comment)
+(global-set-key (kbd "C-/") #'thy/smart-comment)
 (setq comment-empty-lines t) ; comment over empty lines
 
 ;; 自动格式化
-(defun +smart-format ()
+(defun thy/smart-format ()
   "Indent the active region if selected, otherwise format the buffer using eglot if available."
   (interactive)
   (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p)) ; 判断 eglot
@@ -118,12 +118,12 @@
         (indent-region (region-beginning) (region-end))
       (indent-region (point-min) (point-max))))
   (message "formatting done."))
-(global-set-key (kbd "C-c f") '+smart-format)
+(global-set-key (kbd "C-c f") #'thy/smart-format)
 
 ;;; 结构化编辑
 ;; 括号平衡
 (use-package elec-pair
-  :ensure t
+  :ensure nil
   :hook
   ((prog-mode text-mode) . electric-pair-mode)
   ;; 禁用 org-mode 的左尖括号
@@ -147,9 +147,11 @@
 
 ;; 处理类似驼峰命名法的情况，此时会将一个一个驼峰视为一个单词
 (use-package subword
+  :ensure nil
   :hook (((prog-mode minibuffer-setup) . subword-mode)))
 
 (use-package hideshow
+  :ensure nil
   :hook ((prog-mode conf-mode yaml-mode TeX-mode nxml-mode) . hs-minor-mode)
   :bind
   ("C-o" . hs-toggle-hiding)
@@ -189,7 +191,7 @@
       (_ (hs-hide-all))))
 
   ;; Display line counts
-  (defun +hs-display-code-line-counts (ov)
+  (defun thy/hs-display-code-line-counts (ov)
     "Display line counts when hiding codes."
     (when (eq 'code (overlay-get ov 'hs))
       (overlay-put ov 'display
@@ -198,21 +200,21 @@
                              (propertize (concat " ... L" lines " ") 'face '(:inherit shadow :height 0.8 :box t))
                              " "))
                    )))
-  (setq hs-set-up-overlay #'+hs-display-code-line-counts)
+  (setq hs-set-up-overlay #'thy/hs-display-code-line-counts)
 
   ;; hide-show by indentation
-  (defun +fold--hideshow-empty-line-p (_)
+  (defun thy/fold--hideshow-empty-line-p (_)
     (string= "" (string-trim (thing-at-point 'line 'no-props))))
 
-  (defun +fold--hideshow-geq-or-empty-p (base-indent)
-    (or (+fold--hideshow-empty-line-p base-indent)
+  (defun thy/fold--hideshow-geq-or-empty-p (base-indent)
+    (or (thy/fold--hideshow-empty-line-p base-indent)
         (>= (current-indentation) base-indent)))
 
-  (defun +fold--hideshow-g-or-empty-p (base-indent)
-    (or (+fold--hideshow-empty-line-p base-indent)
+  (defun thy/fold--hideshow-g-or-empty-p (base-indent)
+    (or (thy/fold--hideshow-empty-line-p base-indent)
         (> (current-indentation) base-indent)))
 
-  (defun +fold--hideshow-seek (start direction before skip predicate base-indent)
+  (defun thy/fold--hideshow-seek (start direction before skip predicate base-indent)
     "Seeks forward (if direction is 1) or backward (if direction is -1) from start, until predicate
 fails. If before is nil, it will return the first line where predicate fails, otherwise it returns
 the last line where predicate holds."
@@ -231,7 +233,7 @@ the last line where predicate holds."
                       (unless before (setq pt (point-at-bol)))))
         pt)))
 
-  (defun +fold-hideshow-indent-range (&optional point)
+  (defun thy/fold-hideshow-indent-range (&optional point)
     "Return the point at the begin and end of the text block with the same (or
 greater) indentation. If `point' is supplied and non-nil it will return the
 begin and end of the block surrounding point."
@@ -241,17 +243,17 @@ begin and end of the block surrounding point."
       (let ((base-indent (current-indentation))
             (begin (point))
             (end (point)))
-        (setq begin (+fold--hideshow-seek begin -1 t nil #'+fold--hideshow-geq-or-empty-p base-indent)
-              begin (+fold--hideshow-seek begin 1 nil nil #'+fold--hideshow-g-or-empty-p base-indent)
-              end   (+fold--hideshow-seek end 1 t nil #'+fold--hideshow-geq-or-empty-p base-indent)
-              end   (+fold--hideshow-seek end -1 nil nil #'+fold--hideshow-empty-line-p base-indent))
+        (setq begin (thy/fold--hideshow-seek begin -1 t nil #'thy/fold--hideshow-geq-or-empty-p base-indent)
+              begin (thy/fold--hideshow-seek begin 1 nil nil #'thy/fold--hideshow-g-or-empty-p base-indent)
+              end   (thy/fold--hideshow-seek end 1 t nil #'thy/fold--hideshow-geq-or-empty-p base-indent)
+              end   (thy/fold--hideshow-seek end -1 nil nil #'thy/fold--hideshow-empty-line-p base-indent))
         (list begin end base-indent))))
 
-  (defun +fold-hideshow-forward-block-by-indent-fn (_arg)
+  (defun thy/fold-hideshow-forward-block-by-indent-fn (_arg)
     (let ((start (current-indentation)))
       (forward-line)
       (unless (= start (current-indentation))
-        (let ((range (+fold-hideshow-indent-range)))
+        (let ((range (thy/fold-hideshow-indent-range)))
           (goto-char (cadr range))
           (end-of-line)))))
 
@@ -277,10 +279,10 @@ begin and end of the block surrounding point."
                  ,(rx (or "#" "=begin"))                        ; Comment start
                  ruby-forward-sexp nil))
   (add-to-list 'hs-special-modes-alist
-               '(yaml-mode "\\s-*\\_<\\(?:[^:]+\\)\\_>"
-                           ""
-                           "#"
-                           +fold-hideshow-forward-block-by-indent-fn nil))
+                '(yaml-mode "\\s-*\\_<\\(?:[^:]+\\)\\_>"
+                            ""
+                            "#"
+                            thy/fold-hideshow-forward-block-by-indent-fn nil))
   (add-to-list 'hs-special-modes-alist
                '(matlab-mode "if\\|switch\\|case\\|otherwise\\|while\\|for\\|try\\|catch"
                              "end"
@@ -325,11 +327,4 @@ begin and end of the block surrounding point."
   :ensure t
   :config
   (sudo-edit-indicator-mode t)
-  )
-
-;; [wgrep] Edit a grep buffer and apply changes to the file buffer
-(use-package wgrep
-  :ensure t
-  :config
-  (setq wgrep-auto-save-buffer t)
   )

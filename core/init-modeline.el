@@ -139,8 +139,8 @@
 (defun +mode-line-update-remote-host-name ()
   "Hostname for remote buffers."
   (setq +mode-line-remote-host-name
-        (when-let ((hostname (and default-directory
-                                  (file-remote-p default-directory 'host))))
+        (when-let* ((hostname (and default-directory
+                                   (file-remote-p default-directory 'host))))
           (when (not (string-equal hostname "localhost"))
             (concat "@" hostname)))))
 (add-hook 'find-file-hook #'+mode-line-update-remote-host-name)
@@ -293,8 +293,9 @@
 (use-package breadcrumb
   :ensure t
   :custom-face
-  (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t))))
-  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t))))
+  (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t :slant italic))))
+  (breadcrumb-project-crumbs-face ((t (:slant italic))))
+  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :slant italic))))
   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :foreground unspecified))))
   :config
   (setq breadcrumb-imenu-crumb-separator " ⋅ "

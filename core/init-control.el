@@ -163,7 +163,7 @@
   ;; (org-scheduled-today ((t (:family "Sarasa Mono SC"))))
   ;; (org-scheduled-previously ((t (:family "Sarasa Mono SC"))))
   :hook
-  (org-agenda-mode . +set-buffer-face-mode-mono)
+  (org-agenda-mode . thy/set-buffer-face-mode-mono)
   :custom-face
   (org-scheduled-today ((t (:foreground "#f1fa8c"))))
   ;; (org-scheduled ((t (:foreground "#ffb86c"))))

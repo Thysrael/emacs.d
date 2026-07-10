@@ -120,7 +120,7 @@
      "^\\*eshell.*\\*.*$" eshell-mode
      "^\\*shell.*\\*.*$"  shell-mode
      "^\\*terminal.*\\*.*$" term-mode
-     "^\\*vterm.*\\*.*$"  vterm-mode
+     "^\\*ghostel.*\\*.*$"  ghostel-mode
      "^\\*eldoc.*\\*.*$" eldoc-mode
      "\\*Flycheck errors\\*$" " \\*Flycheck checker\\*$"
      "\\*package update results\\*$" "\\*Package-Lint\\*$"

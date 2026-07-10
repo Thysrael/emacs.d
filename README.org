@@ -1,6 +1,7 @@
 #+TITLE: EMO
 
 * 选择
+
 在我结束了大三和保研的事情后，我希望我可以干一些自己想干的事情。配置一款“我自己”的编辑器再次被我提上日程。
 
 vscode 和 sublime text 被我早早划去了，没有任何原因，只是不够帅气。但是对于 vim 和 emacs 的选择，却让我纠结了很久，以至于需要写一个段落来坚定自己的心思。
@@ -12,9 +13,11 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 但是我还是想使用 emacs，我觉得 emacs 对我而言，是一种更多的 *可能性* 。
 
 * 配置架构
+
 正是遵循上文提出的思想，我将我的配置按照工作的场景来划分为不同模块。正因为不同模块对应不同场景，也就是不同需求，所以这样组织的配置，既有逻辑性，又有独特性：
 
 ** 通用设置（general）
+
 这种设置是通用的，不区分工作环境的，可以看做是对于 emacs 本身的增强，这种增强又可以分为两个部分，即功能的增强和组件的增强:
 
 - [[./core/init-package.el][package]]：包管理器配置，包括代理，源，包管理器的选择，配置目录整理等。
@@ -32,6 +35,7 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 - [[file:core/init-ai.el][ai]]: AI Agent 相关配置。
 
 ** 编辑配置（edit）
+
 这部分集中于 emacs 编辑源码的能力，可以说是 vim 之前负责的部分：
 
 - [[./core/init-edit.el][edit]]：通用编辑配置，包括高亮、结构化编辑、重构等。
@@ -41,6 +45,7 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 - [[./core/init-remote.el][remote]]：远端编辑和 docker 配置。
 
 ** 项目管理配置（project）
+
 会以项目的方式被组织和管理，同时在时间维度上需要引入版本控制和日程管理：
 
 - [[./core/init-project.el][project]]：基础的项目管理配置，包括项目内检索，项目侧边栏等。
@@ -51,6 +56,7 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 - [[file:core/init-control.el][control]]: 日程管理配置，包括 org-capture
 
 ** 写作配置（writing）
+
 包括中文适配，文档撰写，博客撰写，论文撰写等（或许还考虑知识管理）：
 
 - [[file:core/init-write.el][write]]: 包括 org-mode, markdown, latex 配置。
@@ -60,6 +66,7 @@ emacs 则相反：因为它不只是一个编辑器，更像是一种 *生活方
 - [[file:core/init-note.el][note]]: 笔记配置，包括 roam 笔记。
 
 * 文档
+
 - [[file:doc/speedup.org][speedup]]：记录启动性能优化思路。
 - [[file:doc/general.org][general]]：记录如何将 emacs 改造成一个舒适的记事本。
 - [[file:doc/keybinding.org][keybinding]]：记录如何完成键绑定。

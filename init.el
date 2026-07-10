@@ -18,23 +18,22 @@
     init-navigate
     init-ui
     init-modeline
-    ;; 'init-input
-    ;; 'init-edit
-    ;; 'init-completion
-    ;; 'init-prog
-    ;; 'init-lang
-    ;; 'init-project
-    ;; 'init-vsc
-    ;; 'init-debug
-    ;; 'init-write
-    ;; 'init-shell
-    ;; 'init-term
-    ;; 'init-remote
-    ;; 'init-read
-    ;; 'init-dired
+    init-input
+    init-edit
+    init-completion
+    init-prog
+    init-lang
+    init-project
+    init-vsc
+    init-debug
+    init-write
+    init-term
+    init-remote
+    init-read
+    init-dired
     ;; 'init-control
     ;; 'init-note
-    ;; 'init-modal
+    ;; init-modal
     ;; 'init-export
     ;; 'init-ai
     )

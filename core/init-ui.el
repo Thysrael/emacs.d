@@ -86,7 +86,7 @@
 
 (defun thy/font-size ()
   "Return the preferred font size for the current machine."
-  (if (string-equal (system-name) "banana") 30 18))
+  (if (string-equal (system-name) "banana") 30 15))
 
 (defun thy/setup-fonts ()
   "Set up default, CJK, and symbol fonts for graphical frames."

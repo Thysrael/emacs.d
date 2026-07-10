@@ -2,7 +2,7 @@
 
 ;;; 代码补全
 (use-package dabbrev
-  :ensure t
+  :ensure nil
   :config
   (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'"))
   )
@@ -14,11 +14,12 @@
   (:map tempel-map
         ("RET" . tempel-next)
         ("S-<RET>" . tempel-previous))
-  :hook (((prog-mode text-mode) . +tempel-setup-capf)
-         ((prog-mode text-mode) . tempel-abbrev-mode))
+  :hook (((prog-mode text-mode) . thy/tempel-setup-capf)
+          ((prog-mode text-mode) . tempel-abbrev-mode))
   :config
-  (defun +tempel-setup-capf ()
-    (push #'tempel-complete completion-at-point-functions))
+  (defun thy/tempel-setup-capf ()
+    "Add Tempel completion to the current buffer."
+    (add-hook 'completion-at-point-functions #'tempel-complete nil t))
 
   (setq tempel-trigger-prefix "`"
         tempel-path (no-littering-expand-etc-file-name "tempel-templates"))
@@ -62,7 +63,7 @@
 (use-package corfu-terminal
   :unless (display-graphic-p)
   :ensure t
-  :custom
+  :config
   (corfu-terminal-mode 1))
 
 ;; 美化 corfu
@@ -76,18 +77,19 @@
 (use-package cape
   :ensure t
   :hook
-  ((prog-mode . +corfu-add-cape-prog-backends)
-   ((LaTeX-mode markdown-mode org-mode) . +corfu-add-cape-write-backends))
+  ((prog-mode . thy/corfu-add-cape-prog-backends)
+   ((LaTeX-mode markdown-mode org-mode) . thy/corfu-add-cape-write-backends))
   :config
   ;; 编程用到的 cape
-  (defun +corfu-add-cape-prog-backends ()
-    (add-to-list 'completion-at-point-functions #'cape-file :append)
-    (add-to-list 'completion-at-point-functions #'cape-dabbrev :append)
-    )
+  (defun thy/corfu-add-cape-prog-backends ()
+    "Add programming completion backends to the current buffer."
+    (add-hook 'completion-at-point-functions #'cape-file 90 t)
+    (add-hook 'completion-at-point-functions #'cape-dabbrev 90 t))
   ;; 写作用到的 cape
-  (defun +corfu-add-cape-write-backends ()
-    (add-to-list 'completion-at-point-functions #'cape-dict :append) ; 加入 dict 享受完美搜索
-    (add-to-list 'completion-at-point-functions #'cape-file :append)
+  (defun thy/corfu-add-cape-write-backends ()
+    "Add writing completion backends to the current buffer."
+    (add-hook 'completion-at-point-functions #'cape-dict 90 t) ; 加入 dict 享受完美搜索
+    (add-hook 'completion-at-point-functions #'cape-file 90 t)
     ;; 数学符号补全，有了 auctex 后不需要
     ;; (add-to-list 'completion-at-point-functions #'cape-tex :append)
     )

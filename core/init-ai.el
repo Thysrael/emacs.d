@@ -99,7 +99,7 @@
   (require 'auth-source)
   (setq chatgpt-shell-openai-key (auth-source-pick-first-password :host "openai.api.key"))
   (setq chatgpt-shell-deepseek-key (auth-source-pick-first-password :host "deepseek.api.key"))
-  (if on-server
+  (if thy/on-server
       (setq chatgpt-shell-model-version "deepseek-chat")
     (progn
       (setq chatgpt-shell-model-version "gpt-4o")

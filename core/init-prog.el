@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package prog-mode
+  :ensure nil
   :hook
   ((prog-mode . prettify-symbols-mode))
   :custom
@@ -13,7 +14,11 @@
 ;; M-? 进行 grep 搜索，是最没有办法的办法
 ;; 可以用 xref-backend-functions 查看后端函数
 (use-package xref
-  :ensure t
+  :ensure nil
+  :preface
+  (defun thy/xref-push-marker-stack (&rest _)
+    "Push the current position to `xref' marker stack."
+    (xref-push-marker-stack (point-marker)))
   :config
   (setq
    xref-search-program 'ripgrep ; 设置工具为 riggrep
@@ -21,9 +26,9 @@
    xref-show-xrefs-function #'xref-show-definitions-completing-read
    xref-history-storage 'xref-window-local-history)
 
-  (defadvice! +xref--push-marker-stack-a (&rest rest)
-    :before '(find-function consult-imenu consult-ripgrep citre-jump)
-    (xref-push-marker-stack (point-marker))) ; 这里是一个压栈函数，用于记录光标位置
+  ;; 这里是一个压栈函数，用于记录光标位置
+  (dolist (command '(find-function consult-imenu consult-ripgrep citre-jump))
+    (advice-add command :before #'thy/xref-push-marker-stack))
 
   ;; (defadvice! +xref--push-marker-stack-a (&rest rest)
   ;;   :before '(find-function consult-imenu consult-ripgrep citre-jump find-definition-with-lsp-bridge)
@@ -50,72 +55,12 @@
         )
   )
 
-;; [citre] Ctags-infra
-;; peek 是一个很舒服的前端
-;; M-n, M-p 可以在小窗里移动，M-N, M-P 在多个搜索源中移动
-;; M-p l 具有 chain 式查看功能，可以在小窗里嵌套调用
-;; (use-package citre
-;;   :straight t
-;;   :bind
-;;   ;; (:map prog-mode-map
-;;   ;;   ("C-t j" . +citre-jump)
-;;   ;;   ("C-t k" . +citre-jump-back)
-;;   ;;   ("C-t p" . citre-peek)
-;;   ;;   ("C-t h" . citre-ace-peek)
-;;   ;;   ("C-t u" . citre-update-this-tags-file)
-;;   ;;   ("C-t n" . citre-create-tags-file))
-;;   ("M-t" . transient-citre)
-;;   :init
-;;   (require 'citre-config)
-;;   :config
-;;   (setq citre-auto-enable-citre-mode-modes '(prog-mode)
-;;         ;; citre-default-create-tags-file-location 'global-cache
-;;         citre-use-project-root-when-creating-tags t
-;;         citre-prompt-language-for-ctags-command t
-;;         citre-enable-capf-integration t)
-;;
-;;   (defun +citre-jump ()
-;;     "Jump to the definition of the symbol at point. Fallback to `xref-find-definitions'."
-;;     (interactive)
-;;     (condition-case _
-;;         (citre-jump)
-;;       (error (call-interactively #'xref-find-definitions))))
-;;
-;;   (defun +citre-jump-back ()
-;;     "Go back to the position before last `citre-jump'. Fallback to `xref-go-back'."
-;;     (interactive)
-;;     (condition-case _
-;;         (citre-jump-back)
-;;       (error (call-interactively #'xref-go-back))))
-;;
-;;   ;; Use Citre xref backend as a [fallback]
-;;   (defadvice! +citre--xref-fallback-a (fn &rest args)
-;;     :around #'xref--create-fetcher
-;;     (let ((fetcher (apply fn args))
-;;           (citre-fetcher
-;;            (let ((xref-backend-functions '(citre-xref-backend t)))
-;;              (ignore xref-backend-functions)
-;;              (apply fn args))))
-;;       (lambda ()
-;;         (or (with-demoted-errors "%s, fallback to citre"
-;;               (funcall fetcher))
-;;             (funcall citre-fetcher)))))
-;;   (transient-define-prefix transient-citre ()
-;;     [
-;;      ("p" "Peek" citre-peek)
-;;      ("h" "Ace Peek"citre-ace-peek)
-;;      ("u" "Update Tags File" citre-update-this-tags-file)
-;;      ("n" "Create Tags File" citre-create-tags-file)
-;;      ]
-;;     )
-;;   )
-
 (use-package eglot
   ;; :straight (eglot :type git
   ;;                 :host github
   ;;                 :repo "AkibAzmain/eglot"
   ;;                 :branch "semantic-tokens")
-  :ensure t
+  :ensure nil
   :custom
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
   (eglot-events-buffer-config '(:size 0 :format full))
@@ -160,98 +105,9 @@
               ([remap xref-find-apropos] . consult-eglot-symbols)
               ))
 
-;; 加速 eglot
-;; 需要先安装 https://github.com/blahgeek/emacs-lsp-booster
-;; 在使用 elgot 前先开启 eglot-booster
-;; 不知道为什么必须手动开启
-;; TODO: eglot-booster 无法放到 local 下，是因为 exec-path 的问题
-;; 使用 tramp 的时候，要求远端也需要 emacs-lsp-booster, 类似于 rg 了
-;; 否则就会导致 lsp server 无法启动
-;; pyright 和 pylsp 都没有 inlay hint
-(use-package eglot-booster
-  :unless on-server
-  :vc (:url "https://github.com/jdtsmith/eglot-booster" :rev "main")
-  :after eglot
-  :demand t
-  :config (eglot-booster-mode)
-  )
-
-;; 让 eglot 可以丰富 tempel, 使用中老报 warning
-;; (use-package eglot-tempel
-;;   :ensure t
-;;   :after (eglot tempel)
-;;   :init
-;;   (eglot-tempel-mode)
-;;   )
-
-;; 虽然有 breadcrumb ，但是需要 all-the-icon ，进而需要 treemacs 包
-;; 每个 buffer 都需要启动 lsp-mode ，太麻烦了
-;; (use-package lsp-mode
-;;   :ensure t
-;;   :init
-;;   (defun lsp-booster--advice-json-parse (old-fn &rest args)
-;;     "Try to parse bytecode instead of json."
-;;     (or
-;;      (when (equal (following-char) ?#)
-;;        (let ((bytecode (read (current-buffer))))
-;;          (when (byte-code-function-p bytecode)
-;;            (funcall bytecode))))
-;;      (apply old-fn args)))
-;;   (advice-add (if (progn (require 'json)
-;;                          (fboundp 'json-parse-buffer))
-;;                   'json-parse-buffer
-;;                 'json-read)
-;;               :around
-;;               #'lsp-booster--advice-json-parse)
-;;
-;;   (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-;;     "Prepend emacs-lsp-booster command to lsp CMD."
-;;     (let ((orig-result (funcall old-fn cmd test?)))
-;;       (if (and (not test?)                             ;; for check lsp-server-present?
-;;                (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-;;                lsp-use-plists
-;;                (not (functionp 'json-rpc-connection))  ;; native json-rpc
-;;                (executable-find "emacs-lsp-booster"))
-;;           (progn
-;;             (message "Using emacs-lsp-booster for %s!" orig-result)
-;;             (cons "emacs-lsp-booster" orig-result))
-;;         orig-result)))
-;;   (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
-;;   :custom-face
-;;   (lsp-inlay-hint-face ((t (:inherit lsp-details-face))))
-;;   :config
-;;   (setq lsp-headerline-arrow ">")
-;;   :custom
-;;   (lsp-headerline-breadcrumb-icons-enable nil)
-;;   (lsp-headerline-breadcrumb-segments '(symbols))
-;;   (lsp-eldoc-render-all t)
-;;   (lsp-enable-snippet nil)
-;;   :hook
-;;   (lsp-mode . lsp-inlay-hints-mode))
-;;
-;; (use-package lsp-imenu
-;;   :init
-;;   ;; 启用 lsp-imenu 集成
-;;   (add-hook 'lsp-after-open-hook 'lsp-enable-imenu))
-;;
-;; (use-package lsp-pyright
-;;   :ensure t
-;;   :custom (lsp-pyright-langserver-command "pyright") ;; or basedpyright
-;;   :hook (python-mode . (lambda ()
-;;                           (require 'lsp-pyright)
-;;                           (lsp))))
-
-;; (use-package lsp-ui
-;;   :straight t
-;;   :init
-;;   ;; 启用 lsp-ui
-;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode)
-;;   ;; 启用 flycheck
-;;   (add-hook 'python-mode-hook 'flycheck-mode))
-
 ;; 文档信息展示
 (use-package eldoc
-  :ensure t
+  :ensure nil
   :config
   (setq eldoc-echo-area-display-truncation-message t
         eldoc-echo-area-prefer-doc-buffer t
@@ -260,41 +116,50 @@
   :bind
   ("M-;" . eldoc))
 
-;; 格式化文档注释自动生成，和 treesit 不兼容
-;; (use-package docstr
-;;   :straight t
-;;   ;; :straight
-;;   ;; (docstr :type git :host github :repo "thysrael/docstr"
-;;   ;;         :files (:defaults "langs/*.el"))
-;;   :init
-;;   (setq docstr-key-support t) ; 设置键入触发
-;;   :config
-;;   (docstr-faces-apply) ; 设置高亮
-;;   ;; :hook
-;;   ;; (after-init . global-docstr-mode)
-;;   :custom
-;;   (docstr-desc-summary "@summary ")
-;;   (docstr-desc-param " ")
-;;   (docstr-desc-return " ")
-;;   )
 
 ;; 新的 ts 语法高亮支持
-(use-package treesit-auto
-  :ensure t
+(use-package treesit
+  :ensure nil
   :demand t
   :custom
-  (treesit-auto-install 'prompt)
   (treesit-font-lock-level 4)
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode)
+  (setq major-mode-remap-alist
+        (append '((c-mode . c-ts-mode)
+                  (c++-mode . c++-ts-mode)
+                  (cmake-mode . cmake-ts-mode)
+                  (csharp-mode . csharp-ts-mode)
+                  (dockerfile-mode . dockerfile-ts-mode)
+                  (elixir-mode . elixir-ts-mode)
+                  (go-mode . go-ts-mode)
+                  (go-mod-mode . go-mod-ts-mode)
+                  (go-work-mode . go-work-ts-mode)
+                  (heex-mode . heex-ts-mode)
+                  (java-mode . java-ts-mode)
+                  (js-mode . js-ts-mode)
+                  (javascript-mode . js-ts-mode)
+                  (json-mode . json-ts-mode)
+                  (lua-mode . lua-ts-mode)
+                  (php-mode . php-ts-mode)
+                  (python-mode . python-ts-mode)
+                  (ruby-mode . ruby-ts-mode)
+                  (rust-mode . rust-ts-mode)
+                  (sh-mode . bash-ts-mode)
+                  (typescript-mode . typescript-ts-mode)
+                  (tsx-mode . tsx-ts-mode)
+                  (css-mode . css-ts-mode)
+                  (html-mode . html-ts-mode)
+                  (mhtml-mode . mhtml-ts-mode)
+                  (markdown-mode . markdown-ts-mode)
+                  (gfm-mode . markdown-ts-mode)
+                  (toml-mode . toml-ts-mode)
+                  (yaml-mode . yaml-ts-mode))
+                major-mode-remap-alist))
   ;; 使得 org src 可以自动映射到 ts 模式
-  (defun +remap-mode (mode)
-    "make org-src-get-lang-mode respect major-mode-remap-alist"
-    (treesit-auto--set-major-remap)
-    (alist-get mode major-mode-remap-alist mode)
-    )
-  (advice-add 'org-src-get-lang-mode :filter-return #'+remap-mode)
+  (defun thy/remap-org-src-mode (mode)
+    "Make `org-src-get-lang-mode' respect `major-mode-remap-alist'."
+    (alist-get mode major-mode-remap-alist mode))
+  (advice-add #'org-src-get-lang-mode :filter-return #'thy/remap-org-src-mode)
   )
 
 ;; (use-package stickyfunc-enhance

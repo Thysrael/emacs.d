@@ -2,6 +2,17 @@
 
 ;; Basic Emacs behavior, editing defaults, history, and runtime tuning.
 
+;; macOS GUI/daemon Emacs does not inherit the user's login shell PATH.
+(use-package exec-path-from-shell
+  :ensure t
+  :demand t
+  :if (and (eq system-type 'darwin)
+           (or (memq window-system '(mac ns))
+               (daemonp)))
+  :config
+  (setq exec-path-from-shell-variables '("PATH" "MANPATH"))
+  (exec-path-from-shell-initialize))
+
 (use-package emacs
   :ensure nil
   :demand t

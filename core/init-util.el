@@ -18,6 +18,10 @@
               ("r" . rainbow-mode))
   :hook ((html-mode css-mode) . rainbow-mode))
 
+(use-package transient
+  :ensure t
+  :demand t)
+
 ;; Use a dedicated mono font where mixed-width text matters.
 (defun thy/set-buffer-face-mode-mono ()
   "Use Sarasa Mono SC in the current buffer."

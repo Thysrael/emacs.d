@@ -1,85 +1,52 @@
 ;;; -*- lexical-binding: t; -*-
 
-;; transient
-(use-package transient
-  :demand t
-  :bind
-  (
-   ("C-x t" . transient-window)
-   ("C-x r" . transient-BRR)
-   )
-  :config
-  ;; window 相关操作
-  (transient-define-prefix transient-window ()
-    "transient for window"
-    [
-     ["Tab"
-      ("c" "Switch" tab-switch)
-      ("0" "Close" tab-close)
-      ("2" "New" tab-new)
-      ("r" "Rename" tab-rename :transient t)
-      ]
+(transient-define-prefix thy/window-transient ()
+  "Transient for window and tab commands."
+  [["Tab"
+    ("c" "Switch" tab-switch)
+    ("0" "Close" tab-close)
+    ("2" "New" tab-new)
+    ("r" "Rename" tab-rename :transient t)]
+   ["Winner"
+    ("u" "Undo" winner-undo :transient t)
+    ("U" "Redo" winner-redo :transient t)]
+   ["Desktop"
+    ("S" "Save" desktop-save-in-desktop-dir)
+    ("l" "Load" desktop-read)]
+   ["Dired"
+    ("d" "Dired" dirvish-dwim)
+    ("s" "Side" dirvish-side)
+    ("f" "Follow" dirvish-side-follow-mode)]
+   ["Resize"
+    ("=" "↕" enlarge-window :transient t)
+    ("-" "⇅" shrink-window :transient t)
+    ("+" "↔" enlarge-window-horizontally :transient t)
+    ("_" "⇄" shrink-window-horizontally :transient t)]])
 
-     ["Winner"
-      ("u" "Undo" winner-undo :transient t)
-      ("U" "Redo" winner-redo :transient t)
-      ("+" "enlarge" enlarge-window-horizontally :transient t)
-      ]
+(transient-define-prefix thy/brr-transient ()
+  "Transient for bookmarks, registers, and rectangles."
+  [["Bookmark"
+    ("v" "List" list-bookmarks)
+    ("M" "Mark" bookmark-set-no-overwrite)
+    ("b" "Jump" bookmark-jump)]
+   ["Register"
+    ("l" "List" consult-register)
+    ("SPC" "Point" point-to-register)
+    ("s" "Text" copy-to-register)
+    ("r" "Rectangle" copy-rectangle-to-register)
+    ("W" "Window" window-configuration-to-register)
+    ("K" "Kmacro" kmacro-to-register)]
+   ["Rectangle"
+    ("m" "Mark" rectangle-mark-mode)
+    ("i" "Index" rectangle-number-lines)
+    ("t" "String" string-rectangle)
+    ("o" "Space" open-rectangle)
+    ("c" "Clear" clear-rectangle)
+    ("k" "Kill" kill-rectangle)
+    ("y" "Yank" yank-rectangle)]])
 
-     ["Desktop"
-      ("S" "Save" desktop-save-in-desktop-dir)
-      ("l" "Load" desktop-read)
-      ]
-
-     ["Dired"
-      ("d" "Dired" dirvish-dwim)
-      ("s" "Side" dirvish-side)
-      ("f" "Follow" dirvish-side-follow-mode)
-      ]
-
-     ["Resize"
-      ("=" "↕" enlarge-window :transient t)
-      ("-" "⇅" shrink-window :transient t)
-      ("+" "↔" enlarge-window-horizontally :transient t)
-      ("_" "⇄" shrink-window-horizontally :transient t)
-      ]
-     ]
-    )
-
-  (transient-define-prefix transient-BRR ()
-    "transient for Bookmark, Register and Rectangle"
-    [
-     ["Bookmark"
-      ("v" "List" list-bookmarks)
-      ("M" "Mark" bookmark-set-no-overwrite)
-      ("b" "Jump" bookmark-jump)
-      ]
-     ;; 寄存器就是一段暂存的内容，可以用一个字母索引
-     ["Register"
-      ("l" "List" consult-register)
-      ("SPC" "Point" point-to-register)
-      ("s" "Text" copy-to-register)
-      ("r" "Rectangle" copy-rectangle-to-register)
-      ("W" "Window" window-configuration-to-register)
-      ("K" "Kmacro" kmacro-to-register)
-      ]
-
-     ["Rectangle"
-      ("m" "Mark "rectangle-mark-mode)
-      ;; 在矩形前加上标号
-      ("i" "Index" rectangle-number-lines)
-      ;; 用 str 填充矩形
-      ("t" "String" string-rectangle)
-      ;; 在矩形前加上空格
-      ("o" "Space" open-rectangle)
-      ;; 删除矩形
-      ("c"  "Clear" clear-rectangle)
-      ("k" "Kill" kill-rectangle)
-      ("y" "Yank" yank-rectangle)
-      ]
-     ]
-    )
-  )
+(global-set-key (kbd "C-x t") #'thy/window-transient)
+(global-set-key (kbd "C-x r") #'thy/brr-transient)
 
 ;;; NOTE:
 ;;; 没有改到 hjkl 键位的关键在于，minibuffer 是没有办法用 C-j, C-k 的
@@ -117,32 +84,30 @@
   ;; 方便使用 SPC j b 打开 buffer
   (global-set-key (kbd "C-x C-b") 'switch-to-buffer)
   ;; 修复 meow 的原生功能。
-  (defmacro +meow-amend-keybinding (key name command)
+  (defmacro thy/meow-amend-keybinding (key name command)
     (let ((kbd-symbol (intern (format "meow--kbd-%s" name))))
       `(progn
          (global-set-key (kbd (concat "H-" ,key)) ',command)
          (setq ,kbd-symbol (concat "H-" ,key)))))
 
-  (+meow-amend-keybinding "C-d" delete-char delete-char)
-  (+meow-amend-keybinding "C-/" undo undo)
-  (+meow-amend-keybinding "C-w" kill-ring-save kill-ring-save)
-  (+meow-amend-keybinding "M-w" kill-region kill-region)
-  (+meow-amend-keybinding "M-;" comment comment-dwin)
-  ;; (+meow-amend-keybinding "C-f" forward-char forward-char)
-  (+meow-amend-keybinding "C-k" kill-line kill-line)
+  (thy/meow-amend-keybinding "C-d" delete-char delete-char)
+  (thy/meow-amend-keybinding "C-/" undo undo)
+  (thy/meow-amend-keybinding "C-w" kill-ring-save kill-ring-save)
+  (thy/meow-amend-keybinding "M-w" kill-region kill-region)
+  (thy/meow-amend-keybinding "M-;" comment comment-dwin)
+  (thy/meow-amend-keybinding "C-k" kill-line kill-line)
 
   ;; 在行尾进入 insert 模式
-  (defun +meow-append-line ()
+  (defun thy/meow-append-line ()
+    "Enter Meow append state at end of line."
     (interactive)
     (progn
       (end-of-line)
       (meow-append)))
-  (defalias '+mark-deactive
-    (kmacro "C-SPC C-SPC"))
   ;; [motion]
   (meow-motion-overwrite-define-key
-   ;; '("j" . meow-next)
-   ;; '("k" . meow-prev)
+   '("j" . meow-next)
+   '("k" . meow-prev)
    '("<escape>" . ignore))
   ;; [leader]
   (meow-leader-define-key
@@ -169,8 +134,8 @@
    '("3" . split-window-right)
    '("4 f" . find-file-other-window)
    '("4 b" . switch-to-buffer-other-window)
-   '("r" . transient-BRR)
-   '("t" . transient-window)
+    '("r" . thy/brr-transient)
+    '("t" . thy/window-transient)
    '("/" . meow-keypad-describe-key)
    '("?" . meow-cheatsheet)
    )
@@ -192,7 +157,7 @@
    '("I" . meow-open-below)
    '("i" . meow-append)
    '("c" . meow-change)
-   '("E" . +meow-append-line)
+   '("E" . thy/meow-append-line)
 
    ;; move
    '("<" . beginend-prog-mode-goto-beginning)
@@ -212,11 +177,11 @@
    ;; '("j" . ace-pinyin-goto-char-timer)
 
    ;; 剪切，复制，粘贴，注释
-   '("q" . my-kill-region-or-line)
-   '("w" . my-copy-region-or-line)
+   '("q" . thy/kill-region-or-line)
+   '("w" . thy/copy-region-or-line)
    '("y" . yank)
    '("Y" . yank-media)
-   '("/" . +smart-comment)
+   '("/" . thy/smart-comment)
    '("." . embrace-commander)
    '("k" . puni-kill-line)
 
@@ -226,7 +191,7 @@
    '("x" . meow-quit)
 
    ;; 搜索
-   '("S" . +consult-ripgrep-single-file)
+   '("S" . thy/consult-ripgrep-single-file)
    '("s" . consult-line)
    '("r" . query-replace-regexp)
 
@@ -248,7 +213,7 @@
    ;; 其他
    '("," . sdcv-search-pointer+)
    '("d" . chatgpt-shell)
-   '("t" . +start-vterm-in-project)
+   '("t" . ghostel-project)
    '("!" . async-shell-command)
    '("|" . shell-command-on-region)
    )
@@ -262,38 +227,9 @@
   (dolist
       (state
        '(
-         (color-rg-mode . motion)
-         (help-mode . normal)
+          (color-rg-mode . motion)
+          (ghostel-mode . insert)
+          (help-mode . normal)
          ))
     (add-to-list 'meow-mode-state-list state))
   )
-
-;; vterm 会与 meow normal 键冲突
-;; 使得 normal-mode 键绑定都可以正常使用
-;; (use-package meow-vterm
-;;   :after (vterm meow)
-;;   :vc (meow-vterm :url "https://github.com/accelbread/meow-vterm" :rev "master")
-;;   :demand t
-;;   :init
-;;   (meow-vterm-enable))
-
-;; change the cursor color with the input-method changing
-(defvar cursor-default-color (face-background 'cursor))
-(defvar cursor-activate-color (face-foreground 'error nil t))
-
-(defun set-cursor-color-red ()
-  "Set the cursor color to red."
-  (set-cursor-color cursor-activate-color))
-(defun set-cursor-color-default ()
-  "Set the cursor color to green."
-  (set-cursor-color cursor-default-color))
-(defun set-cursor-color-according-to-input-method ()
-  "Set cursor color based on the current input method."
-  (interactive)
-  (if (string= current-input-method "rime")
-      (set-cursor-color cursor-activate-color)
-    (set-cursor-color cursor-default-color)))
-
-(add-hook 'input-method-activate-hook 'set-cursor-color-red)
-(add-hook 'input-method-deactivate-hook 'set-cursor-color-default)
-(add-hook 'window-state-change-hook 'set-cursor-color-according-to-input-method)

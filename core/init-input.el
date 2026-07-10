@@ -46,6 +46,7 @@
   (defun thy/macim-add-inline-space-cleanup ()
     "Clean one redundant inline space after `macim' switches back to other input."
     (add-hook 'post-self-insert-hook #'thy/macim-remove-redundant-inline-space nil t))
+
   :config
   (setq thy/macim-chinese-punc-chars
         (mapcar #'string-to-char macim--chinese-punc-list))
@@ -53,5 +54,8 @@
   (setq macim-inline-tail-handler #'thy/macim-remove-tail-space-before-chinese-punc)
   (add-hook 'macim-inline-deactivated-hook #'thy/macim-record-inline-english-space)
   (add-hook 'macim-inline-deactivated-hook #'thy/macim-add-inline-space-cleanup)
+  (with-eval-after-load 'meow
+    (add-hook 'meow-insert-exit-hook #'macim-select-ascii)
+    (add-hook 'meow-insert-enter-hook #'macim-context-switch))
   (setq macim-ascii "com.apple.keylayout.ABC"
         macim-other "im.rime.inputmethod.Squirrel.Hans"))

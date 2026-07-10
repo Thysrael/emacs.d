@@ -1,35 +1,65 @@
-;; -*- lexical-binding: t; -*-
+;;; -*- lexical-binding: t; -*-
 
-(use-package vterm
+(use-package ghostel
   :ensure t
   :bind
-  ;; 用 vterm-copy-mode 可以复制 vterm 输出
-  (("C-t" . +start-vterm-in-project)
-   :map vterm-mode-map
-   ("C-y" . vterm-yank)
-   ("M-y" . vterm-yank-pop)
-   ("C-\\" . toggle-input-method)
-   ("C-M-\\" . rime-force-enable)
-   )
+  (("C-t" . thy/ghostel-toggle-popup)
+   ("C-c t" . thy/ghostel-transient)
+   :map ghostel-semi-char-mode-map
+   ("C-t" . thy/ghostel-toggle-popup)
+   ("C-g" . keyboard-quit))
   :custom
-  (vterm-shell "zsh")
-  :config
-  (setq vterm-tramp-shells '(("docker" "/bin/bash")
-                             ("sshx" "'/bin/zsh'")
-                             ("sshx" "'/bin/zsh'"))) ; 指定在 tramp 时使用的 shell
-  ; /bin/bash 先加双引号，后加单引号可以解决 ssh tmux error 具体文档如下 https://github.com/akermu/emacs-libvterm/issues/569
-  ;; (setq vterm-always-compile-module t)
-  (defun +start-vterm-in-project ()
-    "Start vterm in the current project if available, otherwise start a regular vterm."
-    (interactive)
-    (if (project-current)
-        (let ((default-directory (project-root (project-current))))
-          (vterm))
-      (vterm)))
-  )
+  (ghostel-shell '("zsh"))
+  :preface
+  (defun thy/ghostel-visible-popup-window ()
+    "Return the visible Ghostel popup window, if any."
+    (catch 'window
+      (dolist (entry (and (boundp 'popper-open-popup-alist)
+                          popper-open-popup-alist))
+        (let ((window (car entry))
+              (buffer (cdr entry)))
+          (when (and (window-live-p window)
+                     (buffer-live-p buffer)
+                     (with-current-buffer buffer
+                       (derived-mode-p 'ghostel-mode)))
+            (throw 'window window))))))
 
-;; 多 vterm 支持的同时不影响 vterm toggle 逻辑
-;; (use-package multi-vterm
-;;   :straight t
-;;   :bind
-;;   ("C-c t" . multi-vterm))
+  (defun thy/ghostel-toggle-popup ()
+    "Show the project Ghostel popup, or hide it when already visible."
+    (interactive)
+    (if-let ((window (thy/ghostel-visible-popup-window)))
+        (delete-window window)
+      (ghostel-project)))
+
+  (defun thy/ghostel-new ()
+    "Create a new Ghostel terminal for the current project."
+    (interactive)
+    (let ((current-prefix-arg '(4)))
+      (call-interactively #'ghostel-project)))
+
+  (defun thy/ghostel-list-buffers ()
+    "Select a Ghostel buffer with live preview when Consult is available."
+    (interactive)
+    (let (names)
+      (dolist (buffer (buffer-list))
+        (when (with-current-buffer buffer
+                (derived-mode-p 'ghostel-mode))
+          (push (buffer-name buffer) names)))
+      (setq names (nreverse names))
+      (unless names
+        (user-error "No Ghostel buffers"))
+      (if (and (fboundp 'consult--read)
+               (fboundp 'consult--buffer-preview))
+          (let ((name (consult--read names
+                                     :prompt "Ghostel: "
+                                     :category 'buffer
+                                     :state (consult--buffer-preview))))
+            (pop-to-buffer name))
+        (pop-to-buffer (completing-read "Ghostel: " names nil t)))))
+  :config
+  (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t))
+
+(transient-define-prefix thy/ghostel-transient ()
+  "Transient for Ghostel terminals."
+  [("n" "New" thy/ghostel-new)
+   ("l" "List" thy/ghostel-list-buffers)])

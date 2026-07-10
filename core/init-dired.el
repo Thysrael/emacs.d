@@ -1,10 +1,11 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package dired
+  :ensure nil
   :bind
   (:map dired-mode-map
         ("C-c C-p" . wdired-change-to-wdired-mode)
-        ("W" . +dired-copy-filenames-to-clipboard))
+        ("W" . thy/dired-copy-filenames-to-clipboard))
   :custom
   ;; Always delete and copy recursively
   (dired-recursive-deletes 'top)
@@ -15,12 +16,18 @@
   (dired-create-destination-dirs 'ask)
   ;; symlink
   (dired-hide-details-hide-symlink-targets nil)
-  (dired-listing-switches "-Bhl --group-directories-first --almost-all --time-style=iso")
+  (dired-listing-switches (if (executable-find "gls")
+                              "-Bhl --group-directories-first --almost-all --time-style=iso"
+                            "-alh"))
+  (dired-use-ls-dired (not (eq system-type 'darwin)))
   (dired-vc-rename-file t)
   (dired-clean-confirm-killing-deleted-buffers nil)
   :config
+  (when-let ((gls (executable-find "gls")))
+    (setq insert-directory-program gls
+          dired-use-ls-dired t))
   (setq delete-by-moving-to-trash t)
-  (defun +dired-copy-filenames-to-clipboard ()
+  (defun thy/dired-copy-filenames-to-clipboard ()
     "Copy marked Dired file names to the clipboard in 'file://' URI format, abort if directories are present."
     (interactive)
     (let* ((files (or (dired-get-marked-files)
@@ -48,6 +55,9 @@
   :ensure t
   ;; :vc (:url "https://github.com/alexluigit/dirvish" :lisp-dir "extensions/")
   :init
+  (when-let* ((dirvish-file (locate-library "dirvish"))
+              (dirvish-dir (file-name-directory dirvish-file)))
+    (add-to-list 'load-path (expand-file-name "extensions" dirvish-dir)))
   (dirvish-override-dired-mode)
   :custom-face
   (dirvish-hl-line ((t (:inherit hl-line))))
@@ -129,21 +139,20 @@
   (dirvish-mode . dired-omit-mode)
   ;; (dirvish-setup . dirvish-emerge-mode)
   :config
-  ;; 让 side-window 在 ace-window 表现的更自然
+  ;; Make side windows behave more naturally with ace-window.
   (with-eval-after-load 'ace-window
     (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)
       (or (funcall orig-fn window)
-          (and (> (length (window-list)) 2) ;; Check if there are more than two windows
+          (and (> (length (window-list)) 2)
                (functionp 'dirvish-side--session-visible-p)
                (eq window (dirvish-side--session-visible-p)))))
-    ;; 让 ace  忽略 dirvish-misc-mode ，也就是 modeline 使用的 major-mode
-    (push 'dirvish-misc-mode aw-ignored-buffers)
-    )
+    (push 'dirvish-misc-mode aw-ignored-buffers))
   )
 
 ;; [dired-x] Extra Dired functionality
 ;; 主要使用忽略（omit）功能
 (use-package dired-x
+  :ensure nil
   :bind (:map dired-mode-map
               ("." . dired-omit-mode))
   :config
