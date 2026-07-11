@@ -88,10 +88,17 @@
   "Return the preferred font size for the current machine."
   (if (string-equal (system-name) "banana") 30 15))
 
+(defvar thy/font-size-adjustment 0
+  "Runtime font size adjustment applied on top of `thy/font-size'.")
+
+(defun thy/current-font-size ()
+  "Return the current font size including runtime adjustment."
+  (max 8 (+ (thy/font-size) thy/font-size-adjustment)))
+
 (defun thy/setup-fonts ()
   "Set up default, CJK, and symbol fonts for graphical frames."
   (when (display-graphic-p)
-    (let ((font-size (thy/font-size)))
+    (let ((font-size (thy/current-font-size)))
       (set-face-attribute 'default nil :font (font-spec :family "Maple Mono NF CN" :size font-size))
       (set-fontset-font t 'han (font-spec :family "Maple Mono NF CN" :size font-size))
       (set-fontset-font t 'han (font-spec :script 'han) nil 'append)
@@ -99,13 +106,25 @@
       (set-fontset-font t '(#xe000 . #xf8ff) (font-spec :family "Symbols Nerd Font Mono") nil 'prepend)
       (set-fontset-font t '(#xf0000 . #xffffd) (font-spec :family "Symbols Nerd Font Mono") nil 'prepend))))
 
+(defun thy/adjust-font-size (increment)
+  "Adjust English and CJK font sizes globally by INCREMENT."
+  (interactive "p")
+  (setq thy/font-size-adjustment (+ thy/font-size-adjustment increment))
+  (thy/setup-fonts))
+
+(defun thy/reset-font-size ()
+  "Reset English and CJK font sizes to the machine default."
+  (interactive)
+  (setq thy/font-size-adjustment 0)
+  (thy/setup-fonts))
+
 (thy/setup-fonts)
 (add-hook 'server-after-make-frame-hook #'thy/setup-fonts)
 
 ;; Scale fonts globally; Popper intentionally does not claim these keys.
-(global-set-key (kbd "C-=") #'global-text-scale-adjust)
-(global-set-key (kbd "C--") #'global-text-scale-adjust)
-(global-set-key (kbd "C-0") #'global-text-scale-adjust)
+(global-set-key (kbd "C-=") #'thy/adjust-font-size)
+(global-set-key (kbd "C--") (lambda () (interactive) (thy/adjust-font-size -1)))
+(global-set-key (kbd "C-0") #'thy/reset-font-size)
 
 (setq indicate-buffer-boundaries nil
       indicate-empty-lines nil)
