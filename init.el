@@ -33,9 +33,9 @@
     init-dired
     ;; 'init-control
     ;; 'init-note
+    ;; init-ai
     init-modal
     ;; 'init-export
-    ;; 'init-ai
     )
   "Core modules loaded on local machines.")
 
@@ -60,8 +60,8 @@
     init-write
     init-remote
     init-dired
-    init-modal
-    init-ai)
+    ;; init-ai
+    init-modal)
   "Core modules loaded on remote/server hosts.")
 
 (defvar thy/init-files

@@ -19,8 +19,9 @@
     "Select ASCII input source unless Evil is in Insert state."
     ;; Regaining focus should leave ongoing insert-state Chinese input alone.
     (when (and (fboundp 'macim-select-ascii)
+               (fboundp 'macim-set)
                (not (and (boundp 'evil-state)
-                         (eq evil-state 'insert))))
+                          (eq evil-state 'insert))))
       (macim-select-ascii)))
 
   (defun thy/macim-remove-head-space-after-chinese-punc (_)

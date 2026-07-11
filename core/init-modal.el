@@ -13,11 +13,6 @@
    ["Desktop"
     ("S" "Save" desktop-save-in-desktop-dir)
     ("l" "Load" desktop-read)]
-   ["Dired"
-    ("d" "Dirvish" dirvish)
-    ("D" "Dwim" dirvish-dwim)
-    ("s" "Side" dirvish-side)
-    ("f" "Follow" dirvish-side-follow-mode)]
    ["Resize"
     ("=" "Grow" enlarge-window :transient t)
     ("-" "Shrink" shrink-window :transient t)

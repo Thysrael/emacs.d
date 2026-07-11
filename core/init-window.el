@@ -135,7 +135,8 @@
      "\\*Capture\\*"
      "\\*ChatGPT\\*"
      "\\*IPADS\\*"
-     "\\*chat.*"
+      "\\*chat.*"
+      agent-shell-mode
      ;; "\\*Org Agenda\\*"
      "^CAPTURE-.*\\.org*"
 
