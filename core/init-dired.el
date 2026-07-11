@@ -5,7 +5,7 @@
   :bind
   (:map dired-mode-map
         ("C-c C-p" . wdired-change-to-wdired-mode)
-        ("W" . thy/dired-copy-filenames-to-clipboard))
+        ("W" . thy/dired-copy-files-to-clipboard))
   :custom
   ;; Always delete and copy recursively
   (dired-recursive-deletes 'top)
@@ -27,27 +27,63 @@
     (setq insert-directory-program gls
           dired-use-ls-dired t))
   (setq delete-by-moving-to-trash t)
-  (defun thy/dired-copy-filenames-to-clipboard ()
-    "Copy marked Dired file names to the clipboard in 'file://' URI format, abort if directories are present."
+  (defun thy/find-file (filename &optional wildcards)
+    "Visit FILENAME, opening directories with full-frame Dirvish."
+    (interactive
+     (find-file-read-args "Find file: " (confirm-nonexistent-file-or-buffer)))
+    (if (file-directory-p filename)
+        (dirvish filename)
+      (find-file filename wildcards)))
+
+  (global-set-key (kbd "C-x C-f") #'thy/find-file)
+
+  (defun thy/dired-copy-files-to-clipboard ()
+    "Copy marked Dired files to the system clipboard as file objects."
     (interactive)
-    (let* ((files (or (dired-get-marked-files)
-                      (list (dired-get-filename))))
-           (dirs (seq-filter 'file-directory-p files)))
-      (if dirs
-          (user-error "Operation aborted: Directories are among the selected files.")
-        (let* ((uri-list (mapconcat (lambda (file)
-                                      (concat "file://" (expand-file-name file)))
-                                    files
-                                    "\n"))
-               (file-names (mapconcat 'file-name-nondirectory files ", ")))
-          ;; Use `xclip` to copy the file list to the clipboard as 'text/uri-list'.
+    (let* ((files (mapcar #'expand-file-name (dired-get-marked-files)))
+           (uri-list (mapconcat (lambda (file) (concat "file://" file)) files "\n")))
+      (kill-new (mapconcat #'identity files "\n"))
+      (cond
+       ((and (eq system-type 'darwin) (executable-find "osascript"))
+        ;; Finder paste needs NSPasteboard file URLs, not plain file:// text.
+        (let ((script "use framework \"Foundation\"
+use framework \"AppKit\"
+use scripting additions
+
+on run argv
+  set pasteboard to (current application's NSPasteboard's generalPasteboard())
+  pasteboard's clearContents()
+
+  set urlArray to (current application's NSMutableArray's array())
+  repeat with path in argv
+    set nsPath to (current application's NSString's stringWithString_(path))
+    set nsURL to (current application's |NSURL|'s fileURLWithPath_(nsPath))
+    (urlArray's addObject_(nsURL))
+  end repeat
+  pasteboard's writeObjects_(urlArray)
+
+  set previousDelimiters to AppleScript's text item delimiters
+  set AppleScript's text item delimiters to linefeed
+  set joinedPaths to (argv as text)
+  set AppleScript's text item delimiters to previousDelimiters
+
+  set joinedString to (current application's NSString's stringWithString_(joinedPaths))
+  pasteboard's setString_forType_(joinedString, current application's NSPasteboardTypeString)
+end run
+"))
           (with-temp-buffer
-            (insert uri-list)
-            (call-process-region (point-min) (point-max) "xclip"
-                                 nil nil nil
-                                 "-i" "-selection" "clipboard" "-t" "text/uri-list"))
-          ;; Display the copied file paths.
-          (message "Copied files to clipboard:\n%s" file-names)))))
+            (insert script)
+            (unless (zerop (apply #'call-process-region
+                                  (point-min) (point-max)
+                                  "osascript" nil t nil "-" files))
+              (user-error "Failed to copy files to clipboard: %s"
+                          (replace-regexp-in-string "[[:space:]\n]+\\='" "" (buffer-string)))))))
+       ((executable-find "xclip")
+        (with-temp-buffer
+          (insert uri-list)
+          (call-process-region (point-min) (point-max) "xclip" nil nil nil
+                               "-i" "-selection" "clipboard" "-t" "text/uri-list"))))
+      (message "Copied %d file%s" (length files) (if (= (length files) 1) "" "s"))))
   )
 
 ;; 使用 `E` 可以用外部命令打开文件
@@ -103,7 +139,7 @@
      ("Audio"         (extensions "mp3" "flac" "wav" "ape" "aac"))
      ("Archives"      (extensions "gz" "rar" "zip"))
      ("Office"        (extensions "doc" "docx" "xls" "xlsx" "ppt" "pptx"))))
-  (dirvish-default-layout '(0 0 0.5))
+  (dirvish-default-layout '(1 0.15 0.55))
   ;; (dirvish-hide-details '(dirvish-side))
   ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
   :bind
@@ -113,13 +149,15 @@
    ("?"   . dirvish-dispatch)     ; contains most of sub-menus in dirvish extensions
    ;; 导航
    ("a"   . dirvish-quick-access)
-   ("r"   . dirvish-history-jump)
+   ("r"   . dired-do-rename)
    ("M-f" . dirvish-history-go-forward)
    ("M-b" . dirvish-history-go-backward)
    ;; fd
    ("f"   . dirvish-fd)
    ("F"   . dirvish-fd-switches)
    ("y"   . dirvish-yank-menu)
+   ("Y"   . thy/dired-copy-files-to-clipboard)
+   ("W"   . thy/dired-copy-files-to-clipboard)
    ("N"   . dirvish-narrow)
    ("<"   . dired-up-directory)
    (">"   . dired-find-file)

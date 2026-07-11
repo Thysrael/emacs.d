@@ -76,9 +76,12 @@
   ("<f7>" . symbol-overlay-put)
   ("<f8>" . symbol-overlay-remove-all)
   (:map symbol-overlay-map
-        ("N" . symbol-overlay-jump-next)
-        ("P" . symbol-overlay-jump-prev)
-        ("n" . nil)
+        ("n" . symbol-overlay-jump-next)
+        ("N" . symbol-overlay-jump-prev)
+        ("r" . symbol-overlay-rename)
+        ("R" . symbol-overlay-query-replace)
+        ("/" . symbol-overlay-isearch-literally)
+        ("q" . symbol-overlay-remove-all)
         ("p" . nil)
         ("e" . nil)
         ("d" . nil)
@@ -294,32 +297,37 @@ begin and end of the block surrounding point."
   )
 
 ;; 可以快速选择区域
+(defun thy/er-mark-emt-word ()
+  "Mark the Chinese word at point using `emt' segmentation."
+  (interactive)
+  (when (and (bound-and-true-p emt-mode)
+             (fboundp 'emt--get-bounds-at-point)
+             (fboundp 'emt-split))
+    (condition-case nil
+        (pcase-let* ((`(,beg . ,end) (emt--get-bounds-at-point 'all))
+                     (index (- (point) beg))
+                     (text (buffer-substring-no-properties beg end))
+                     (word-bounds
+                      (catch 'word-bounds
+                        (dolist (bounds (emt-split text))
+                          (let ((word-beg (car bounds))
+                                (word-end (cdr bounds)))
+                            (when (or (and (<= word-beg index) (< index word-end))
+                                      (and (< word-beg index) (<= index word-end)))
+                              (throw 'word-bounds bounds)))))))
+          (when word-bounds
+            (goto-char (+ beg (cdr word-bounds)))
+            (set-mark (point))
+            (goto-char (+ beg (car word-bounds)))))
+      (error nil))))
+
 (use-package expand-region
   :ensure t
+  :config
+  (add-to-list 'er/try-expand-list #'thy/er-mark-emt-word)
   :bind
   ("C-l" . er/expand-region)
   ("C-M-l" . er/contract-region))
-
-;; 用于强化删除功能，可以平衡删除
-(use-package puni
-  :ensure t
-  :hook
-  ((prog-mode sgml-mode nxml-mode tex-mode eval-expression-minibuffer-setup) . puni-mode)
-  :bind
-  (:map puni-mode-map
-        ("C-w" . nil)
-        ("C-d" . nil)
-        ("<backspace>" . nil)
-        ("<DEL>" . nil)))
-
-;; 快速编辑成对出现的标点
-(use-package embrace
-  :ensure t
-  :bind
-  ("C-." . embrace-commander)
-  :hook
-  (org-mode . embrace-org-mode-hook)
-  )
 
 ;;; misc
 ;; [sudo-edit] edit file with su permissions

@@ -139,9 +139,6 @@
 
   (set-language-environment "UTF-8")
 
-  ;; Put the command prefix on the right-hand home row.
-  (define-key key-translation-map (kbd "C-j") (kbd "C-x"))
-
   ;; Translate modified Chinese punctuation to ASCII punctuation.
   (cl-loop for prefix in '("C-" "M-" "s-" "H-")
            do (cl-loop for cpunc in '("，" "。" "？" "！" "；" "：" "、"

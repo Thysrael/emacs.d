@@ -188,9 +188,9 @@
   (org-appear-trigger 'manual)
   :preface
   (defun thy/org-add-appear-hook ()
-    "Toggle `org-appear' while entering and leaving Meow insert state."
-    (add-hook 'meow-insert-enter-hook #'org-appear-manual-start nil t)
-    (add-hook 'meow-insert-exit-hook #'org-appear-manual-stop nil t)))
+    "Toggle `org-appear' while entering and leaving Evil insert state."
+    (add-hook 'evil-insert-state-entry-hook #'org-appear-manual-start nil t)
+    (add-hook 'evil-insert-state-exit-hook #'org-appear-manual-stop nil t)))
 
 (use-package advance-words-count
   :vc (advance-words-count :url "https://github.com/Thysrael/advance-words-count.el" :rev "master")

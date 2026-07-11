@@ -14,14 +14,15 @@
     ("S" "Save" desktop-save-in-desktop-dir)
     ("l" "Load" desktop-read)]
    ["Dired"
-    ("d" "Dired" dirvish-dwim)
+    ("d" "Dirvish" dirvish)
+    ("D" "Dwim" dirvish-dwim)
     ("s" "Side" dirvish-side)
     ("f" "Follow" dirvish-side-follow-mode)]
    ["Resize"
-    ("=" "↕" enlarge-window :transient t)
-    ("-" "⇅" shrink-window :transient t)
-    ("+" "↔" enlarge-window-horizontally :transient t)
-    ("_" "⇄" shrink-window-horizontally :transient t)]])
+    ("=" "Grow" enlarge-window :transient t)
+    ("-" "Shrink" shrink-window :transient t)
+    ("+" "Widen" enlarge-window-horizontally :transient t)
+    ("_" "Narrow" shrink-window-horizontally :transient t)]])
 
 (transient-define-prefix thy/brr-transient ()
   "Transient for bookmarks, registers, and rectangles."
@@ -47,189 +48,252 @@
 
 (global-set-key (kbd "C-x t") #'thy/window-transient)
 (global-set-key (kbd "C-x r") #'thy/brr-transient)
+(global-set-key (kbd "C-x C-b") #'switch-to-buffer)
 
-;;; NOTE:
-;;; 没有改到 hjkl 键位的关键在于，minibuffer 是没有办法用 C-j, C-k 的
-;;; 所以会造成一定的不一致性。
-;;;
-;;; keypad 模式的逻辑是这样的，当按下 SPC 后，按 c, x, h 会分别对应 C-c, C-x, C-h
-;;; 之后再按的字母 <c> 都会变成 C-<c> ，如果想按出来不加 C- 的，那么就需要按 SPC-<c>
-;;; 此外 keypad 还有 fallback 逻辑，指的是当无法匹配的时候，会采用一种退而求其次的匹配
-;;; 但是 fallback 具体是什么我理解不了，我个人感觉是 SPC 后加一个非 c, x, h 键 <c>
-;;; 那么就会被翻译成 C-c <c> 。
-;;; 这种机制会导致基本上都是 3 键才能解决形如 C-[cx] C-<c> 的按键，这相对于原来 2 键就解决耽误了不少。
-;;; 对于 C-x <c> 需要 4 键才能解决，这些都是不能接受的。
-;;; 所以要将这些按键尽量放到 normal 下。
-;;; 但是 C-c C-<c> 因为是 major-mode 相关，所以没法简单改键位，所以这种按键会非常麻烦
-;;;
-;;; 在 motion 模式时，按键基本上就是原生的，对于 dired, magit 这样的特殊模式本身没有关系
-;;; 但是在切换 window 的时候，原本 normal 熟悉的按键不能使用了，只能用 keypad 模式按键
-;;; 而 window 切换又是非常难按的 4 键，所以要特殊设计
+(defun thy/evil-paste-pop-or-consult-yank-pop ()
+  "Use Consult yank history in minibuffers, otherwise use Evil paste-pop."
+  (interactive)
+  (if (minibufferp)
+      (call-interactively #'consult-yank-pop)
+    (call-interactively #'evil-paste-pop)))
 
-(use-package meow
+(defun thy/evil-yank-keep-point (orig-fn &rest args)
+  "Call ORIG-FN with ARGS, then restore point after Evil yanks text."
+  (let ((pos (copy-marker (point))))
+    (unwind-protect
+        (apply orig-fn args)
+      (when (marker-buffer pos)
+        (goto-char pos))
+      (set-marker pos nil))))
+
+(defun thy/section-heading-regexp ()
+  "Return a heading regexp for document section text objects."
+  (cond
+   ((derived-mode-p 'org-mode) "^\\*+\\(?:[ \\t]\\|$\\)")
+   ((derived-mode-p 'markdown-mode 'markdown-ts-mode) "^#+\\(?:[ \\t]\\|$\\)")))
+
+(defun thy/section-heading-level ()
+  "Return heading level at point for document section text objects."
+  (save-excursion
+    (back-to-indentation)
+    (cond
+     ((looking-at "\\*+") (length (match-string 0)))
+     ((looking-at "#+") (length (match-string 0)))
+     (t 0))))
+
+(defun thy/section-bounds (&optional inner)
+  "Return current Org/Markdown section bounds.
+When INNER is non-nil, exclude the heading line."
+  (when-let* ((heading-regexp (thy/section-heading-regexp)))
+    (save-excursion
+      (let (start content-start end level)
+        (unless (looking-at heading-regexp)
+          (re-search-backward heading-regexp nil t))
+        (if (looking-at heading-regexp)
+            (setq start (line-beginning-position)
+                  content-start (line-beginning-position 2)
+                  level (thy/section-heading-level))
+          (setq start (point-min)
+                content-start (point-min)
+                level 0))
+        (goto-char content-start)
+        (setq end
+              (if (= level 0)
+                  (or (and (re-search-forward heading-regexp nil t)
+                           (line-beginning-position))
+                      (point-max))
+                (catch 'section-end
+                  (while (re-search-forward heading-regexp nil t)
+                    (when (<= (thy/section-heading-level) level)
+                      (throw 'section-end (line-beginning-position))))
+                  (point-max))))
+        (cons (if inner content-start start)
+              (max (if inner content-start start) end))))))
+
+(use-package evil
   :ensure t
-  :hook
-  (after-init . meow-global-mode)
-  ;; 改变 meow 的默认区域删除行为
-  (meow-global-mode . (lambda () (setq delete-active-region t)))
-  ;; (meow-insert-enter . (lambda () (corfu-mode +1)))
   :demand t
-  :custom
-  (meow-keypad-meta-prefix ?z)
-  (meow-keypad-ctrl-meta-prefix ?Z)
-  (meow-keypad-describe-delay 1.0)
+  :init
+  (setq evil-respect-visual-line-mode t)
+  (setq evil-undo-system 'undo-redo)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-integration t)
+  (setq evil-want-minibuffer nil)
+  (setq evil-mode-buffers nil)
   :config
-  ;; 关闭 change 选择行为
-  (setq meow-select-on-change nil)
-  ;; 方便使用 SPC j b 打开 buffer
-  (global-set-key (kbd "C-x C-b") 'switch-to-buffer)
-  ;; 修复 meow 的原生功能。
-  (defmacro thy/meow-amend-keybinding (key name command)
-    (let ((kbd-symbol (intern (format "meow--kbd-%s" name))))
-      `(progn
-         (global-set-key (kbd (concat "H-" ,key)) ',command)
-         (setq ,kbd-symbol (concat "H-" ,key)))))
+  (setq evil-symbol-word-search t)
+  (setq evil-want-fine-undo t)
+  (evil-mode 1)
 
-  (thy/meow-amend-keybinding "C-d" delete-char delete-char)
-  (thy/meow-amend-keybinding "C-/" undo undo)
-  (thy/meow-amend-keybinding "C-w" kill-ring-save kill-ring-save)
-  (thy/meow-amend-keybinding "M-w" kill-region kill-region)
-  (thy/meow-amend-keybinding "M-;" comment comment-dwin)
-  (thy/meow-amend-keybinding "C-k" kill-line kill-line)
+  ;; Keep yanks visually stable; the pulse feedback already shows what was copied.
+  (advice-add #'evil-yank :around #'thy/evil-yank-keep-point)
 
-  ;; 在行尾进入 insert 模式
-  (defun thy/meow-append-line ()
-    "Enter Meow append state at end of line."
-    (interactive)
-    (progn
-      (end-of-line)
-      (meow-append)))
-  ;; [motion]
-  (meow-motion-overwrite-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
-  ;; [leader]
-  (meow-leader-define-key
-   ;; 将 j 视为 x
-   '("j" . "C-x")
-   ;; Use SPC (0-9) for digit arguments.
-   ;; '("1" . meow-digit-argument)
-   ;; '("2" . meow-digit-argument)
-   ;; '("3" . meow-digit-argument)
-   ;; '("4" . meow-digit-argument)
-   ;; '("5" . meow-digit-argument)
-   ;; '("6" . meow-digit-argument)
-   ;; '("7" . meow-digit-argument)
-   ;; '("8" . meow-digit-argument)
-   ;; '("9" . meow-digit-argument)
-   ;; '("0" . meow-digit-argument)
-   '("o" . ace-window)
-   '("O" . org-capture)
-   '("9" . ace-delete-window)
-   '("8" . ace-swap-window)
-   '("0" . delete-window)
-   '("1" . delete-other-windows)
-   '("2" . split-window-below)
-   '("3" . split-window-right)
-   '("4 f" . find-file-other-window)
-   '("4 b" . switch-to-buffer-other-window)
-    '("r" . thy/brr-transient)
-    '("t" . thy/window-transient)
-   '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet)
-   )
+  (evil-define-operator thy/evil-format (beg end type)
+    "Format text from BEG to END using Evil motion TYPE."
+    (interactive "<R>")
+    (when (eq type 'line)
+      (setq end (save-excursion
+                  (goto-char end)
+                  (line-end-position))))
+    (if (and (bound-and-true-p eglot--managed-mode)
+             (fboundp 'eglot-managed-p)
+             (eglot-managed-p))
+        (eglot-format beg end)
+      (indent-region beg end)))
 
-  ;; [normal]
-  (meow-normal-define-key
-   '("0" . meow-expand-0)
-   '("9" . meow-expand-9)
-   '("8" . meow-expand-8)
-   '("7" . meow-expand-7)
-   '("6" . meow-expand-6)
-   '("5" . meow-expand-5)
-   '("4" . meow-expand-4)
-   '("3" . meow-expand-3)
-   '("2" . meow-expand-2)
-   '("1" . meow-expand-1)
+  (evil-define-text-object thy/evil-inner-section (count &optional beg end type)
+    "Select the current Org/Markdown section body."
+    :type line
+    (when-let* ((bounds (thy/section-bounds t)))
+      (evil-range (car bounds) (cdr bounds) 'line)))
 
-   ;; 模式切换键
-   '("I" . meow-open-below)
-   '("i" . meow-append)
-   '("c" . meow-change)
-   '("E" . thy/meow-append-line)
+  (evil-define-text-object thy/evil-a-section (count &optional beg end type)
+    "Select the current Org/Markdown section including its heading."
+    :type line
+    (when-let* ((bounds (thy/section-bounds)))
+      (evil-range (car bounds) (cdr bounds) 'line)))
 
-   ;; move
-   '("<" . beginend-prog-mode-goto-beginning)
-   '(">" . beginend-prog-mode-goto-end)
-   '("f" . "C-f")
-   '("F" . meow-right-expand)
-   '("b" . backward-char)
-   '("B" . meow-left-expand)
-   '("n" . next-line)
-   '("N" . meow-next-expand)
-   '("p" . previous-line)
-   '("P" . meow-prev-expand)
-   '("a" . move-beginning-of-line)
-   '("e" . move-end-of-line)
-   '("o" . hs-toggle-hiding)
-   '("h" . meow-find)
-   ;; '("j" . ace-pinyin-goto-char-timer)
+  (evil-set-initial-state 'color-rg-mode 'motion)
+  (evil-set-initial-state 'ghostel-mode 'insert)
+  (evil-set-initial-state 'help-mode 'normal)
 
-   ;; 剪切，复制，粘贴，注释
-   '("q" . thy/kill-region-or-line)
-   '("w" . thy/copy-region-or-line)
-   '("y" . yank)
-   '("Y" . yank-media)
-   '("/" . thy/smart-comment)
-   '("." . embrace-commander)
-   '("k" . puni-kill-line)
+  (define-key evil-inner-text-objects-map "s" #'thy/evil-inner-section)
+  (define-key evil-outer-text-objects-map "s" #'thy/evil-a-section)
 
-   ;; 撤销
-   '("u" . meow-undo)
-   '("U" . meow-undo-in-selection)
-   '("x" . meow-quit)
+  ;; In minibuffers, use Consult history instead of Evil paste-pop state checks.
+  (define-key evil-normal-state-map (kbd "M-y") #'thy/evil-paste-pop-or-consult-yank-pop)
+  (define-key evil-normal-state-map [remap yank-pop] #'thy/evil-paste-pop-or-consult-yank-pop)
 
-   ;; 搜索
-   '("S" . thy/consult-ripgrep-single-file)
-   '("s" . consult-line)
-   '("r" . query-replace-regexp)
+  ;; Normal-state single keys are deliberately tuned for this config, not pure Vim.
+  (define-key evil-normal-state-map (kbd ";") #'embark-act)
+  (define-key evil-normal-state-map (kbd "P") #'consult-yank-pop)
+  (define-key evil-normal-state-map (kbd "=") #'thy/evil-format)
+  (define-key evil-normal-state-map (kbd "gd") #'xref-find-definitions)
+  (define-key evil-normal-state-map (kbd "gr") #'xref-find-references)
+  (define-key evil-normal-state-map (kbd "J") #'avy-goto-char-2)
+  (define-key evil-normal-state-map (kbd "K") #'eldoc)
+  (define-key evil-normal-state-map (kbd "s") #'consult-line)
+  (define-key evil-normal-state-map (kbd "C-t") #'thy/ghostel-toggle-popup)
+  (define-key evil-normal-state-map (kbd "H") #'mwim-beginning-of-code-or-line)
+  (define-key evil-normal-state-map (kbd "L") #'mwim-end-of-code-or-line)
+  (define-key evil-normal-state-map (kbd "m") #'symbol-overlay-put)
+  (define-key evil-normal-state-map (kbd "M") #'symbol-overlay-remove-all)
+  (define-key evil-normal-state-map (kbd "U") #'vundo)
+  (define-key evil-normal-state-map (kbd "z") #'hs-toggle-hiding)
+  (define-key evil-normal-state-map (kbd "Z") #'hs-toggle-all)
 
-   ;; 标记与区域
-   '("v" . set-mark-command)
-   '("V" . exchange-point-and-mark)
-   '(";" . embark-act)
-   '("M" . pop-to-mark-command)
-   '("l" . er/expand-region)
-   '("L" . er/contract-region)
-   '("g" . meow-cancel-selection)
-   ;; 多光标
-   ;; grab 会将原来的 region 当成一个 grab region 在这里可以创造多个光标。
-   ;; 默认是每一行创造一个光标
-   ;; 也可以是使用 next-word 或者 find 指令主动创造行内光标
-   ;; grab 的本质是第二选区，可以和第一选区互相作用
-   '("G" . meow-grab)
-   '("W" . meow-next-word)
-   ;; 其他
-   '("," . sdcv-search-pointer+)
-   '("d" . chatgpt-shell)
-   '("t" . ghostel-project)
-   '("!" . async-shell-command)
-   '("|" . shell-command-on-region)
-   )
-  ;; 在退出 insert 模式时自动退出 corfu 补全
+  (define-key evil-insert-state-map (kbd "C-n") #'next-line)
+  (define-key evil-insert-state-map (kbd "C-p") #'previous-line)
+  (define-key evil-insert-state-map (kbd "C-s") #'consult-line)
+  (define-key evil-insert-state-map (kbd "C-a") #'mwim-beginning-of-code-or-line)
+  (define-key evil-insert-state-map (kbd "C-e") #'mwim-end-of-code-or-line)
+  (define-key evil-insert-state-map (kbd "C-f") #'+smart-forward)
+  (define-key evil-insert-state-map (kbd "C-b") #'backward-char)
+  (define-key evil-insert-state-map (kbd "M-<") #'beginning-of-buffer)
+  (define-key evil-insert-state-map (kbd "M->") #'end-of-buffer)
+
+  (define-key evil-visual-state-map (kbd "v") #'er/expand-region)
+  (define-key evil-visual-state-map (kbd "V") #'er/contract-region)
+  (define-key evil-visual-state-map (kbd "=") #'thy/evil-format)
+
+  ;; Use C-j as a direct C-x prefix inside Evil states; key-translation-map breaks C-x.
+  (dolist (map (list evil-normal-state-map
+                     evil-insert-state-map
+                     evil-visual-state-map
+                     evil-motion-state-map
+                     evil-emacs-state-map))
+    (define-key map (kbd "C-j") ctl-x-map))
+
+  ;; Keep leader bindings explicit instead of pulling in a leader/general package.
+  (evil-define-key 'normal 'global
+    (kbd "SPC o") #'ace-window
+    (kbd "SPC O") #'org-capture
+    (kbd "SPC 9") #'ace-delete-window
+    (kbd "SPC 8") #'ace-swap-window
+    (kbd "SPC 0") #'delete-window
+    (kbd "SPC 1") #'delete-other-windows
+    (kbd "SPC 2") #'split-window-below
+    (kbd "SPC 3") #'split-window-right
+    (kbd "SPC 4 f") #'find-file-other-window
+    (kbd "SPC 4 b") #'switch-to-buffer-other-window
+    (kbd "SPC ;") #'embark-dwim
+    (kbd "SPC b") #'switch-to-buffer
+    (kbd "SPC B") #'switch-to-buffer-other-window
+    (kbd "SPC f") #'thy/find-file
+    (kbd "SPC g") #'global-blamer-mode
+    (kbd "SPC i") #'consult-imenu
+    (kbd "SPC p") #'consult-fd
+    (kbd "SPC r") #'consult-recent-file
+    (kbd "SPC R") #'thy/brr-transient
+    (kbd "SPC s") #'consult-ripgrep
+    (kbd "SPC t") #'thy/ghostel-transient
+    (kbd "SPC T") #'thy/window-transient
+    (kbd "SPC v") #'magit
+    (kbd "SPC w") #'save-buffer)
+
   (with-eval-after-load 'corfu
     (when (fboundp 'corfu-quit)
-      (add-hook 'meow-insert-exit-hook 'corfu-quit)))
+      (add-hook 'evil-insert-state-exit-hook #'corfu-quit)))
 
-  (with-eval-after-load 'eaf-pdf-viewer
-    (eaf-bind-key meow-keypad "<SPC>" eaf-pdf-viewer-keybinding))
-  (dolist
-      (state
-       '(
-          (color-rg-mode . motion)
-          (ghostel-mode . insert)
-          (help-mode . normal)
-         ))
-    (add-to-list 'meow-mode-state-list state))
-  )
+  ;; Special buffers get small manual bindings instead of broad evil-collection maps.
+  (with-eval-after-load 'dired
+    (evil-define-key 'normal dired-mode-map
+      (kbd "j") #'dired-next-line
+      (kbd "k") #'dired-previous-line
+      (kbd "h") #'dired-up-directory
+      (kbd "l") #'dired-find-file
+      (kbd "r") #'dired-do-rename
+      (kbd "Y") #'thy/dired-copy-files-to-clipboard
+      (kbd "W") #'thy/dired-copy-files-to-clipboard
+      (kbd "q") #'quit-window))
+
+  (with-eval-after-load 'magit
+    (evil-define-key 'normal magit-mode-map
+      (kbd "j") #'magit-section-forward
+      (kbd "k") #'magit-section-backward))
+
+  (with-eval-after-load 'org-agenda
+    (evil-define-key 'normal org-agenda-mode-map
+      (kbd "j") #'org-agenda-next-line
+      (kbd "k") #'org-agenda-previous-line)))
+
+(use-package evil-commentary
+  :ensure t
+  :after evil
+  :commands (evil-commentary evil-commentary-line)
+  :init
+  (define-key evil-normal-state-map (kbd "gc") #'evil-commentary)
+  (define-key evil-visual-state-map (kbd "gc") #'evil-commentary-line))
+
+(use-package evil-surround
+  :ensure t
+  :after evil
+  :hook (after-init . global-evil-surround-mode))
+
+(use-package evil-textobj-tree-sitter
+  :ensure t
+  :after evil
+  :commands (evil-textobj-tree-sitter-get-textobj)
+  :init
+  ;; Install text object keys eagerly while loading the tree-sitter package lazily.
+  (autoload 'evil-textobj-tree-sitter-get-textobj "evil-textobj-tree-sitter")
+  (define-key evil-inner-text-objects-map "f"
+              (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  (define-key evil-outer-text-objects-map "f"
+              (evil-textobj-tree-sitter-get-textobj "function.outer"))
+  (define-key evil-inner-text-objects-map "c"
+              (evil-textobj-tree-sitter-get-textobj "class.inner"))
+  (define-key evil-outer-text-objects-map "c"
+              (evil-textobj-tree-sitter-get-textobj "class.outer"))
+  (define-key evil-inner-text-objects-map "a"
+              (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
+  (define-key evil-outer-text-objects-map "a"
+              (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+  (define-key evil-inner-text-objects-map "l"
+              (evil-textobj-tree-sitter-get-textobj "loop.inner"))
+  (define-key evil-outer-text-objects-map "l"
+              (evil-textobj-tree-sitter-get-textobj "loop.outer"))
+  (define-key evil-inner-text-objects-map "/"
+              (evil-textobj-tree-sitter-get-textobj "comment.inner"))
+  (define-key evil-outer-text-objects-map "/"
+              (evil-textobj-tree-sitter-get-textobj "comment.outer")))

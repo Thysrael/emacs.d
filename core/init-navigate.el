@@ -14,6 +14,17 @@
    ((looking-at-p "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
    (t (forward-char))))
 
+(defun thy/emt-evil-forward-word (orig-fun count)
+  "Use `emt-forward-word' for Evil word motions when `emt-mode' is active."
+  (if (and (bound-and-true-p emt-mode)
+           (fboundp 'emt-forward-word))
+      (condition-case nil
+          (if (emt-forward-word count)
+              0
+            (funcall orig-fun count))
+        (error (funcall orig-fun count)))
+    (funcall orig-fun count)))
+
 ;; 字符跳转
 (use-package avy
   :ensure t
@@ -30,12 +41,6 @@
   :bind (([remap move-beginning-of-line] . mwim-beginning-of-code-or-line)
          ([remap move-end-of-line] . mwim-end-of-code-or-line)))
 
-
-;; [beginend] Better M-< M-> for programming
-(use-package beginend
-  :ensure t
-  :hook (after-init . beginend-global-mode))
-
 ;; 结构化跳转
 (use-package imenu
   :ensure nil
@@ -48,6 +53,10 @@
 (use-package emt
   :if (eq system-type 'darwin)
   :vc (emt :url "https://github.com/roife/emt.git"
-           :rev "master")
+            :rev "master")
   :commands (emt-mode emt-forward-word emt-backward-word emt-download-module)
-  :hook (after-init . emt-mode))
+  :hook (after-init . emt-mode)
+  :config
+  (with-eval-after-load 'evil
+    (advice-add #'evil--forward-word-respect-categories
+                :around #'thy/emt-evil-forward-word)))

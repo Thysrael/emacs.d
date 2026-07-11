@@ -78,9 +78,6 @@
 ;; Keep temporary buffers in a reusable popup window.
 (use-package popper
   :ensure t
-  :bind
-  ("C-=" . popper-toggle-type) ; Convert a popup into a normal buffer.
-  ("C--"  . popper-cycle) ; Cycle popup buffers or show the popup window.
   :hook
   (emacs-startup . popper-mode)
   :custom
@@ -200,12 +197,12 @@
   (advice-add #'enable-theme :after #'thy/auto-dim-other-buffers-auto-set-face)
   )
 
-;; Highlight line at cursor after switching window
+;; Highlight jump targets and copied text briefly.
 (use-package pulse
   :ensure nil
   :custom-face
-  (pulse-highlight-start-face ((t (:inherit region :background unspecified))))
-  (pulse-highlight-face ((t (:inherit region :background unspecified :extend t))))
+  (pulse-highlight-start-face ((t (:inherit isearch :extend t))))
+  (pulse-highlight-face ((t (:inherit lazy-highlight :extend t))))
   :hook
   (((dumb-jump-after-jump imenu-after-jump) . thy/recenter-and-pulse)
    ((bookmark-after-jump magit-diff-visit-file next-error) . thy/recenter-and-pulse-line))
@@ -220,6 +217,13 @@
         (xref-pulse-momentarily)
       (thy/pulse-momentary-line)))
 
+  (defun thy/pulse-region (beg end &rest _)
+    "Pulse region between BEG and END."
+    (when (and (number-or-marker-p beg)
+               (number-or-marker-p end)
+               (/= beg end))
+      (pulse-momentary-highlight-region beg end)))
+
   (defun thy/recenter-and-pulse (&rest _)
     "Recenter and pulse the region or the current line."
     (recenter)
@@ -232,10 +236,10 @@
 
   (dolist (cmd '(recenter-top-bottom
                  other-window switch-to-buffer
-                  aw-select thy/ace-window-select-numbered toggle-window-split
-                  windmove-do-window-select
-                  pager-page-down pager-page-up
-                  treemacs-select-window))
+                 aw-select thy/ace-window-select-numbered toggle-window-split
+                 windmove-do-window-select
+                 pager-page-down pager-page-up
+                 treemacs-select-window))
     (advice-add cmd :after #'thy/pulse-momentary-line))
 
   (dolist (cmd '(pop-to-mark-command
@@ -246,6 +250,12 @@
   (dolist (cmd '(symbol-overlay-basic-jump
                  compile-goto-error))
     (advice-add cmd :after #'thy/recenter-and-pulse-line))
-  (setq pulse-delay 0.04
-        pulse-iterations 4)
+
+  ;; Flash copied regions for both Emacs copy commands and Evil yanks.
+  (advice-add #'kill-ring-save :after #'thy/pulse-region)
+
+  (with-eval-after-load 'evil
+    (advice-add #'evil-yank :after #'thy/pulse-region))
+  (setq pulse-delay 0.05
+        pulse-iterations 5)
   )

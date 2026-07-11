@@ -68,8 +68,6 @@
   ;; :custom-face
   ;; (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono"))))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
-  :bind
-  ("C-c l" . transient-hydra)
   :config
   (setq eglot-events-buffer-size 0
         eglot-connect-timeout 10

@@ -102,6 +102,11 @@
 (thy/setup-fonts)
 (add-hook 'server-after-make-frame-hook #'thy/setup-fonts)
 
+;; Scale fonts globally; Popper intentionally does not claim these keys.
+(global-set-key (kbd "C-=") #'global-text-scale-adjust)
+(global-set-key (kbd "C--") #'global-text-scale-adjust)
+(global-set-key (kbd "C-0") #'global-text-scale-adjust)
+
 (setq indicate-buffer-boundaries nil
       indicate-empty-lines nil)
 

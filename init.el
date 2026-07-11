@@ -33,7 +33,7 @@
     init-dired
     ;; 'init-control
     ;; 'init-note
-    ;; init-modal
+    init-modal
     ;; 'init-export
     ;; 'init-ai
     )
