@@ -81,7 +81,10 @@
   :hook
   (emacs-startup . popper-mode)
   :custom
-  (popper-window-height 18)
+  (popper-window-height
+   (lambda (window)
+     (let ((height (floor (* 0.45 (frame-height (window-frame window))))))
+       (fit-window-to-buffer window height height))))
   (popper-reference-buffers
    '("\\*Messages\\*"
      "Output\\*$" "\\*Pp Eval Output\\*$"

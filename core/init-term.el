@@ -96,7 +96,9 @@
     (thy/ghostel-bind-input-keys))
   (evil-define-key '(normal insert) evil-ghostel-mode-map
     (kbd "C-t") #'thy/ghostel-toggle-popup
-    (kbd "C-c") #'ghostel-send-C-c))
+    (kbd "C-c") #'ghostel-send-C-c)
+  (evil-define-key* 'insert evil-ghostel-mode-map
+    (kbd "C-SPC") #'evil-force-normal-state))
 
 (transient-define-prefix thy/ghostel-transient ()
   "Transient for Ghostel terminals."

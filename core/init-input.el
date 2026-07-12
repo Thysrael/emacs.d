@@ -67,7 +67,7 @@
   (add-hook 'macim-inline-deactivated-hook #'thy/macim-add-inline-space-cleanup)
   ;; Modal transitions are the reliable place to switch between ASCII and Rime.
   (with-eval-after-load 'evil
-    (add-hook 'evil-insert-state-exit-hook #'macim-select-ascii)
+    (add-hook 'evil-normal-state-entry-hook #'macim-select-ascii)
     (add-hook 'evil-insert-state-entry-hook #'macim-context-switch))
   (setq macim-ascii "com.apple.keylayout.ABC"
         macim-other "im.rime.inputmethod.Squirrel.Hans"))

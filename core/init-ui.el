@@ -100,9 +100,9 @@
   (when (display-graphic-p)
     (let ((font-size (thy/current-font-size)))
       (set-face-attribute 'default nil :font (font-spec :family "Maple Mono NF CN" :size font-size))
-      (set-fontset-font t 'han (font-spec :family "Maple Mono NF CN" :size font-size))
+      (set-fontset-font t 'han (font-spec :family "Maple Mono NF CN"))
       (set-fontset-font t 'han (font-spec :script 'han) nil 'append)
-      (set-fontset-font t 'cjk-misc (font-spec :family "Maple Mono NF CN" :size font-size))
+      (set-fontset-font t 'cjk-misc (font-spec :family "Maple Mono NF CN"))
       (set-fontset-font t '(#xe000 . #xf8ff) (font-spec :family "Symbols Nerd Font Mono") nil 'prepend)
       (set-fontset-font t '(#xf0000 . #xffffd) (font-spec :family "Symbols Nerd Font Mono") nil 'prepend))))
 
