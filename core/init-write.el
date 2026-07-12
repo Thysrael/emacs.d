@@ -98,6 +98,8 @@
 
 (use-package org
   :ensure nil
+  :init
+  (setq org-element-cache-persistent nil)
   :custom-face
   (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :family "Sarasa Mono SC"))))
   (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :family "Sarasa Mono SC"))))
@@ -107,8 +109,6 @@
   :custom
   (org-confirm-babel-evaluate nil)
   (org-edit-src-content-indentation 0)
-  (org-element-cache-persistent nil)
-  (org-element-use-cache nil)
   (org-ellipsis "¶")
   (org-emphasis-alist '(("*" org-bold)
                         ("/" italic)
