@@ -326,6 +326,9 @@ When INNER is non-nil, exclude the heading line."
   :config
   (evil-collection-init '(magit dired org-agenda))
 
+  (evil-define-key 'normal magit-mode-map
+    (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC")))
+
   ;; Preserve local additions after evil-collection installs its Dired bindings.
   (with-eval-after-load 'dired
     (evil-define-key 'normal dired-mode-map
