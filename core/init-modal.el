@@ -61,6 +61,70 @@
         (goto-char pos))
       (set-marker pos nil))))
 
+(defvar-local thy/evil-operator-line-number-overlays nil
+  "Overlays showing relative line numbers for a pending Evil operator.")
+
+(defun thy/evil-hide-operator-line-numbers ()
+  "Remove relative line number overlays for a pending Evil operator."
+  (mapc #'delete-overlay thy/evil-operator-line-number-overlays)
+  (setq thy/evil-operator-line-number-overlays nil))
+
+(defun thy/evil-show-operator-line-numbers ()
+  "Overlay visible line starts with relative numbers while awaiting a motion."
+  (thy/evil-hide-operator-line-numbers)
+  (let* ((current-line (line-number-at-pos))
+         (window (get-buffer-window (current-buffer)))
+         (start (if window (window-start window) (point-min)))
+         (end (if window
+                  (or (window-end window t) (point-max))
+                (point-max))))
+    (save-excursion
+      (goto-char start)
+      (let* ((line (line-number-at-pos (line-beginning-position)))
+             done)
+        (beginning-of-line)
+        (while (not done)
+          (let ((distance (abs (- line current-line))))
+            (unless (zerop distance)
+              (let* ((beg (point))
+                     (line-end (line-end-position))
+                     (label (propertize (number-to-string distance)
+                                        'face 'avy-lead-face))
+                     overlay)
+                (cond
+                 ((= beg (point-max))
+                  (setq overlay (make-overlay beg beg))
+                  (overlay-put overlay 'after-string label))
+                 ((= beg line-end)
+                  (setq overlay (make-overlay beg (1+ beg)))
+                  (overlay-put overlay 'display (concat label "\n")))
+                 (t
+                  (let ((covered-width 0)
+                        (label-width (string-width label))
+                        (overlay-end beg))
+                    (while (and (< covered-width label-width)
+                                (< overlay-end line-end))
+                      (let ((char (char-after overlay-end)))
+                        (setq covered-width
+                              (+ covered-width
+                                 (if (eq char ?\t)
+                                     (- tab-width (% covered-width tab-width))
+                                   (or (char-width char) 1)))))
+                      (setq overlay-end (1+ overlay-end)))
+                    (setq overlay (make-overlay beg overlay-end))
+                    (overlay-put overlay 'display
+                                 (concat label
+                                         (make-string
+                                          (max 0 (- covered-width label-width))
+                                          ?\s))))))
+                (when window
+                  (overlay-put overlay 'window window))
+                (overlay-put overlay 'priority 100)
+                (push overlay thy/evil-operator-line-number-overlays))))
+          (setq line (1+ line))
+          (setq done (or (>= (line-end-position) end)
+                         (not (zerop (forward-line 1))))))))))
+
 (defun thy/section-heading-regexp ()
   "Return a heading regexp for document section text objects."
   (cond
@@ -122,6 +186,8 @@ When INNER is non-nil, exclude the heading line."
 
   ;; Keep yanks visually stable; the pulse feedback already shows what was copied.
   (advice-add #'evil-yank :around #'thy/evil-yank-keep-point)
+  (add-hook 'evil-operator-state-entry-hook #'thy/evil-show-operator-line-numbers)
+  (add-hook 'evil-operator-state-exit-hook #'thy/evil-hide-operator-line-numbers)
 
   (evil-define-operator thy/evil-format (beg end type)
     "Format text from BEG to END using Evil motion TYPE."
@@ -190,6 +256,9 @@ When INNER is non-nil, exclude the heading line."
   (define-key evil-visual-state-map (kbd "v") #'er/expand-region)
   (define-key evil-visual-state-map (kbd "V") #'er/contract-region)
   (define-key evil-visual-state-map (kbd "=") #'thy/evil-format)
+
+  (define-key evil-motion-state-map (kbd "H") #'evil-beginning-of-line)
+  (define-key evil-motion-state-map (kbd "L") #'evil-end-of-line)
 
   ;; Use C-j as a direct C-x prefix inside Evil states; key-translation-map breaks C-x.
   (dolist (map (list evil-normal-state-map
