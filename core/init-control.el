@@ -132,7 +132,7 @@
   ("C-c a" . org-agenda)
   :custom
   (org-agenda-files
-   '("~/learn/org/agenda.org"))
+   '("~/Documents/org/agenda.org"))
   ;; 日视图还是周视图，通过 v-d, v-w, v-m, v-y 切换视图，默认周视图
   (org-agenda-span 'day)
   ;; q 退出时删除 agenda 缓冲区
@@ -157,13 +157,6 @@
   (org-deadline-warning-days 7)
   ;; clock report level 增加到 3 ，显示 tag ，隐藏 agenda 文件显示
   (org-agenda-clockreport-parameter-plist '(:link t :hidefiles t :maxlevel 3 :tags t))
-  ;; :custom-face
-  ;; (org-schedule ((t (:family "Sarasa Mono SC"))))
-  ;; (org-scheduled ((t (:family "Sarasa Mono SC"))))
-  ;; (org-scheduled-today ((t (:family "Sarasa Mono SC"))))
-  ;; (org-scheduled-previously ((t (:family "Sarasa Mono SC"))))
-  :hook
-  (org-agenda-mode . thy/set-buffer-face-mode-mono)
   :custom-face
   (org-scheduled-today ((t (:foreground "#f1fa8c"))))
   ;; (org-scheduled ((t (:foreground "#ffb86c"))))
@@ -268,10 +261,16 @@
                 parse-time-weekdays)))
 
 ;; 中国节日设置
+(defun thy/cal-china-x-setup ()
+  "Load and set up cal-china-x while suppressing its missing cookie warning."
+  (let ((warning-suppress-types
+         (cons '(files missing-lexbind-cookie) warning-suppress-types)))
+    (require 'cal-china-x)
+    (cal-china-x-setup)))
+
 (use-package cal-china-x
   :ensure t
-  :commands cal-china-x-setup
-  :hook (after-init . cal-china-x-setup)
+  :hook (after-init . thy/cal-china-x-setup)
   :custom-face
   (cal-china-x-important-holiday-face ((t (:background "#ff757f"))))
   (cal-china-x-general-holiday-face ((t (:background "#82aaff"))))

@@ -271,8 +271,10 @@ When INNER is non-nil, exclude the heading line."
 
   ;; Keep leader bindings explicit instead of pulling in a leader/general package.
   (evil-define-key 'normal 'global
+    (kbd "SPC a") #'org-agenda
+    (kbd "SPC A") #'calendar
     (kbd "SPC o") #'ace-window
-    (kbd "SPC O") #'org-capture
+    (kbd "SPC k") #'org-capture
     (kbd "SPC 9") #'ace-delete-window
     (kbd "SPC 8") #'ace-swap-window
     (kbd "SPC 0") #'delete-window
@@ -297,6 +299,17 @@ When INNER is non-nil, exclude the heading line."
     (kbd "SPC T") #'thy/window-transient
     (kbd "SPC v") #'magit
     (kbd "SPC w") #'save-buffer)
+
+  (with-eval-after-load 'org
+    (evil-define-key 'normal org-mode-map
+      (kbd "TAB") #'org-cycle
+      (kbd "<tab>") #'org-cycle
+      (kbd "SPC c w") #'thy/org-archive-subtree-hierarchical))
+
+  (with-eval-after-load 'markdown-ts-mode
+    (evil-define-key 'normal markdown-ts-mode-map
+      (kbd "TAB") #'markdown-ts-outline-cycle
+      (kbd "<tab>") #'markdown-ts-outline-cycle))
 
   (with-eval-after-load 'corfu
     (when (fboundp 'corfu-quit)

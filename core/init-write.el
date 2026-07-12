@@ -2,7 +2,7 @@
 
 (use-package visual-fill-column
   :ensure t
-  :hook ((markdown-mode markdown-ts-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . thy/center-text)
+  :hook ((markdown-mode markdown-ts-mode markdown-view-mode markdown-ts-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . thy/center-text)
   :preface
   (defun thy/center-text ()
     "Center text in the current buffer with `visual-fill-column'."
@@ -66,7 +66,7 @@
   (:map markdown-mode-map
         ("C-c C-v" . thy/toggle-markdown-mode)
         ("C-c C-b" . markdown-insert-bold))
-  :hook ((gfm-mode markdown-ts-mode) . thy/set-prose-line-spacing)
+  :hook ((gfm-mode markdown-ts-mode markdown-ts-view-mode) . thy/set-prose-line-spacing)
   :custom
   (markdown-asymmetric-header t)
   (markdown-enable-math t)
@@ -105,32 +105,149 @@
 
 (use-package markdown-ts-mode
   :ensure nil
+  :hook (markdown-ts-mode . thy/markdown-ts-appear-mode)
   :bind
   (:map markdown-ts-mode-map
-        ("C-c C-v" . thy/toggle-markdown-mode)
-        ("C-c C-b" . thy/markdown-ts-insert-bold))
+         ("C-c C-v" . thy/toggle-markdown-mode)
+         ("C-c C-b" . thy/markdown-ts-insert-bold)
+   :map markdown-ts-view-mode-map
+         ("C-c C-v" . thy/toggle-markdown-mode))
+  :preface
+  (defvar-local thy/markdown-ts-appear-region nil
+    "Markers delimiting the region whose Markdown markup is visible.")
+
+  (defvar-local thy/markdown-ts-appear-previous-hide-markup nil
+    "Value of `markdown-ts-hide-markup' before appear mode was enabled.")
+
+  (defun thy/markdown-ts-appear--restore ()
+    "Restore hidden markup in the previously revealed region."
+    (when-let* ((region thy/markdown-ts-appear-region)
+                (beg (marker-position (car region)))
+                (end (marker-position (cdr region))))
+      (font-lock-flush beg end)
+      (font-lock-ensure beg end)
+      (set-marker (car region) nil)
+      (set-marker (cdr region) nil)
+      (setq thy/markdown-ts-appear-region nil)))
+
+  (defun thy/markdown-ts-appear-bounds ()
+    "Return the line or fenced code block bounds at point."
+    (font-lock-ensure (line-beginning-position)
+                      (min (point-max) (line-beginning-position 2)))
+    (let ((overlay
+           (seq-find (lambda (candidate)
+                       (overlay-get candidate 'markdown-ts-code-block))
+                     (overlays-at (point)))))
+      (if overlay
+          (cons (save-excursion
+                  (goto-char (overlay-start overlay))
+                  (line-beginning-position 0))
+                (save-excursion
+                  (goto-char (overlay-end overlay))
+                  (min (point-max) (line-beginning-position 2))))
+        (cons (line-beginning-position)
+              (min (point-max) (line-beginning-position 2))))))
+
+  (defun thy/markdown-ts-appear-at-point ()
+    "Reveal hidden markup on the current line or fenced code block."
+    (pcase-let ((`(,beg . ,end) (thy/markdown-ts-appear-bounds)))
+      (unless (and thy/markdown-ts-appear-region
+                   (= beg (marker-position (car thy/markdown-ts-appear-region))))
+        (thy/markdown-ts-appear--restore)
+        (font-lock-ensure beg end)
+        (with-silent-modifications
+          (let ((pos beg))
+            (while (< pos end)
+              (let ((next (next-single-property-change
+                           pos 'invisible nil end)))
+                (when (eq (get-text-property pos 'invisible)
+                          'markdown-ts--markup)
+                  (remove-text-properties pos next '(invisible nil)))
+                (setq pos next)))))
+        (setq thy/markdown-ts-appear-region
+              (cons (copy-marker beg) (copy-marker end t))))))
+
+  (defun thy/markdown-ts-appear-start ()
+    "Reveal Markdown markup while Evil is in insert state."
+    (add-hook 'post-command-hook #'thy/markdown-ts-appear-at-point nil t)
+    (thy/markdown-ts-appear-at-point))
+
+  (defun thy/markdown-ts-appear-stop ()
+    "Hide Markdown markup after leaving Evil insert state."
+    (remove-hook 'post-command-hook #'thy/markdown-ts-appear-at-point t)
+    (when (and (fboundp 'markdown-ts-at-table-p)
+               (ignore-errors (markdown-ts-at-table-p nil t)))
+      (ignore-errors (markdown-ts-table-align-table)))
+    (thy/markdown-ts-appear--restore))
+
+  (defun thy/markdown-ts-keep-code-fence-visible (function node &rest arguments)
+    "Call FUNCTION without hiding fenced code block markup for NODE."
+    (let ((markdown-ts-hide-markup
+           (and markdown-ts-hide-markup
+                (not (member (treesit-node-type node)
+                             '("fenced_code_block_delimiter"
+                               "info_string"))))))
+      (apply function node arguments)))
+
+  (define-minor-mode thy/markdown-ts-appear-mode
+    "Reveal nearby Markdown markup while Evil is in insert state."
+    :lighter nil
+    (if thy/markdown-ts-appear-mode
+        (progn
+          (setq thy/markdown-ts-appear-previous-hide-markup
+                markdown-ts-hide-markup)
+          (unless markdown-ts-hide-markup
+            (markdown-ts-toggle-hide-markup))
+          (add-hook 'evil-insert-state-entry-hook
+                    #'thy/markdown-ts-appear-start nil t)
+          (add-hook 'evil-insert-state-exit-hook
+                    #'thy/markdown-ts-appear-stop nil t)
+          (when (eq (bound-and-true-p evil-state) 'insert)
+            (thy/markdown-ts-appear-start)))
+      (remove-hook 'evil-insert-state-entry-hook
+                   #'thy/markdown-ts-appear-start t)
+      (remove-hook 'evil-insert-state-exit-hook
+                   #'thy/markdown-ts-appear-stop t)
+      (thy/markdown-ts-appear-stop)
+      (unless thy/markdown-ts-appear-previous-hide-markup
+        (when markdown-ts-hide-markup
+          (markdown-ts-toggle-hide-markup)))))
   :custom-face
   (markdown-ts-heading-1 ((t (:inherit org-level-1))))
   (markdown-ts-heading-2 ((t (:inherit org-level-2))))
   (markdown-ts-heading-3 ((t (:inherit org-level-3))))
   (markdown-ts-heading-4 ((t (:inherit org-level-4))))
-  (markdown-ts-code-block ((t (:inherit org-code))))
-  (markdown-ts-code-span ((t (:inherit markdown-ts-code-block :extend nil))))
-  (markdown-ts-delimiter ((t (:foreground "#616161" :height 0.9))))
-  (markdown-ts-table ((t (:inherit org-table))))
+  (markdown-ts-code-block
+   ((((background light)) (:inherit fixed-pitch :background "#f3f3f3" :extend t))
+    (((background dark)) (:inherit fixed-pitch :background "#30323b" :extend t))))
+  (markdown-ts-code-block-markup-hidden
+   ((((background light)) (:inherit fixed-pitch :background "#f3f3f3" :extend t))
+    (((background dark)) (:inherit fixed-pitch :background "#30323b" :extend t))))
+  (markdown-ts-code-span
+   ((t (:inherit (fixed-pitch font-lock-constant-face) :extend nil))))
+  (markdown-ts-table
+   ((((background light)) (:inherit fixed-pitch :background "#f7f7f7" :extend t))
+    (((background dark)) (:inherit fixed-pitch :background "#2b2d35" :extend t))))
+  (markdown-ts-table-header
+   ((t (:inherit markdown-ts-table :weight bold))))
   (markdown-ts-table-cell ((t (:inherit markdown-ts-table))))
-  (markdown-ts-table-header ((t (:inherit markdown-ts-table)))))
+  (markdown-ts-table-delimiter-cell
+   ((t (:inherit (markdown-ts-table shadow)))))
+  :custom
+  (markdown-ts-table-auto-align t)
+  :config
+  (advice-add 'markdown-ts--fontify-delimiter :around
+              #'thy/markdown-ts-keep-code-fence-visible))
 
 (use-package org
   :ensure nil
   :init
   (setq org-element-cache-persistent nil)
   :custom-face
-  (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold :family "Sarasa Mono SC"))))
-  (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold :family "Sarasa Mono SC"))))
-  (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold :family "Sarasa Mono SC"))))
-  (org-level-4 ((t (:inherit outline-4 :extend nil :weight bold :family "Sarasa Mono SC"))))
-  (org-table ((t (:family "Sarasa Mono SC"))))
+  (org-level-1 ((t (:inherit outline-1 :extend nil :weight bold))))
+  (org-level-2 ((t (:inherit outline-2 :extend nil :weight bold))))
+  (org-level-3 ((t (:inherit outline-3 :extend nil :weight bold))))
+  (org-level-4 ((t (:inherit outline-4 :extend nil :weight bold))))
   :custom
   (org-confirm-babel-evaluate nil)
   (org-edit-src-content-indentation 0)
@@ -172,7 +289,6 @@
   :preface
   (defface org-bold
     '((t :foreground "#d2268b"
-         :family "Sarasa Mono SC"
          :weight bold))
     "Face for org-mode bold."
     :group 'org-faces)
@@ -195,6 +311,69 @@
             (":CREATED:" . "󱓞")))
     (setq prettify-symbols-unprettify-at-point nil)
     (prettify-symbols-mode))
+
+  (defun thy/org-heading-line ()
+    "Return the current Org heading line without text properties."
+    (buffer-substring-no-properties
+     (line-beginning-position) (line-end-position)))
+
+  (defun thy/org-child-headings ()
+    "Return the immediate child heading lines at point."
+    (save-excursion
+      (if (zerop (org-outline-level))
+          (outline-next-visible-heading 1)
+        (org-goto-first-child))
+      (let ((headings (list (thy/org-heading-line))))
+        (while (org-goto-sibling)
+          (push (thy/org-heading-line) headings))
+        headings)))
+
+  (defun thy/org-parent-headings ()
+    "Return the parent heading lines of the current subtree."
+    (let (headings)
+      (save-excursion
+        (while (org-up-heading-safe)
+          (push (thy/org-heading-line) headings)))
+      headings))
+
+  (defun thy/org-insert-heading-structure (headings)
+    "Insert Org HEADINGS in hierarchical order."
+    (dolist (heading headings)
+      (insert heading "\n")))
+
+  (defun thy/org-archive-subtree-hierarchical ()
+    "Archive the current subtree while preserving its parent hierarchy."
+    (interactive)
+    (require 'org-archive)
+    (let* ((parent-headings (thy/org-parent-headings))
+           (source-buffer (current-buffer))
+           (location (or (org-entry-get nil "ARCHIVE" 'inherit)
+                         org-archive-location))
+           (archive-file (car (org-archive--compute-location location)))
+           (archive-buffer
+            (if (string-empty-p archive-file)
+                source-buffer
+              (find-file-noselect archive-file))))
+      (org-cut-subtree)
+      (with-current-buffer archive-buffer
+        (org-mode)
+        (goto-char (point-min))
+        (while parent-headings
+          (if (member (car parent-headings) (thy/org-child-headings))
+              (progn
+                (search-forward (car parent-headings))
+                (setq parent-headings (cdr parent-headings)))
+            (goto-char (point-max))
+            (unless (bolp)
+              (insert "\n"))
+            (thy/org-insert-heading-structure parent-headings)
+            (setq parent-headings nil)))
+        (unless (bolp)
+          (insert "\n"))
+        (org-yank)
+        (unless (eq source-buffer archive-buffer)
+          (save-buffer)))
+      (message "Subtree archived in %s" (abbreviate-file-name archive-file))))
   :config
   (plist-put org-format-latex-options :scale 1.0)
   (push '("jupyter-python" . python) org-src-lang-modes))

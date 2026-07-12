@@ -21,10 +21,3 @@
 (use-package transient
   :ensure t
   :demand t)
-
-;; Use a dedicated mono font where mixed-width text matters.
-(defun thy/set-buffer-face-mode-mono ()
-  "Use Sarasa Mono SC in the current buffer."
-  (interactive)
-  (setq-local buffer-face-mode-face '(:family "Sarasa Mono SC"))
-  (buffer-face-mode))

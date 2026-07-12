@@ -31,7 +31,7 @@
     init-remote
     init-read
     init-dired
-    ;; 'init-control
+    init-control
     init-note
     ;; init-ai
     init-modal

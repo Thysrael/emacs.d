@@ -31,6 +31,37 @@
      (if links (hash-table-keys links) nil)
      "Forward links: ")))
 
+(defun thy/obsidian-expand-wikilink ()
+  "Select and insert an Obsidian link after typing `[['."
+  (when (and (bound-and-true-p obsidian-mode)
+             (eq last-command-event ?\[)
+             (looking-back "\\[\\[" (line-beginning-position)))
+    (delete-char -2)
+    (condition-case nil
+        (call-interactively #'obsidian-insert-wikilink)
+      (quit (insert "[[")))))
+
+(defun thy/obsidian-setup ()
+  "Configure Obsidian editing in the current buffer."
+  (add-hook 'post-self-insert-hook #'thy/obsidian-expand-wikilink nil t)
+  (when (derived-mode-p 'markdown-ts-mode)
+    (font-lock-add-keywords
+     nil '(("\\[\\[\\([^]\n]+\\)\\]\\]" 1 'link prepend)) 'append)
+    (font-lock-flush)))
+
+(defun thy/obsidian-return ()
+  "Follow an Obsidian link at point, or insert a Markdown newline."
+  (interactive)
+  (if (or (markdown-link-p)
+          (markdown-wiki-link-p)
+          (obsidian-backlink-p)
+          (thing-at-point-url-at-point))
+      (obsidian-follow-link-at-point)
+    (call-interactively
+     (if (derived-mode-p 'markdown-ts-mode)
+         #'markdown-ts-newline
+       #'markdown-enter-key))))
+
 (transient-define-prefix thy/note-transient ()
   "Transient for Obsidian note commands."
   [["Find"
@@ -60,10 +91,23 @@
 (use-package obsidian
   :ensure t
   :commands (obsidian-backlinks obsidian-file-metadata obsidian-file-p)
-  :hook ((markdown-mode markdown-ts-mode) . obsidian-enable-minor-mode)
+  :hook (((markdown-mode markdown-ts-mode markdown-ts-view-mode) . obsidian-enable-minor-mode)
+         (obsidian-mode . thy/obsidian-setup))
+  :bind
+  (:map obsidian-mode-map
+        ("RET" . thy/obsidian-return)
+        ("<return>" . thy/obsidian-return)
+        ("<kp-enter>" . thy/obsidian-return)
+        ("C-c C-o" . obsidian-follow-link-at-point))
   :init
   (setq elgrep-data-file nil)
   :custom
   (obsidian-directory "~/Documents/obsidian/content/")
   (obsidian-include-hidden-files nil)
-  (obsidian-use-update-timer nil))
+  (obsidian-use-update-timer nil)
+  :config
+  (with-eval-after-load 'evil
+    (evil-define-key 'normal obsidian-mode-map
+      (kbd "RET") #'thy/obsidian-return
+      (kbd "<return>") #'thy/obsidian-return
+      (kbd "<kp-enter>") #'thy/obsidian-return)))
