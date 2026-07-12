@@ -180,14 +180,29 @@
       (ignore-errors (markdown-ts-table-align-table)))
     (thy/markdown-ts-appear--restore))
 
-  (defun thy/markdown-ts-keep-code-fence-visible (function node &rest arguments)
-    "Call FUNCTION without hiding fenced code block markup for NODE."
-    (let ((markdown-ts-hide-markup
-           (and markdown-ts-hide-markup
-                (not (member (treesit-node-type node)
-                             '("fenced_code_block_delimiter"
-                               "info_string"))))))
-      (apply function node arguments)))
+  (defun thy/markdown-ts-fontify-delimiter (function node &rest arguments)
+    "Call FUNCTION while preserving code fences and styling quote markers."
+    (let* ((type (treesit-node-type node))
+           (hide-markup-p markdown-ts-hide-markup)
+           (quote-marker-p
+            (and (member type '("block_quote_marker" "block_continuation"))
+                 (eq (char-after (treesit-node-start node)) ?>)))
+           (markdown-ts-hide-markup
+            (and markdown-ts-hide-markup
+                 (not (or quote-marker-p
+                          (member type '("fenced_code_block_delimiter"
+                                         "info_string")))))))
+      (apply function node arguments)
+      (when (equal type "fenced_code_block_delimiter")
+        (let ((face (if hide-markup-p
+                        'markdown-ts-code-block-markup-hidden
+                      'markdown-ts-code-block)))
+          (save-excursion
+            (goto-char (treesit-node-start node))
+            (add-face-text-property
+             (line-beginning-position)
+             (min (point-max) (1+ (line-end-position)))
+             face t))))))
 
   (define-minor-mode thy/markdown-ts-appear-mode
     "Reveal nearby Markdown markup while Evil is in insert state."
@@ -237,7 +252,7 @@
   (markdown-ts-table-auto-align t)
   :config
   (advice-add 'markdown-ts--fontify-delimiter :around
-              #'thy/markdown-ts-keep-code-fence-visible))
+              #'thy/markdown-ts-fontify-delimiter))
 
 (use-package org
   :ensure nil

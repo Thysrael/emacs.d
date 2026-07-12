@@ -311,6 +311,10 @@ When INNER is non-nil, exclude the heading line."
       (kbd "TAB") #'markdown-ts-outline-cycle
       (kbd "<tab>") #'markdown-ts-outline-cycle))
 
+  (with-eval-after-load 'git-commit
+    (evil-define-key 'normal git-commit-mode-map
+      (kbd "SPC c c") #'with-editor-finish))
+
   (with-eval-after-load 'corfu
     (when (fboundp 'corfu-quit)
       (add-hook 'evil-insert-state-exit-hook #'corfu-quit))))
