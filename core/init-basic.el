@@ -42,7 +42,10 @@
     (cl-letf (((symbol-function #'sit-for) #'ignore))
       (apply fn args)))
   :bind
-  (("C-q" . thy/kill-region-or-line)
+  (("M-c" . thy/copy-region-or-line)
+   ("M-v" . yank)
+   ("M-z" . undo)
+   ("C-q" . thy/kill-region-or-line)
    ("C-w" . thy/copy-region-or-line)
    ("C-S-v" . yank)
    ("C-S-x" . thy/kill-region-or-line)

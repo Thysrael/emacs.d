@@ -64,7 +64,6 @@
   (markdown-table-face ((t (:inherit org-table))))
   :bind
   (:map markdown-mode-map
-        ("C-c C-v" . thy/toggle-markdown-mode)
         ("C-c C-b" . markdown-insert-bold))
   :hook ((gfm-mode markdown-ts-mode markdown-ts-view-mode) . thy/set-prose-line-spacing)
   :custom
@@ -108,10 +107,7 @@
   :hook (markdown-ts-mode . thy/markdown-ts-appear-mode)
   :bind
   (:map markdown-ts-mode-map
-         ("C-c C-v" . thy/toggle-markdown-mode)
-         ("C-c C-b" . thy/markdown-ts-insert-bold)
-   :map markdown-ts-view-mode-map
-         ("C-c C-v" . thy/toggle-markdown-mode))
+         ("C-c C-b" . thy/markdown-ts-insert-bold))
   :preface
   (defvar-local thy/markdown-ts-appear-region nil
     "Markers delimiting the region whose Markdown markup is visible.")

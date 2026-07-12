@@ -64,15 +64,19 @@
         (pop-to-buffer (completing-read "Ghostel: " names nil t)))))
 
   (defun thy/ghostel-bind-input-keys ()
-    "Bind popup toggle and interrupt keys in every Ghostel input map."
+    "Bind editing and control keys in every Ghostel input map."
     ;; Ghostel rebuilds some maps, so these keys must be re-applied.
     (dolist (map (list ghostel-char-mode-map
                        ghostel-line-mode-map
                        ghostel-semi-char-mode-map))
+      (define-key map (kbd "M-c") #'ghostel-readonly-copy)
+      (define-key map (kbd "M-v") #'ghostel-yank)
       (define-key map (kbd "C-t") #'thy/ghostel-toggle-popup)
       (define-key map (kbd "C-c") #'ghostel-send-C-c))
     (with-eval-after-load 'evil
       (evil-define-key '(normal insert) ghostel-mode-map
+        (kbd "M-c") #'ghostel-readonly-copy
+        (kbd "M-v") #'ghostel-yank
         (kbd "C-t") #'thy/ghostel-toggle-popup
         (kbd "C-c") #'ghostel-send-C-c)))
   :config
@@ -95,6 +99,8 @@
   (with-eval-after-load 'ghostel
     (thy/ghostel-bind-input-keys))
   (evil-define-key '(normal insert) evil-ghostel-mode-map
+    (kbd "M-c") #'ghostel-readonly-copy
+    (kbd "M-v") #'ghostel-yank
     (kbd "C-t") #'thy/ghostel-toggle-popup
     (kbd "C-c") #'ghostel-send-C-c)
   (evil-define-key* 'insert evil-ghostel-mode-map

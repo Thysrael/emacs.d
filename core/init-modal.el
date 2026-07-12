@@ -304,12 +304,24 @@ When INNER is non-nil, exclude the heading line."
     (evil-define-key 'normal org-mode-map
       (kbd "TAB") #'org-cycle
       (kbd "<tab>") #'org-cycle
-      (kbd "SPC c w") #'thy/org-archive-subtree-hierarchical))
+      (kbd "SPC c a") #'thy/org-archive-subtree-hierarchical
+      (kbd "SPC c s") #'org-schedule
+      (kbd "SPC c t") #'org-todo
+      (kbd "SPC c w") #'org-refile))
 
   (with-eval-after-load 'markdown-ts-mode
     (evil-define-key 'normal markdown-ts-mode-map
       (kbd "TAB") #'markdown-ts-outline-cycle
-      (kbd "<tab>") #'markdown-ts-outline-cycle))
+      (kbd "<tab>") #'markdown-ts-outline-cycle
+      (kbd "SPC c v") #'thy/toggle-markdown-mode)
+    (evil-define-key 'normal markdown-ts-view-mode-map
+      (kbd "SPC c v") #'thy/toggle-markdown-mode))
+
+  (with-eval-after-load 'markdown-mode
+    (evil-define-key 'normal markdown-mode-map
+      (kbd "SPC c v") #'thy/toggle-markdown-mode)
+    (evil-define-key 'normal gfm-view-mode-map
+      (kbd "SPC c v") #'thy/toggle-markdown-mode))
 
   (with-eval-after-load 'git-commit
     (evil-define-key 'normal git-commit-mode-map
