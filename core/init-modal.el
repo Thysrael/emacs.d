@@ -344,6 +344,8 @@ When INNER is non-nil, exclude the heading line."
   ;; Preserve local additions after evil-collection installs its Dired bindings.
   (with-eval-after-load 'dired
     (evil-define-key 'normal dired-mode-map
+      (kbd "h") #'dired-up-directory
+      (kbd "l") #'dired-find-file
       (kbd "Y") #'thy/dired-copy-files-to-clipboard
       (kbd "W") #'thy/dired-copy-files-to-clipboard)))
 

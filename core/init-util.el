@@ -8,8 +8,7 @@
   :ensure t
   :demand t
   :config
-  (setq custom-file (no-littering-expand-var-file-name "custom.el"))
-  (load custom-file 'noerror 'nomessage))
+  (setq custom-file (no-littering-expand-var-file-name "custom.el")))
 
 ;; Show color previews in markup and style buffers.
 (use-package rainbow-mode

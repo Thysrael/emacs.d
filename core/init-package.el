@@ -17,6 +17,10 @@
 
 (package-initialize)
 
+;; Reconstruct top-level packages when Customize state is intentionally not loaded.
+(unless package-selected-packages
+  (setq package-selected-packages (package--find-non-dependencies)))
+
 ;; Shallow clone package-vc repositories when a branch or tag is specified.
 (defun thy/vc-git-clone (fn remote directory rev)
   "Call FN to clone REMOTE into DIRECTORY, shallowly when REV permits it."

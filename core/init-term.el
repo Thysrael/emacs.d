@@ -106,6 +106,24 @@
   (evil-define-key* 'insert evil-ghostel-mode-map
     (kbd "C-SPC") #'evil-force-normal-state))
 
+(use-package ghostel-ime
+  :ensure nil
+  :after ghostel
+  :preface
+  (defun thy/ghostel-rime-composing-p (buffer)
+    "Return non-nil when Rime is composing in Ghostel BUFFER."
+    (with-current-buffer buffer
+      (and (boundp 'rime--preedit-overlay)
+           (overlayp rime--preedit-overlay)
+           (eq (overlay-buffer rime--preedit-overlay) buffer))))
+
+  (defun thy/ghostel-enable-ime-support ()
+    "Enable IME forwarding and Rime-safe redraws in Ghostel."
+    (ghostel-ime-mode 1)
+    (add-hook 'ghostel-inhibit-redraw-functions
+              #'thy/ghostel-rime-composing-p nil t))
+  :hook (ghostel-mode . thy/ghostel-enable-ime-support))
+
 (transient-define-prefix thy/ghostel-transient ()
   "Transient for Ghostel terminals."
   [("n" "New" thy/ghostel-new)
