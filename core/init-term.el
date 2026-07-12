@@ -6,7 +6,6 @@
   (("C-t" . thy/ghostel-toggle-popup)
    ("C-c t" . thy/ghostel-transient)
    :map ghostel-semi-char-mode-map
-   ("C-c" . ghostel-send-C-c)
    ("C-g" . keyboard-quit))
   :custom
   (ghostel-shell '("zsh"))
@@ -15,6 +14,8 @@
                           ("ssh" "zsh")
                           ("scp" "zsh")
                           ("docker" "/bin/sh")))
+  :custom-face
+  (ghostel-default ((t (:height 0.9))))
   :preface
   (defun thy/ghostel-visible-popup-window ()
     "Return the visible Ghostel popup window, if any."
@@ -62,20 +63,22 @@
             (pop-to-buffer name))
         (pop-to-buffer (completing-read "Ghostel: " names nil t)))))
 
-  (defun thy/ghostel-bind-toggle-key ()
-    "Make `C-t' toggle Ghostel in every Ghostel input keymap."
-    ;; Ghostel rebuilds some maps, so the toggle key must be re-applied.
+  (defun thy/ghostel-bind-input-keys ()
+    "Bind popup toggle and interrupt keys in every Ghostel input map."
+    ;; Ghostel rebuilds some maps, so these keys must be re-applied.
     (dolist (map (list ghostel-char-mode-map
                        ghostel-line-mode-map
                        ghostel-semi-char-mode-map))
-      (define-key map (kbd "C-t") #'thy/ghostel-toggle-popup))
+      (define-key map (kbd "C-t") #'thy/ghostel-toggle-popup)
+      (define-key map (kbd "C-c") #'ghostel-send-C-c))
     (with-eval-after-load 'evil
       (evil-define-key '(normal insert) ghostel-mode-map
-        (kbd "C-t") #'thy/ghostel-toggle-popup)))
+        (kbd "C-t") #'thy/ghostel-toggle-popup
+        (kbd "C-c") #'ghostel-send-C-c)))
   :config
-  (thy/ghostel-bind-toggle-key)
+  (thy/ghostel-bind-input-keys)
   (advice-add #'ghostel--rebuild-semi-char-keymap
-              :after (lambda (&rest _) (thy/ghostel-bind-toggle-key)))
+              :after (lambda (&rest _) (thy/ghostel-bind-input-keys)))
   (add-to-list 'project-switch-commands '(ghostel-project "Ghostel") t))
 
 (use-package evil-ghostel
@@ -90,9 +93,10 @@
   :hook (ghostel-mode . evil-ghostel-mode)
   :config
   (with-eval-after-load 'ghostel
-    (thy/ghostel-bind-toggle-key))
+    (thy/ghostel-bind-input-keys))
   (evil-define-key '(normal insert) evil-ghostel-mode-map
-    (kbd "C-t") #'thy/ghostel-toggle-popup))
+    (kbd "C-t") #'thy/ghostel-toggle-popup
+    (kbd "C-c") #'ghostel-send-C-c))
 
 (transient-define-prefix thy/ghostel-transient ()
   "Transient for Ghostel terminals."

@@ -86,7 +86,7 @@
 
 (defun thy/font-size ()
   "Return the preferred font size for the current machine."
-  (if (string-equal (system-name) "banana") 30 15))
+  (if (string-equal (system-name) "banana") 28 14))
 
 (defvar thy/font-size-adjustment 0
   "Runtime font size adjustment applied on top of `thy/font-size'.")
