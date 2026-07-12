@@ -71,9 +71,7 @@
   :config
   (setq eglot-events-buffer-size 0
         eglot-connect-timeout 10
-        eglot-autoshutdown t
-        ;; use global completion styles
-        completion-category-defaults nil)
+        eglot-autoshutdown t)
   ;; (transient-define-prefix transient-hydra ()
   ;;   ["Eglot Menu"
   ;;    [

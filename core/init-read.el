@@ -6,7 +6,7 @@
   (defun thy/toggle-eww ()
     "Switch to an existing EWW buffer, or prompt for a URL."
     (interactive)
-    (if-let ((buffer (get-buffer "*eww*")))
+    (if-let* ((buffer (get-buffer "*eww*")))
         (switch-to-buffer buffer)
       (eww (read-string "Enter URL: "))))
   :hook

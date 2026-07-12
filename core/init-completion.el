@@ -29,7 +29,7 @@
   ;; :straight (:files (:defaults "extensions/*.el"))
   :ensure t
   :hook
-  (((LaTeX-mode tex-mode prog-mode conf-mode yaml-mode shell-mode eshell-mode org-mode markdown-mode) . corfu-mode)
+   (((LaTeX-mode tex-mode prog-mode conf-mode yaml-mode shell-mode eshell-mode org-mode markdown-mode markdown-ts-mode) . corfu-mode)
    ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil)))
    )
   :bind
@@ -78,7 +78,7 @@
   :ensure t
   :hook
   ((prog-mode . thy/corfu-add-cape-prog-backends)
-   ((LaTeX-mode markdown-mode org-mode) . thy/corfu-add-cape-write-backends))
+    ((LaTeX-mode markdown-mode markdown-ts-mode org-mode) . thy/corfu-add-cape-write-backends))
   :config
   ;; 编程用到的 cape
   (defun thy/corfu-add-cape-prog-backends ()

@@ -11,7 +11,7 @@
             (setq gc-cons-percentage 0.1)))
 
 ;; Native compilation settings.
-(setq native-comp-deferred-compilation t)
+(setq native-comp-jit-compilation t)
 (setq native-comp-async-report-warnings-errors nil)
 
 (when (fboundp 'startup-redirect-eln-cache)

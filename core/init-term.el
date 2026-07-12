@@ -33,7 +33,7 @@
   (defun thy/ghostel-toggle-popup ()
     "Show the project Ghostel popup, or hide it when already visible."
     (interactive)
-    (if-let ((window (thy/ghostel-visible-popup-window)))
+    (if-let* ((window (thy/ghostel-visible-popup-window)))
         (delete-window window)
       (ghostel-project)))
 

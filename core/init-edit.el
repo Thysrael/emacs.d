@@ -1,14 +1,14 @@
 ;;; -*- lexical-binding: t -*-
 
-;;; 高亮设置
-;; 高亮当前行
+;;; Highlighting
+;; Highlight the current line.
 (use-package hl-line
   :ensure nil
   :hook ((prog-mode text-mode
                     yaml-mode conf-mode
                     special-mode org-agenda-mode dired-mode) . hl-line-mode))
 
-;; 显示配对扩号
+;; Highlight matching delimiters.
 (use-package paren
   :ensure nil
   :custom-face (show-paren-match ((t (:underline t))))
@@ -18,7 +18,7 @@
         show-paren-context-when-offscreen t)
   )
 
-;; 彩虹扩号
+;; Color nested delimiters.
 (use-package rainbow-delimiters
   :ensure t
   :hook ((prog-mode conf-mode yaml-mode) . rainbow-delimiters-mode)
@@ -26,7 +26,7 @@
   (setq rainbow-delimiters-max-face-count 5)
   )
 
-;; 高亮 TODO, BUG 等关键词
+;; Highlight TODO, BUG, and similar keywords.
 (use-package hl-todo
   :ensure t
   :custom-face
@@ -38,6 +38,7 @@
         hl-todo-highlight-punctuation ":")
 
   (defun thy/hl-todo-add-keywords (keys color)
+    "Add or update hl-todo KEYS using COLOR."
     (dolist (keyword keys)
       (if-let* ((item (assoc keyword hl-todo-keyword-faces)))
           (setf (cdr item) color)
@@ -45,13 +46,14 @@
 
   ;; HACK: `hl-todo' won't update face when changing theme, so we must add a hook for it
   (defun thy/hl-update-keyword-faces (&rest _)
+    "Refresh custom hl-todo faces for the current theme."
     (thy/hl-todo-add-keywords '("BUG" "DEFECT" "ISSUE") (face-foreground 'error))
     (thy/hl-todo-add-keywords '("WORKAROUND" "HACK" "TRICK") (face-foreground 'warning)))
   (thy/hl-update-keyword-faces)
   (advice-add #'enable-theme :after #'thy/hl-update-keyword-faces)
   )
 
-;; 缩进虚线
+;; Display indentation guides.
 (use-package indent-bars
   ;; :straight (indent-bars :type git :host github :repo "jdtsmith/indent-bars")
   :ensure t
@@ -63,13 +65,14 @@
   ;; HACK: `indent-bars' calculates its faces from the current theme,
   ;; but is unable to do so properly in terminal Emacs
   (defun thy/indent-bars-auto-set-faces (&rest _)
+    "Refresh indent-bars faces after a theme change."
     (when indent-bars-mode
       (indent-bars-reset)))
   (advice-add #'enable-theme :after #'thy/indent-bars-auto-set-faces)
   )
 
-;;; 重构设置
-;; 将需要高亮的符号进行高亮，当光标在 overlay 区域时，会触发新的快捷键用于操作符号
+;;; Refactoring
+;; Highlight symbols and expose symbol operations at highlighted occurrences.
 (use-package symbol-overlay
   :ensure t
   :bind
@@ -90,7 +93,7 @@
   (((prog-mode yaml-mode) . symbol-overlay-mode))
   )
 
-;; 撤销历史, 使用 a / e / f / b 移动
+;; Visualize undo history; navigate with a, e, f, and b.
 (use-package vundo
   :ensure t
   :config
@@ -99,8 +102,9 @@
   ("C-c u" . vundo)
   )
 
-;; 智能注释
+;; Context-aware commenting.
 (defun thy/smart-comment (&optional arg)
+  "Comment the current line or invoke `comment-dwim' with ARG."
   (interactive "*P")
   (comment-normalize-vars)
   (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
@@ -109,11 +113,11 @@
 (global-set-key (kbd "C-/") #'thy/smart-comment)
 (setq comment-empty-lines t) ; comment over empty lines
 
-;; 自动格式化
+;; Format code automatically.
 (defun thy/smart-format ()
   "Indent the active region if selected, otherwise format the buffer using eglot if available."
   (interactive)
-  (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p)) ; 判断 eglot
+  (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p))
       (if (use-region-p)
           (eglot-format (region-beginning) (region-end))
         (eglot-format-buffer))
@@ -123,13 +127,13 @@
   (message "formatting done."))
 (global-set-key (kbd "C-c f") #'thy/smart-format)
 
-;;; 结构化编辑
-;; 括号平衡
+;;; Structured editing
+;; Keep delimiters balanced.
 (use-package elec-pair
   :ensure nil
   :hook
   ((prog-mode text-mode) . electric-pair-mode)
-  ;; 禁用 org-mode 的左尖括号
+  ;; Do not treat the opening angle bracket as a pair in Org buffers.
   ;; :config
   ;; (setq electric-pair-inhibit-predicate
   ;;       `(lambda (c)
@@ -142,13 +146,13 @@
   ;;   		                 (if (char-equal c ?\<) t (,electric-pair-inhibit-predicate c))))))
   )
 
-;; 空格处理
+;; Whitespace handling.
 (use-package ws-butler
   :ensure t
-  :hook ((prog-mode markdown-mode) . ws-butler-mode)) ; Remove trailing whitespace with lines touched
+  :hook ((prog-mode markdown-mode markdown-ts-mode) . ws-butler-mode)) ; Remove trailing whitespace with lines touched
 (setq backward-delete-char-untabify-method 'hungry) ; 一次删除多个空格
 
-;; 处理类似驼峰命名法的情况，此时会将一个一个驼峰视为一个单词
+;; Treat each component of a camelCase identifier as a word.
 (use-package subword
   :ensure nil
   :hook (((prog-mode minibuffer-setup) . subword-mode)))
@@ -158,37 +162,38 @@
   :hook ((prog-mode conf-mode yaml-mode TeX-mode nxml-mode) . hs-minor-mode)
   :bind
   ("C-o" . hs-toggle-hiding)
-  ("C-M-o" . hs-toggle-all)
+  ("C-M-o" . thy/hs-toggle-all)
   :config
   ;; More functions
   ;; @see https://karthinks.com/software/simple-folding-with-hideshow/
-  (defun hs-cycle (&optional level)
+  (defun thy/hs-cycle (&optional level)
+    "Cycle visibility at point or hide LEVEL levels of blocks."
     (interactive "p")
     (let (message-log-max
           (inhibit-message t))
       (if (= level 1)
           (pcase last-command
-            ('hs-cycle
+            ('thy/hs-cycle
              (hs-hide-level 1)
-             (setq this-command 'hs-cycle-children))
-            ('hs-cycle-children
+             (setq this-command 'thy/hs-cycle-children))
+            ('thy/hs-cycle-children
              (save-excursion (hs-show-block))
-             (setq this-command 'hs-cycle-subtree))
-            ('hs-cycle-subtree
+             (setq this-command 'thy/hs-cycle-subtree))
+            ('thy/hs-cycle-subtree
              (hs-hide-block))
             (_
              (if (not (hs-already-hidden-p))
-                 (hs-hide-block)
+                (hs-hide-block)
                (hs-hide-level 1)
-               (setq this-command 'hs-cycle-children))))
+               (setq this-command 'thy/hs-cycle-children))))
         (hs-hide-level level)
         (setq this-command 'hs-hide-level))))
 
-  (defun hs-toggle-all ()
+  (defun thy/hs-toggle-all ()
     "Toggle hide/show all."
     (interactive)
     (pcase last-command
-      ('hs-toggle-all
+      ('thy/hs-toggle-all
        (save-excursion (hs-show-all))
        (setq this-command 'hs-global-show))
       (_ (hs-hide-all))))
@@ -207,13 +212,16 @@
 
   ;; hide-show by indentation
   (defun thy/fold--hideshow-empty-line-p (_)
+    "Return non-nil when the current line is empty."
     (string= "" (string-trim (thing-at-point 'line 'no-props))))
 
   (defun thy/fold--hideshow-geq-or-empty-p (base-indent)
+    "Return non-nil for empty lines or indentation at least BASE-INDENT."
     (or (thy/fold--hideshow-empty-line-p base-indent)
         (>= (current-indentation) base-indent)))
 
   (defun thy/fold--hideshow-g-or-empty-p (base-indent)
+    "Return non-nil for empty lines or indentation greater than BASE-INDENT."
     (or (thy/fold--hideshow-empty-line-p base-indent)
         (> (current-indentation) base-indent)))
 
@@ -223,7 +231,7 @@ fails. If before is nil, it will return the first line where predicate fails, ot
 the last line where predicate holds."
     (save-excursion
       (goto-char start)
-      (goto-char (point-at-bol))
+      (goto-char (line-beginning-position))
       (let ((bnd (if (> 0 direction)
                      (point-min)
                    (point-max)))
@@ -231,9 +239,9 @@ the last line where predicate holds."
         (when skip (forward-line direction))
         (cl-loop while (and (/= (point) bnd) (funcall predicate base-indent))
                  do (progn
-                      (when before (setq pt (point-at-bol)))
-                      (forward-line direction)
-                      (unless before (setq pt (point-at-bol)))))
+                       (when before (setq pt (line-beginning-position)))
+                       (forward-line direction)
+                       (unless before (setq pt (line-beginning-position)))))
         pt)))
 
   (defun thy/fold-hideshow-indent-range (&optional point)
@@ -253,6 +261,7 @@ begin and end of the block surrounding point."
         (list begin end base-indent))))
 
   (defun thy/fold-hideshow-forward-block-by-indent-fn (_arg)
+    "Move forward over one indentation-based block for hideshow."
     (let ((start (current-indentation)))
       (forward-line)
       (unless (= start (current-indentation))

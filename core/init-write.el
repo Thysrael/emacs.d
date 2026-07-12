@@ -2,13 +2,13 @@
 
 (use-package visual-fill-column
   :ensure t
-  :hook ((markdown-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . thy/center-text)
+  :hook ((markdown-mode markdown-ts-mode markdown-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . thy/center-text)
   :preface
   (defun thy/center-text ()
     "Center text in the current buffer with `visual-fill-column'."
     (interactive)
-    (visual-fill-column-mode)
-    (setq visual-fill-column-center-text t)))
+    (setq visual-fill-column-center-text t)
+    (visual-fill-column-mode)))
 
 (use-package pangu-spacing
   :ensure t
@@ -39,7 +39,7 @@
                     ("^\\\\begin{[^}]+}" "^\\\\end{[^}]+}")))
       (add-to-list 'ispell-skip-region-alist pair)))
   :hook ((org-mode . thy/org-ispell-skip-region-alist)
-         (markdown-mode . thy/markdown-ispell-skip-region-alist))
+          ((markdown-mode markdown-ts-mode) . thy/markdown-ispell-skip-region-alist))
   :custom
   (ispell-dictionary "en_US")
   (ispell-extra-args '("--sug-mode=ultra" "--run-together"))
@@ -66,7 +66,7 @@
   (:map markdown-mode-map
         ("C-c C-v" . thy/toggle-markdown-mode)
         ("C-c C-b" . markdown-insert-bold))
-  :hook (gfm-mode . thy/set-prose-line-spacing)
+  :hook ((gfm-mode markdown-ts-mode) . thy/set-prose-line-spacing)
   :custom
   (markdown-asymmetric-header t)
   (markdown-enable-math t)
@@ -81,11 +81,18 @@
     (setq line-spacing 0.25))
 
   (defun thy/toggle-markdown-mode ()
-    "Toggle between `gfm-mode' and `gfm-view-mode'."
+    "Toggle between the active Markdown editing and viewing modes."
     (interactive)
-    (if (eq major-mode 'gfm-mode)
-        (gfm-view-mode)
-      (gfm-mode)))
+    (pcase major-mode
+      ('markdown-ts-mode (markdown-ts-view-mode))
+      ('markdown-ts-view-mode (markdown-ts-mode))
+      ('gfm-mode (gfm-view-mode))
+      (_ (gfm-mode))))
+
+  (defun thy/markdown-ts-insert-bold ()
+    "Insert or apply bold emphasis in `markdown-ts-mode'."
+    (interactive)
+    (markdown-ts-emphasize ?b))
   :config
   (dolist (mapping '(("verilog" . verilog-mode)
                      ("c" . c-mode)
@@ -95,6 +102,24 @@
                      ("shell" . shell-script-mode)
                      ("bash" . shell-script-mode)))
     (add-to-list 'markdown-code-lang-modes mapping)))
+
+(use-package markdown-ts-mode
+  :ensure nil
+  :bind
+  (:map markdown-ts-mode-map
+        ("C-c C-v" . thy/toggle-markdown-mode)
+        ("C-c C-b" . thy/markdown-ts-insert-bold))
+  :custom-face
+  (markdown-ts-heading-1 ((t (:inherit org-level-1))))
+  (markdown-ts-heading-2 ((t (:inherit org-level-2))))
+  (markdown-ts-heading-3 ((t (:inherit org-level-3))))
+  (markdown-ts-heading-4 ((t (:inherit org-level-4))))
+  (markdown-ts-code-block ((t (:inherit org-code))))
+  (markdown-ts-code-span ((t (:inherit markdown-ts-code-block :extend nil))))
+  (markdown-ts-delimiter ((t (:foreground "#616161" :height 0.9))))
+  (markdown-ts-table ((t (:inherit org-table))))
+  (markdown-ts-table-cell ((t (:inherit markdown-ts-table))))
+  (markdown-ts-table-header ((t (:inherit markdown-ts-table)))))
 
 (use-package org
   :ensure nil

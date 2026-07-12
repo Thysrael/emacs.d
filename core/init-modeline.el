@@ -11,6 +11,7 @@
 (defconst +mode-line-window-width-limit 90)
 (defvar-local +mode-line-enough-width-p nil)
 (defun +mode-line-window-size-change-function (&rest _)
+  "Update whether the selected window is wide enough for full details."
   (setq +mode-line-enough-width-p
         (> (window-total-width) +mode-line-window-width-limit)))
 (dolist (hook '(after-revert-hook buffer-list-update-hook window-size-change-functions))
@@ -189,6 +190,7 @@
 ;;; [vcs-info] cache for vcs
 (defvar-local +mode-line-vcs-info nil)
 (defun +mode-line-update-vcs-info ()
+  "Cache version-control information for the current buffer."
   (when (and vc-mode buffer-file-name)
     (setq +mode-line-vcs-info
           (let* ((backend (vc-backend buffer-file-name))
@@ -224,6 +226,7 @@
 
 
 (defun +nerd-icons-icon-for-buffer ()
+  "Return a Nerd Font icon for the current buffer."
   (interactive)
   (if (or (eq major-mode 'eaf-mode))
       ;; WORKAROUND: eaf don't have `buffer-file-name`

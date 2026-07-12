@@ -1,12 +1,12 @@
 ;;; -*- lexical-binding: t -*-
 
-;; 改变光标移动绑定，使其更加方便
-(global-set-key (kbd "C-f") '+smart-forward)
+;; Use a context-aware forward motion for convenient cursor movement.
+(global-set-key (kbd "C-f") #'thy/smart-forward)
 (defun thy/forward-word (&optional arg)
-  "Move forward by word using the active `forward-word' remapping."
+  "Move forward ARG words using the active `forward-word' remapping."
   (funcall (or (command-remapping 'forward-word) #'forward-word) (or arg 1)))
 
-(defun +smart-forward ()
+(defun thy/smart-forward ()
   "Move cursor based on its position in a word."
   (interactive)
   (cond
@@ -15,7 +15,7 @@
    (t (forward-char))))
 
 (defun thy/emt-evil-forward-word (orig-fun count)
-  "Use `emt-forward-word' for Evil word motions when `emt-mode' is active."
+  "Call ORIG-FUN with COUNT unless active EMT word motion succeeds."
   (if (and (bound-and-true-p emt-mode)
            (fboundp 'emt-forward-word))
       (condition-case nil
@@ -44,7 +44,7 @@
 ;; 结构化跳转
 (use-package imenu
   :ensure nil
-  :hook ((prog-mode conf-mode yaml-mode markdown-mode org-mode) . imenu-add-menubar-index)
+  :hook ((prog-mode conf-mode yaml-mode markdown-mode markdown-ts-mode org-mode) . imenu-add-menubar-index)
   :config
   (setq imenu-auto-rescan t)
   )

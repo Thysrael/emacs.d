@@ -11,7 +11,7 @@
         workspace)))
 
 (defun thy/agent-shell-cache-dir (&rest components)
-  "Return an Agent Shell cache directory under `no-littering'."
+  "Return an Agent Shell cache directory built from COMPONENTS under `no-littering'."
   (let ((dir (apply #'file-name-concat
                     (no-littering-expand-var-file-name "agent-shell/cache/")
                     components)))

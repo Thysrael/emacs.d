@@ -1,6 +1,8 @@
-;; 配置 eshell
+;;; -*- lexical-binding: t; -*-
+
+;; Configure Eshell.
 (use-package esh-mode
-  :straight nil
+  :ensure nil
   :functions eshell/alias
   :custom-face
   ;; 避免路径下划线
@@ -106,13 +108,13 @@
 
 ;; 支持未完成命令和非法命令高亮
 (use-package eshell-syntax-highlighting
-  :straight t
+  :ensure t
   :after eshell
   :hook (eshell-mode . eshell-syntax-highlighting-mode))
 
 ;; 自动提示
 (use-package capf-autosuggest
-  :straight t
+  :ensure t
   :after eshell
   :hook
   (eshell-mode . capf-autosuggest-mode)
@@ -123,13 +125,13 @@
 
 ;; 输入 z 命令后会弹出 minibuffer 选择 path
 (use-package eshell-z
-  :straight t
+  :ensure t
   :after eshell
   :commands (eshell/z))
 
 ;; promter 自定义
 (use-package eshell-git-prompt
-  :straight t
+  :ensure t
   :after eshell
   :init
   (require 'eshell-git-prompt)

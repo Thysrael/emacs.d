@@ -177,7 +177,8 @@ When INNER is non-nil, exclude the heading line."
   (setq evil-undo-system 'undo-redo)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-integration t)
-  (setq evil-want-minibuffer nil)
+  (setq evil-want-keybinding nil)
+  ;; Evil 1.15 declares this variable without giving it an initial value.
   (setq evil-mode-buffers nil)
   :config
   (setq evil-symbol-word-search t)
@@ -241,14 +242,14 @@ When INNER is non-nil, exclude the heading line."
   (define-key evil-normal-state-map (kbd "M") #'symbol-overlay-remove-all)
   (define-key evil-normal-state-map (kbd "U") #'vundo)
   (define-key evil-normal-state-map (kbd "z") #'hs-toggle-hiding)
-  (define-key evil-normal-state-map (kbd "Z") #'hs-toggle-all)
+  (define-key evil-normal-state-map (kbd "Z") #'thy/hs-toggle-all)
 
   (define-key evil-insert-state-map (kbd "C-n") #'next-line)
   (define-key evil-insert-state-map (kbd "C-p") #'previous-line)
   (define-key evil-insert-state-map (kbd "C-s") #'consult-line)
   (define-key evil-insert-state-map (kbd "C-a") #'mwim-beginning-of-code-or-line)
   (define-key evil-insert-state-map (kbd "C-e") #'mwim-end-of-code-or-line)
-  (define-key evil-insert-state-map (kbd "C-f") #'+smart-forward)
+  (define-key evil-insert-state-map (kbd "C-f") #'thy/smart-forward)
   (define-key evil-insert-state-map (kbd "C-b") #'backward-char)
   (define-key evil-insert-state-map (kbd "M-<") #'beginning-of-buffer)
   (define-key evil-insert-state-map (kbd "M->") #'end-of-buffer)
@@ -286,6 +287,8 @@ When INNER is non-nil, exclude the heading line."
     (kbd "SPC f") #'thy/find-file
     (kbd "SPC g") #'global-blamer-mode
     (kbd "SPC i") #'consult-imenu
+    (kbd "SPC n") #'consult-notes
+    (kbd "SPC N") #'thy/note-transient
     (kbd "SPC p") #'consult-fd
     (kbd "SPC r") #'consult-recent-file
     (kbd "SPC R") #'thy/brr-transient
@@ -297,29 +300,20 @@ When INNER is non-nil, exclude the heading line."
 
   (with-eval-after-load 'corfu
     (when (fboundp 'corfu-quit)
-      (add-hook 'evil-insert-state-exit-hook #'corfu-quit)))
+      (add-hook 'evil-insert-state-exit-hook #'corfu-quit))))
 
-  ;; Special buffers get small manual bindings instead of broad evil-collection maps.
+(use-package evil-collection
+  :ensure t
+  :after evil
+  :demand t
+  :config
+  (evil-collection-init '(magit dired org-agenda))
+
+  ;; Preserve local additions after evil-collection installs its Dired bindings.
   (with-eval-after-load 'dired
     (evil-define-key 'normal dired-mode-map
-      (kbd "j") #'dired-next-line
-      (kbd "k") #'dired-previous-line
-      (kbd "h") #'dired-up-directory
-      (kbd "l") #'dired-find-file
-      (kbd "r") #'dired-do-rename
       (kbd "Y") #'thy/dired-copy-files-to-clipboard
-      (kbd "W") #'thy/dired-copy-files-to-clipboard
-      (kbd "q") #'quit-window))
-
-  (with-eval-after-load 'magit
-    (evil-define-key 'normal magit-mode-map
-      (kbd "j") #'magit-section-forward
-      (kbd "k") #'magit-section-backward))
-
-  (with-eval-after-load 'org-agenda
-    (evil-define-key 'normal org-agenda-mode-map
-      (kbd "j") #'org-agenda-next-line
-      (kbd "k") #'org-agenda-previous-line)))
+      (kbd "W") #'thy/dired-copy-files-to-clipboard)))
 
 (use-package evil-commentary
   :ensure t

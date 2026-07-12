@@ -23,7 +23,7 @@
   (dired-vc-rename-file t)
   (dired-clean-confirm-killing-deleted-buffers nil)
   :config
-  (when-let ((gls (executable-find "gls")))
+  (when-let* ((gls (executable-find "gls")))
     (setq insert-directory-program gls
           dired-use-ls-dired t))
   (setq delete-by-moving-to-trash t)
@@ -86,7 +86,7 @@ end run
       (message "Copied %d file%s" (length files) (if (= (length files) 1) "" "s"))))
   )
 
-;; 使用 `E` 可以用外部命令打开文件
+;; Use E to open files with an external command.
 (use-package dirvish
   :ensure t
   ;; :vc (:url "https://github.com/alexluigit/dirvish" :lisp-dir "extensions/")
@@ -108,25 +108,24 @@ end run
      ("r" "~/roam/" "Roam")
      ("l" "~/learn/" "Learn")
      ))
-  ;; dirvish 底栏
+  ;; Dirvish mode line.
   (dirvish-mode-line-format
    '(:left (sort omit symlink) :right (file-group ":" file-user " " file-time index)))
   (dirvish-side-mode-line-format
    '(:right (yank file-size index)))
-  ;; dirvish 条目
-  ;; collapse 是对于目录的折叠
+  ;; Dirvish file attributes; collapse folds directory contents.
   (dirvish-attributes
    '(vc-state nerd-icons collapse git-msg file-size))
-  ;; dirvish 侧边栏条目
+  ;; Dirvish side-window attributes.
   (dirvish-side-attributes
    '(vc-state nerd-icons collapse))
-  ;; dirvish 顶栏
+  ;; Dirvish header line.
   (dirvish-header-line-format
    '(:left (path) :right (omit yank vc-info free-space)))
   (dirvish-path-separators '("~" "/" "/"))
   (dirvish-window-fringe 4)
   (dirvish-hide-cursor t) ; 在 wired 下不方便
-  ;; 将 pdf 预览换成 pdf-preface
+  ;; Use the PDF preview dispatcher.
   (dirvish-preview-dispatchers
    '(video image gif audio epub archive font pdf))
   ;; M-e
@@ -147,7 +146,7 @@ end run
    ("<f6>" . dirvish-side)
    :map dirvish-mode-map          ; Dirvish inherits `dired-mode-map'
    ("?"   . dirvish-dispatch)     ; contains most of sub-menus in dirvish extensions
-   ;; 导航
+   ;; Navigation.
    ("a"   . dirvish-quick-access)
    ("r"   . dired-do-rename)
    ("M-f" . dirvish-history-go-forward)
@@ -161,10 +160,10 @@ end run
    ("N"   . dirvish-narrow)
    ("<"   . dired-up-directory)
    (">"   . dired-find-file)
-   ;; 快速排序
+   ;; Quick sorting.
    ("s"   . consult-line)
    ("S"   . dirvish-quicksort)
-   ;; 快速标记
+   ;; Quick marking.
    ("M" . dirvish-mark-menu)
    ;; ("W" . dirvish-copy-file-path)
    ("v"   . dirvish-vc-menu)      ; remapped `dired-view-file'
@@ -188,7 +187,7 @@ end run
   )
 
 ;; [dired-x] Extra Dired functionality
-;; 主要使用忽略（omit）功能
+;; Primarily configure Dired's omit feature.
 (use-package dired-x
   :ensure nil
   :bind (:map dired-mode-map

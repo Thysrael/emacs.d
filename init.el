@@ -32,7 +32,7 @@
     init-read
     init-dired
     ;; 'init-control
-    ;; 'init-note
+    init-note
     ;; init-ai
     init-modal
     ;; 'init-export

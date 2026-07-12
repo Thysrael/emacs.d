@@ -28,10 +28,10 @@
                               (car args))
                       (cdr args))))
   (advice-add #'org-olpath-completing-read :around
-              (lambda (&rest args)
+              (lambda (orig-fun &rest args)
                 (minibuffer-with-setup-hook
                     (lambda () (setq-local completion-styles '(basic)))
-                  (apply args))))
+                  (apply orig-fun args))))
   )
 
 ;; Directory-aware navigation and deletion while completing file names.
