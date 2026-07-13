@@ -27,16 +27,6 @@
     (setq insert-directory-program gls
           dired-use-ls-dired t))
   (setq delete-by-moving-to-trash t)
-  (defun thy/find-file (filename &optional wildcards)
-    "Visit FILENAME, opening directories with full-frame Dirvish."
-    (interactive
-     (find-file-read-args "Find file: " (confirm-nonexistent-file-or-buffer)))
-    (if (file-directory-p filename)
-        (dirvish filename)
-      (find-file filename wildcards)))
-
-  (global-set-key (kbd "C-x C-f") #'thy/find-file)
-
   (defun thy/dired-copy-files-to-clipboard ()
     "Copy marked Dired files to the system clipboard as file objects."
     (interactive)
@@ -125,6 +115,8 @@ end run
   (dirvish-path-separators '("~" "/" "/"))
   (dirvish-window-fringe 4)
   (dirvish-hide-cursor t) ; 在 wired 下不方便
+  ;; Avoid the `all' function collision in Dirvish 2.3.0 on newer Emacs.
+  (dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all)))
   ;; Use the PDF preview dispatcher.
   (dirvish-preview-dispatchers
    '(video image gif audio epub archive font pdf))
@@ -154,8 +146,10 @@ end run
    ;; fd
    ("f"   . dirvish-fd)
    ("F"   . dirvish-fd-switches)
-   ("y"   . dirvish-yank-menu)
-   ("Y"   . thy/dired-copy-files-to-clipboard)
+    ("y"   . dired-do-copy)
+    ("p"   . dirvish-yank)
+    ("P"   . dirvish-yank-menu)
+    ("Y"   . thy/dired-copy-files-to-clipboard)
    ("W"   . thy/dired-copy-files-to-clipboard)
    ("N"   . dirvish-narrow)
    ("<"   . dired-up-directory)

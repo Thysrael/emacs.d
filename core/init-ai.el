@@ -1,7 +1,5 @@
 ;;; -*- lexical-binding: t -*-
 
-(autoload 'agent-shell-openai-start-codex "agent-shell-openai" nil t)
-
 (defun thy/agent-shell-cwd ()
   "Return a project root for Agent Shell, or a private fallback workspace."
   (or (when-let* ((project (project-current)))
@@ -18,23 +16,9 @@
     (make-directory dir t)
     dir))
 
-(defun thy/gptel-horizon-api-key ()
-  "Return the Horizon OpenAI-compatible API key from the environment."
-  (or (getenv "OPENAI_HORIZON_API_KEY")
-      (user-error "OPENAI_HORIZON_API_KEY is not set")))
-
-(use-package gptel
-  :ensure t
-  :commands (gptel gptel-send gptel-menu)
-  :config
-  ;; Keep credentials out of this config; export OPENAI_HORIZON_API_KEY instead.
-  (require 'gptel-openai-responses)
-  (setq gptel-model 'gpt-5.4-mini)
-  (setq gptel-backend
-        (gptel-make-openai-responses "OpenAI"
-          :host "api.horizon1123.top"
-          :key #'thy/gptel-horizon-api-key
-          :stream t)))
+(defun thy/agent-shell-set-buffer-face ()
+  "Scale the Agent Shell buffer face to 90 percent."
+  (face-remap-add-relative 'default :height 0.9))
 
 (use-package acp
   :vc (acp :url "https://github.com/xenodium/acp.el" :rev :newest))
@@ -47,15 +31,38 @@
 
 (use-package agent-shell
   :vc (agent-shell :url "https://github.com/xenodium/agent-shell" :rev :newest)
-  :after (acp shell-maker)
-  :commands (agent-shell)
+  :commands (agent-shell agent-shell-toggle)
+  :bind ("C-o" . thy/agent-shell-toggle)
+  :hook (agent-shell-mode . thy/agent-shell-set-buffer-face)
+  :preface
+  (defun thy/agent-shell-toggle (&optional arg)
+    "Create an Agent Shell, or toggle an existing one.
+With prefix ARG, delegate to `agent-shell'."
+    (interactive "P")
+    (if arg
+        (agent-shell arg)
+      (require 'agent-shell)
+      (if (agent-shell-buffers)
+          (agent-shell-toggle)
+        (agent-shell))))
+  :init
+  (with-eval-after-load 'evil
+    (evil-define-key* '(normal insert) 'global
+      (kbd "C-o") #'thy/agent-shell-toggle))
   :config
   ;; Keep Agent Shell's fallback workspace and cache out of HOME.
   (setq agent-shell-cwd-function #'thy/agent-shell-cwd)
+  (setq agent-shell-header-style 'text)
+  (setq agent-shell-session-restore-verbosity 'full)
   (advice-add #'agent-shell-cache-dir :override #'thy/agent-shell-cache-dir)
-  ;; Codex defaults to login-based OpenAI authentication.
-  (require 'agent-shell-openai)
-  (setq agent-shell-openai-authentication
-        (agent-shell-openai-make-authentication :login t))
+  (require 'agent-shell-opencode)
+  (setq agent-shell-opencode-authentication
+        (agent-shell-opencode-make-authentication :none t))
   (setq agent-shell-preferred-agent-config
-        (agent-shell-openai-make-codex-config)))
+        (agent-shell-opencode-make-agent-config))
+  (define-key agent-shell-mode-map (kbd "C-t") #'thy/ghostel-toggle-popup)
+  (define-key agent-shell-mode-map (kbd "C-o") #'thy/agent-shell-toggle)
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal insert) agent-shell-mode-map
+      (kbd "C-t") #'thy/ghostel-toggle-popup
+      (kbd "C-o") #'thy/agent-shell-toggle)))

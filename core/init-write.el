@@ -104,7 +104,8 @@
 
 (use-package markdown-ts-mode
   :ensure nil
-  :hook (markdown-ts-mode . thy/markdown-ts-appear-mode)
+  :hook ((markdown-ts-mode . visual-line-mode)
+         (markdown-ts-mode . thy/markdown-ts-appear-mode))
   :bind
   (:map markdown-ts-mode-map
          ("C-c C-b" . thy/markdown-ts-insert-bold))

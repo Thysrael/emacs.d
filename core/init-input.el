@@ -25,11 +25,18 @@
   :ensure t
   :after rime
   :demand t
-  :bind ("<f18>" . sis-switch)
+  :bind ("<f18>" . thy/sis-switch)
   :hook
   (((text-mode prog-mode) . sis-context-mode)
    ((text-mode prog-mode) . sis-inline-mode))
   :preface
+  (defun thy/sis-switch ()
+    "Switch input source unless Evil is in a non-input state."
+    (interactive)
+    (if (rime-predicate-evil-mode-p)
+        (sis-set-english)
+      (sis-switch)))
+
   (defun thy/sis-update-other-cursor-color (&rest _)
     "Use the current theme's error color for non-English input."
     (setq sis-other-cursor-color

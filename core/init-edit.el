@@ -161,7 +161,6 @@
   :ensure nil
   :hook ((prog-mode conf-mode yaml-mode TeX-mode nxml-mode) . hs-minor-mode)
   :bind
-  ("C-o" . hs-toggle-hiding)
   ("C-M-o" . thy/hs-toggle-all)
   :config
   ;; More functions

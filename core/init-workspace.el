@@ -7,7 +7,9 @@
   (("M-t" . tab-new)
    ("M-w" . tab-close)
    ("M-k" . tab-next)
-   ("M-j" . tab-previous))
+   ("M-j" . tab-previous)
+   :map tab-bar-mode-map
+   ("C-<tab>" . nil))
   :custom
   (tab-bar-auto-width t)
   (tab-bar-auto-width-max nil)

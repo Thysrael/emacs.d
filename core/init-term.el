@@ -72,12 +72,14 @@
       (define-key map (kbd "M-c") #'ghostel-readonly-copy)
       (define-key map (kbd "M-v") #'ghostel-yank)
       (define-key map (kbd "C-t") #'thy/ghostel-toggle-popup)
+      (define-key map (kbd "C-o") #'thy/agent-shell-toggle)
       (define-key map (kbd "C-c") #'ghostel-send-C-c))
     (with-eval-after-load 'evil
       (evil-define-key '(normal insert) ghostel-mode-map
         (kbd "M-c") #'ghostel-readonly-copy
         (kbd "M-v") #'ghostel-yank
         (kbd "C-t") #'thy/ghostel-toggle-popup
+        (kbd "C-o") #'thy/agent-shell-toggle
         (kbd "C-c") #'ghostel-send-C-c)))
   :config
   (thy/ghostel-bind-input-keys)
@@ -102,6 +104,7 @@
     (kbd "M-c") #'ghostel-readonly-copy
     (kbd "M-v") #'ghostel-yank
     (kbd "C-t") #'thy/ghostel-toggle-popup
+    (kbd "C-o") #'thy/agent-shell-toggle
     (kbd "C-c") #'ghostel-send-C-c)
   (evil-define-key* 'insert evil-ghostel-mode-map
     (kbd "C-SPC") #'evil-force-normal-state))
@@ -117,12 +120,34 @@
            (overlayp rime--preedit-overlay)
            (eq (overlay-buffer rime--preedit-overlay) buffer))))
 
+  (defun thy/ghostel-forward-rime-return (function &rest args)
+    "Forward text inserted by Rime's return command to Ghostel's PTY."
+    (if (not (and (derived-mode-p 'ghostel-mode)
+                  (ghostel--terminal-input-mode-p)))
+        (apply function args)
+      (let ((before-point (point)))
+        (let ((inhibit-read-only t))
+          (apply function args))
+        (when (> (point) before-point)
+          (let ((inserted (buffer-substring-no-properties
+                           before-point (point))))
+            (let ((inhibit-read-only t))
+              (delete-region before-point (point)))
+            (ghostel--send-string
+             (encode-coding-string inserted 'utf-8)))))))
+
   (defun thy/ghostel-enable-ime-support ()
-    "Enable IME forwarding and Rime-safe redraws in Ghostel."
+    "Enable stable Rime input support in Ghostel."
+    (when (fboundp 'sis-inline-mode)
+      (sis-inline-mode -1))
+    (when (fboundp 'sis-context-mode)
+      (sis-context-mode -1))
     (ghostel-ime-mode 1)
     (add-hook 'ghostel-inhibit-redraw-functions
               #'thy/ghostel-rime-composing-p nil t))
-  :hook (ghostel-mode . thy/ghostel-enable-ime-support))
+  :hook (ghostel-mode . thy/ghostel-enable-ime-support)
+  :config
+  (advice-add #'rime--return :around #'thy/ghostel-forward-rime-return))
 
 (transient-define-prefix thy/ghostel-transient ()
   "Transient for Ghostel terminals."

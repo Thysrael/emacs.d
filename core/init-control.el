@@ -88,7 +88,7 @@
   (defun prio ()
     (format "[#%c]" org-default-priority))
   :custom
-  (org-default-notes-file "~/learn/org/agenda.org")
+  (org-default-notes-file "~/Documents/org/agenda.org")
   ;; %^g: tag
   ;; %U: unactivated timestamp
   ;; %^{prompt}: input content

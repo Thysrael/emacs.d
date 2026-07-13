@@ -286,7 +286,7 @@ When INNER is non-nil, exclude the heading line."
     (kbd "SPC ;") #'embark-dwim
     (kbd "SPC b") #'switch-to-buffer
     (kbd "SPC B") #'switch-to-buffer-other-window
-    (kbd "SPC f") #'thy/find-file
+    (kbd "SPC f") #'find-file
     (kbd "SPC g") #'global-blamer-mode
     (kbd "SPC i") #'consult-imenu
     (kbd "SPC n") #'consult-notes
@@ -305,22 +305,40 @@ When INNER is non-nil, exclude the heading line."
       (kbd "TAB") #'org-cycle
       (kbd "<tab>") #'org-cycle
       (kbd "SPC c a") #'thy/org-archive-subtree-hierarchical
+      (kbd "SPC c c") #'org-ctrl-c-ctrl-c
+      (kbd "SPC c o") #'org-open-at-point
       (kbd "SPC c s") #'org-schedule
       (kbd "SPC c t") #'org-todo
       (kbd "SPC c w") #'org-refile))
+
+  (with-eval-after-load 'org-capture
+    (evil-define-key 'normal org-capture-mode-map
+      (kbd "SPC c c") #'org-capture-finalize
+      (kbd "SPC c k") #'org-capture-kill))
 
   (with-eval-after-load 'markdown-ts-mode
     (evil-define-key 'normal markdown-ts-mode-map
       (kbd "TAB") #'markdown-ts-outline-cycle
       (kbd "<tab>") #'markdown-ts-outline-cycle
+      (kbd "H") #'evil-beginning-of-visual-line
+      (kbd "L") #'evil-end-of-visual-line
+      (kbd "SPC c o") #'markdown-follow-thing-at-point
       (kbd "SPC c v") #'thy/toggle-markdown-mode)
+    (evil-define-key 'visual markdown-ts-mode-map
+      (kbd "H") #'evil-beginning-of-visual-line
+      (kbd "L") #'evil-end-of-visual-line)
     (evil-define-key 'normal markdown-ts-view-mode-map
+      (kbd "H") #'evil-beginning-of-visual-line
+      (kbd "L") #'evil-end-of-visual-line
+      (kbd "SPC c o") #'markdown-follow-thing-at-point
       (kbd "SPC c v") #'thy/toggle-markdown-mode))
 
   (with-eval-after-load 'markdown-mode
     (evil-define-key 'normal markdown-mode-map
+      (kbd "SPC c o") #'markdown-follow-thing-at-point
       (kbd "SPC c v") #'thy/toggle-markdown-mode)
     (evil-define-key 'normal gfm-view-mode-map
+      (kbd "SPC c o") #'markdown-follow-thing-at-point
       (kbd "SPC c v") #'thy/toggle-markdown-mode))
 
   (with-eval-after-load 'git-commit
@@ -346,8 +364,37 @@ When INNER is non-nil, exclude the heading line."
     (evil-define-key 'normal dired-mode-map
       (kbd "h") #'dired-up-directory
       (kbd "l") #'dired-find-file
+      (kbd "y") #'dired-do-copy
+      (kbd "p") #'dirvish-yank
+      (kbd "P") #'dirvish-yank-menu
       (kbd "Y") #'thy/dired-copy-files-to-clipboard
-      (kbd "W") #'thy/dired-copy-files-to-clipboard)))
+      (kbd "W") #'thy/dired-copy-files-to-clipboard))
+
+  (with-eval-after-load 'dirvish
+    (evil-define-key 'normal dirvish-mode-map
+      (kbd "q") #'dirvish-quit
+      (kbd "?") #'dirvish-dispatch
+      (kbd "a") #'dirvish-quick-access
+      (kbd "r") #'dired-do-rename
+      (kbd "M-f") #'dirvish-history-go-forward
+      (kbd "M-b") #'dirvish-history-go-backward
+      (kbd "f") #'dirvish-fd
+      (kbd "F") #'dirvish-fd-switches
+      (kbd "y") #'dirvish-yank-menu
+      (kbd "Y") #'thy/dired-copy-files-to-clipboard
+      (kbd "W") #'thy/dired-copy-files-to-clipboard
+      (kbd "N") #'dirvish-narrow
+      (kbd "<") #'dired-up-directory
+      (kbd ">") #'dired-find-file
+      (kbd "s") #'consult-line
+      (kbd "S") #'dirvish-quicksort
+      (kbd "M") #'dirvish-mark-menu
+      (kbd "v") #'dirvish-vc-menu
+      (kbd "TAB") #'dirvish-subtree-toggle
+      (kbd "M-t") #'dirvish-layout-toggle
+      (kbd "M-s") #'dirvish-setup-menu
+      (kbd "M-e") #'dirvish-emerge-mode
+      (kbd "M-j") #'dirvish-fd-jump)))
 
 (use-package evil-commentary
   :ensure t

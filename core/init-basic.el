@@ -10,7 +10,8 @@
            (or (memq window-system '(mac ns))
                (daemonp)))
   :config
-  (setq exec-path-from-shell-variables '("PATH" "MANPATH"))
+  (setq exec-path-from-shell-variables
+        '("PATH" "MANPATH" "OPENAI_HORIZON_API_KEY"))
   (exec-path-from-shell-initialize))
 
 (use-package emacs
