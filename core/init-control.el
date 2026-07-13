@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
 (use-package org
+  :ensure nil
   ;; :init
   ;; ;; 禁止 org agenda file 的 showup 设置
   ;; (setq org-agenda-inhibit-startup t)
@@ -63,10 +64,11 @@
   )
 
 (use-package org-capture
+  :ensure nil
   :bind
   ("C-c k" . org-capture)
   :config
-  (defun +org-get-top-headings ()
+  (defun thy/org-top-headings ()
     "Get the names of the headings in the current org file."
     (save-excursion
       (goto-char (point-min))
@@ -77,15 +79,16 @@
             (add-to-list 'headings heading t)))
         headings)))
 
-  (defun +org-select-top-level-header ()
+  (defun thy/org-select-top-level-heading ()
     "Visit all headings in the current file."
     (interactive)
     (goto-char (point-min))
-    (let ((choice (completing-read "Heading: " (+org-get-top-headings))))
+    (let ((choice (completing-read "Heading: " (thy/org-top-headings))))
       (goto-char (point-min))
       (re-search-forward (format "^[\\*]+ %s" choice))
       (forward-line 1)))
-  (defun prio ()
+  (defun thy/org-priority-cookie ()
+    "Return the default Org priority cookie."
     (format "[#%c]" org-default-priority))
   :custom
   (org-default-notes-file "~/Documents/org/agenda.org")
@@ -98,7 +101,7 @@
    '(
      ("i" "Inbox" entry
       (file+olp "" "inbox")
-      "* TODO %(prio) %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+      "* TODO %(thy/org-priority-cookie) %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
       :empty-lines-after 1)
      ("s" "Schedule" entry
       (file+olp "" "schedule")
@@ -106,14 +109,14 @@
       :empty-lines-after 1)
      ("S" "Someday" entry
       (file+olp "" "someday")
-      "* TODO %(prio) %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
+      "* TODO %(thy/org-priority-cookie) %? %^g\n:PROPERTIES:\n:CREATED: %U\n:END:\n"
       :empty-lines-after 1)
      ("r" "References" entry
       (file+olp "" "references")
       "* TODO %?\n:PROPERTIES:\n:CREATED: %U\n:END:\n%c\n"
       :empty-lines-after 1)
      ("a" "Append" item
-      (file+function "" +org-select-top-level-header)
+      (file+function "" thy/org-select-top-level-heading)
       "%?")
      ("h" "Habit" entry
       (file+olp "" "habits")
@@ -128,6 +131,7 @@
   )
 
 (use-package org-agenda
+  :ensure nil
   :bind
   ("C-c a" . org-agenda)
   :custom
@@ -171,6 +175,7 @@
 ;; 需要注意 overdue 是相对于今天特定时间的事情，比如说今天的事情相对于明天来说一定是过期的
 ;; ready: 当天已经做完的事情
 (use-package org-habit
+  :ensure nil
   :after org-agenda
   :demand t
   :custom
@@ -197,6 +202,7 @@
 ;; g d 可以选择日期
 ;; C-<SPACE> 标记，用 M-= 来计算间隔
 (use-package calendar
+  :ensure nil
   :bind
   ("C-c A" . calendar)
   :hook (calendar-today-visible . calendar-mark-today)

@@ -52,16 +52,6 @@
 (use-package markdown-mode
   :ensure t
   :mode ("\\.md\\'" . gfm-mode)
-  :custom-face
-  (markdown-code-face ((t (:inherit nil))))
-  (markdown-header-face-1 ((t (:inherit org-level-1))))
-  (markdown-header-face-2 ((t (:inherit org-level-2))))
-  (markdown-header-face-3 ((t (:inherit org-level-3))))
-  (markdown-header-face-4 ((t (:inherit org-level-4))))
-  (markdown-pre-face ((t (:inherit org-code))))
-  (markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
-  (markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9))))
-  (markdown-table-face ((t (:inherit org-table))))
   :bind
   (:map markdown-mode-map
         ("C-c C-b" . markdown-insert-bold))
@@ -93,6 +83,18 @@
     (interactive)
     (markdown-ts-emphasize ?b))
   :config
+  (custom-theme-set-faces
+   'user
+   '(markdown-code-face ((t (:inherit nil))))
+   '(markdown-header-face-1 ((t (:inherit org-level-1))))
+   '(markdown-header-face-2 ((t (:inherit org-level-2))))
+   '(markdown-header-face-3 ((t (:inherit org-level-3))))
+   '(markdown-header-face-4 ((t (:inherit org-level-4))))
+   '(markdown-pre-face ((t (:inherit org-code))))
+   '(markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
+   '(markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9))))
+   '(markdown-table-face ((t (:inherit org-table)))))
+
   (dolist (mapping '(("verilog" . verilog-mode)
                      ("c" . c-mode)
                      ("c++" . c++-mode)
@@ -324,67 +326,86 @@
     (setq prettify-symbols-unprettify-at-point nil)
     (prettify-symbols-mode))
 
-  (defun thy/org-heading-line ()
-    "Return the current Org heading line without text properties."
-    (buffer-substring-no-properties
-     (line-beginning-position) (line-end-position)))
-
-  (defun thy/org-child-headings ()
-    "Return the immediate child heading lines at point."
-    (save-excursion
-      (if (zerop (org-outline-level))
-          (outline-next-visible-heading 1)
-        (org-goto-first-child))
-      (let ((headings (list (thy/org-heading-line))))
-        (while (org-goto-sibling)
-          (push (thy/org-heading-line) headings))
-        headings)))
-
-  (defun thy/org-parent-headings ()
-    "Return the parent heading lines of the current subtree."
-    (let (headings)
-      (save-excursion
-        (while (org-up-heading-safe)
-          (push (thy/org-heading-line) headings)))
-      headings))
-
-  (defun thy/org-insert-heading-structure (headings)
-    "Insert Org HEADINGS in hierarchical order."
-    (dolist (heading headings)
-      (insert heading "\n")))
+  (defun thy/org-find-or-create-heading-path (headings)
+    "Move to HEADINGS in the current Org buffer, creating missing entries."
+    (let (path parent-marker)
+      (dolist (heading headings)
+        (setq path (append path (list heading)))
+        (let ((marker (condition-case nil
+                          (org-find-olp path t)
+                        (error nil))))
+          (unless marker
+            (if parent-marker
+                (progn
+                  (goto-char parent-marker)
+                  (org-end-of-subtree t t))
+              (goto-char (point-max)))
+            (unless (bolp)
+              (insert "\n"))
+            (let ((start (point)))
+              (insert (make-string (length path) ?*) " " heading "\n")
+              (setq marker (copy-marker start))))
+          (setq parent-marker marker)))
+      (when parent-marker
+        (goto-char parent-marker))
+      parent-marker))
 
   (defun thy/org-archive-subtree-hierarchical ()
     "Archive the current subtree while preserving its parent hierarchy."
     (interactive)
     (require 'org-archive)
-    (let* ((parent-headings (thy/org-parent-headings))
-           (source-buffer (current-buffer))
+    (org-back-to-heading t)
+    (let* ((source-buffer (current-buffer))
+           (source-start (copy-marker (point)))
+           (source-end (copy-marker
+                        (save-excursion
+                          (org-end-of-subtree t t)
+                          (point))))
+           (subtree (buffer-substring-no-properties source-start source-end))
+           (parent-headings (org-get-outline-path))
            (location (or (org-entry-get nil "ARCHIVE" 'inherit)
-                         org-archive-location))
-           (archive-file (car (org-archive--compute-location location)))
+                          org-archive-location))
+           (archive-location (org-archive--compute-location location))
+           (archive-file (car archive-location))
+           (archive-heading (cdr archive-location))
            (archive-buffer
-            (if (string-empty-p archive-file)
-                source-buffer
-              (find-file-noselect archive-file))))
-      (org-cut-subtree)
-      (with-current-buffer archive-buffer
-        (org-mode)
-        (goto-char (point-min))
-        (while parent-headings
-          (if (member (car parent-headings) (thy/org-child-headings))
-              (progn
-                (search-forward (car parent-headings))
-                (setq parent-headings (cdr parent-headings)))
-            (goto-char (point-max))
-            (unless (bolp)
-              (insert "\n"))
-            (thy/org-insert-heading-structure parent-headings)
-            (setq parent-headings nil)))
-        (unless (bolp)
-          (insert "\n"))
-        (org-yank)
-        (unless (eq source-buffer archive-buffer)
-          (save-buffer)))
+             (if (string-empty-p archive-file)
+                 source-buffer
+               (find-file-noselect archive-file)))
+           (archive-root
+            (unless (string-empty-p archive-heading)
+              (unless (string-match-p "\\`\\*+\\s-+" archive-heading)
+                (user-error "Unsupported hierarchical archive target: %s"
+                            archive-heading))
+              (with-temp-buffer
+                (org-mode)
+                (insert archive-heading)
+                (goto-char (point-min))
+                (org-get-heading t t t t))))
+           (target-path (append (and archive-root (list archive-root))
+                                parent-headings)))
+      (cl-labels
+          ((archive-subtree
+            ()
+            (with-current-buffer archive-buffer
+              (org-mode)
+              (if (thy/org-find-or-create-heading-path target-path)
+                  (org-end-of-subtree t t)
+                (goto-char (point-max)))
+              (unless (bolp)
+                (insert "\n"))
+              (insert subtree)
+              (unless (string-suffix-p "\n" subtree)
+                (insert "\n"))
+              (unless (eq source-buffer archive-buffer)
+                (save-buffer)))
+            (with-current-buffer source-buffer
+              (goto-char source-start)
+              (org-cut-subtree))))
+        (if (eq source-buffer archive-buffer)
+            (atomic-change-group
+              (archive-subtree))
+          (archive-subtree)))
       (message "Subtree archived in %s" (abbreviate-file-name archive-file))))
   :config
   (plist-put org-format-latex-options :scale 1.0)
@@ -408,17 +429,15 @@
     (add-hook 'evil-insert-state-entry-hook #'org-appear-manual-start nil t)
     (add-hook 'evil-insert-state-exit-hook #'org-appear-manual-stop nil t)))
 
-(use-package advance-words-count
-  :vc (advance-words-count :url "https://github.com/Thysrael/advance-words-count.el" :rev "master")
-  :commands advance-words-count)
-
 (use-package org-autolist
   :ensure t
   :after org
   :hook (org-mode . org-autolist-mode))
 
 (use-package gnuplot
-  :ensure t)
+  :ensure t
+  :mode (("\\.gp\\'" . gnuplot-mode)
+         ("\\.gnuplot\\'" . gnuplot-mode)))
 
 (use-package org-src
   :ensure nil
@@ -446,14 +465,15 @@
   (TeX-electric-sub-and-superscript t)
   (TeX-parse-self t)
   (TeX-save-query nil)
-  :custom-face
-  (font-latex-sedate-face ((t (:foreground "#ff5555" :weight bold))))
   :preface
   (defun thy/latex-prettify-symbols ()
     "Add custom prettified LaTeX symbols to the current buffer."
     (push '("\\lnot" . ?¬) prettify-symbols-alist)
     (prettify-symbols-mode 1))
   :config
+  (custom-theme-set-faces
+   'user
+   '(font-latex-sedate-face ((t (:foreground "#ff5555" :weight bold)))))
   (setq-default TeX-engine 'xetex)
   (add-hook 'TeX-after-compilation-finished-functions #'TeX-revert-document-buffer)
   (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' -shell-escape %t" TeX-run-TeX nil t))
@@ -472,7 +492,7 @@
         ("C-c C-o" . outline-cycle)
         ("C-c [" . nil)))
 
-(use-package bibtex-mode
+(use-package bibtex
   :ensure nil
   :bind
   (:map bibtex-mode-map

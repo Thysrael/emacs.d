@@ -8,6 +8,8 @@
    :map ghostel-semi-char-mode-map
    ("C-g" . keyboard-quit))
   :custom
+  (ghostel-module-directory
+   (no-littering-expand-var-file-name "ghostel/"))
   (ghostel-shell '("zsh"))
   ;; Remote Ghostel terminals should use zsh too; this does not affect RPC jobs.
   (ghostel-tramp-shells '(("rpc" "zsh")

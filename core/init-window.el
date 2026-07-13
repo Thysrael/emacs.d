@@ -27,10 +27,11 @@
   ("C-x 8" . ace-swap-window)
   :hook
   ((window-configuration-change . aw-update)) ; For modeline.
+  :custom
+  (aw-scope 'frame)
+  (aw-background nil)
+  (aw-ignore-current t)
   :config
-  (setq aw-scope 'frame
-        aw-background nil
-        aw-ignore-current t)
   ;; Select windows via `M-1'...`M-9'.
   (defun thy/ace-window-select-numbered (number)
     "Select the specified window."

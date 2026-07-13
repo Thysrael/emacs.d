@@ -29,42 +29,39 @@
   ;; :straight (:files (:defaults "extensions/*.el"))
   :ensure t
   :hook
-   (((LaTeX-mode tex-mode prog-mode conf-mode yaml-mode shell-mode eshell-mode org-mode markdown-mode markdown-ts-mode) . corfu-mode)
+   (((LaTeX-mode tex-mode prog-mode conf-mode yaml-ts-mode shell-mode eshell-mode org-mode markdown-mode markdown-ts-mode) . corfu-mode)
    ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil)))
    )
   :bind
   (:map corfu-map
-        ("RET" . nil))
-  :config
-  (setq corfu-cycle t                ;; Enable cycling for `corfu-next/previous'
-        corfu-auto t                 ;; Enable auto completion
-        corfu-auto-prefix 1          ;; minimun prefix to enable completion
-        corfu-on-exact-match nil
-        corfu-preview-current nil
-        corfu-auto-delay 0.1)
+         ("RET" . nil))
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 1)
+  (corfu-on-exact-match nil)
+  (corfu-preview-current nil)
+  (corfu-auto-delay 0.1)
   )
 
 (use-package corfu-history
+  :ensure nil
   :after corfu
-  :init
-  (corfu-history-mode 1)
+  :demand t
   :config
+  (corfu-history-mode 1)
   (with-eval-after-load 'savehist
     (cl-pushnew 'corfu-history savehist-additional-variables))
   )
 
 (use-package corfu-popupinfo
+  :ensure nil
   :after corfu
-  :init
-  (corfu-popupinfo-mode 1)
+  :demand t
+  :custom
+  (corfu-popupinfo-delay '(1.0 . 1.0))
   :config
-  (setq corfu-popupinfo-delay '(1.0 . 1.0)))
-
-(use-package corfu-terminal
-  :unless (display-graphic-p)
-  :ensure t
-  :config
-  (corfu-terminal-mode 1))
+  (corfu-popupinfo-mode 1))
 
 ;; 美化 corfu
 (use-package nerd-icons-corfu

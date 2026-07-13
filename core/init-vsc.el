@@ -1,46 +1,113 @@
 ;;; -*- lexical-binding: t -*-
 
+(use-package vc
+  :ensure nil
+  :custom
+  (vc-handled-backends '(Git)))
+
+(use-package vc-git
+  :ensure nil
+  :custom
+  (vc-git-diff-switches '("--histogram")))
+
+(defun thy/consult-diff-hunks ()
+  "Browse the current buffer's changed hunks with live preview."
+  (interactive)
+  (require 'consult)
+  (require 'diff-hl)
+  (unless (and buffer-file-name (vc-backend buffer-file-name))
+    (user-error "The buffer is not under version control"))
+  (let ((buffer (current-buffer))
+        candidates)
+    (save-restriction
+      (widen)
+      (diff-hl-update)
+      (let ((hunks
+             (sort (seq-filter
+                    (lambda (overlay) (overlay-get overlay 'diff-hl-hunk))
+                    (overlays-in (point-min) (point-max)))
+                   (lambda (left right)
+                     (< (overlay-start left) (overlay-start right))))))
+        (dolist (overlay hunks)
+          (let* ((start (overlay-start overlay))
+                 (end (overlay-end overlay))
+                 (line (line-number-at-pos start))
+                 (type (overlay-get overlay 'diff-hl-hunk-type))
+                 (summary
+                  (string-trim
+                   (replace-regexp-in-string
+                    "[[:space:]\n]+" " "
+                    (buffer-substring-no-properties start end))))
+                  (label
+                   (propertize
+                    (pcase type
+                      ('change "edit")
+                      ('insert "add")
+                      ('delete "delete")
+                      (_ (symbol-name type)))
+                    'face (intern (format "diff-hl-%s" type))))
+                  (candidate
+                   (format "%-6s %5d  %s"
+                           label line
+                           (if (string-empty-p summary)
+                               "(empty line)"
+                             (truncate-string-to-width
+                              summary 100 nil nil "...")))))
+            (push (consult--location-candidate
+                   candidate (cons buffer start) line line)
+                  candidates)))))
+    (setq candidates (nreverse candidates))
+    (unless candidates
+      (user-error "No changed hunks"))
+    (consult--read candidates
+                   :prompt "Diff hunk: "
+                   :category 'consult-location
+                   :sort nil
+                   :require-match t
+                   :lookup #'consult--lookup-location
+                   :state (consult--location-state candidates))))
+
 (use-package diff-hl
   :ensure t
   :defines desktop-minor-mode-table
   :hook
-  (find-file    . diff-hl-mode)
-  (vc-dir-mode  . diff-hl-dir-mode)
-  (dired-mode   . diff-hl-dired-mode)
-  ((focus-in . diff-hl-update-once))
-  :hook
-  ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
-         (lambda ()
-           (diff-hl-update-once)
-           (unless (display-graphic-p) (diff-hl-margin-local-mode 1))))
+  ((find-file . diff-hl-mode)
+   (vc-dir-mode . diff-hl-dir-mode)
+   (dired-mode . diff-hl-dired-mode)
+   (focus-in . diff-hl-update-once)
+   ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
+          (lambda ()
+            (diff-hl-update-once)
+            (unless (display-graphic-p) (diff-hl-margin-local-mode 1)))))
   :custom
   (diff-hl-disable-on-remote t)
   (diff-hl-draw-borders nil)
-  (vc-git-diff-switches '("--histogram"))
   :bind
   ("C-c g" . diff-hl-show-hunk)
-  :custom-face
-  (diff-hl-change ((t (:background "#82aaff" :foreground "#82aaff"))))
-  (diff-hl-delete ((t (:background "#ff757f" :foreground "#ff757f"))))
-  (diff-hl-insert ((t (:background "#77e0c6" :foreground "#77e0c6"))))
   :config
   (setq-default fringes-outside-margins t)
 
-  (setq diff-hl-fringe-bmp-function
-        (lambda (&rest _)
-          (define-fringe-bitmap 'thy/diff-hl-bmp
-            (vector #b00000000)
-            1 8
-            '(center t))))
+  (custom-theme-set-faces
+   'user
+   '(diff-hl-change ((t (:background "#82aaff" :foreground "#82aaff"))))
+   '(diff-hl-delete ((t (:background "#ff757f" :foreground "#ff757f"))))
+   '(diff-hl-insert ((t (:background "#77e0c6" :foreground "#77e0c6")))))
 
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
-  (with-eval-after-load 'flymake
-    (setq flymake-fringe-indicator-position 'right-fringe))
-
   (advice-add #'ws-butler-after-save :after #'diff-hl-update-once))
+
+(transient-define-prefix thy/diff-hunk-transient ()
+  "Transient for navigating and acting on diff hunks."
+  [["Navigate"
+    ("n" "Next" diff-hl-next-hunk :transient t)
+    ("p" "Previous" diff-hl-previous-hunk :transient t)
+    ("s" "Show" diff-hl-show-hunk)]
+   ["Act"
+    ("r" "Revert" diff-hl-revert-hunk)
+    ("S" "Stage" diff-hl-stage-current-hunk)]])
 
 (use-package magit
   :ensure t
@@ -82,11 +149,3 @@
         (when (re-search-forward "^<<<<<<< " nil t)
           (require 'smerge-mode)
           (smerge-mode 1))))))
-
-(use-package blamer
-  :ensure t
-  :bind (("C-c G" . global-blamer-mode))
-  :custom
-  (blamer-idle-time 0.3)
-  (blamer-min-offset 40)
-  (blamer-commit-formatter "* %s"))

@@ -18,5 +18,5 @@
   :hook ((html-mode css-mode) . rainbow-mode))
 
 (use-package transient
-  :ensure t
+  :ensure nil
   :demand t)

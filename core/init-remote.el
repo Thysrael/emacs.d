@@ -13,7 +13,6 @@
   (tramp-default-method "ssh")
   (tramp-use-ssh-controlmaster-options nil)
   (tramp-verbose 0)
-  (vc-handled-backends '(Git))
   :config
   (connection-local-set-profile-variables
    'remote-direct-async-process

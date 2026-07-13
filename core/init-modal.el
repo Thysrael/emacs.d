@@ -43,7 +43,6 @@
 
 (global-set-key (kbd "C-x t") #'thy/window-transient)
 (global-set-key (kbd "C-x r") #'thy/brr-transient)
-(global-set-key (kbd "C-x C-b") #'switch-to-buffer)
 
 (defun thy/evil-paste-pop-or-consult-yank-pop ()
   "Use Consult yank history in minibuffers, otherwise use Evil paste-pop."
@@ -286,11 +285,14 @@ When INNER is non-nil, exclude the heading line."
     (kbd "SPC ;") #'embark-dwim
     (kbd "SPC b") #'switch-to-buffer
     (kbd "SPC B") #'switch-to-buffer-other-window
+    (kbd "SPC e") #'consult-flymake
     (kbd "SPC f") #'find-file
-    (kbd "SPC g") #'global-blamer-mode
+    (kbd "SPC g") #'thy/consult-diff-hunks
+    (kbd "SPC G") #'thy/diff-hunk-transient
     (kbd "SPC i") #'consult-imenu
     (kbd "SPC n") #'consult-notes
     (kbd "SPC N") #'thy/note-transient
+    (kbd "SPC O") #'thy/agent-shell-transient
     (kbd "SPC p") #'consult-fd
     (kbd "SPC r") #'consult-recent-file
     (kbd "SPC R") #'thy/brr-transient
@@ -367,8 +369,11 @@ When INNER is non-nil, exclude the heading line."
             #'thy/evil-collection-restore-org-agenda-leader)
   (evil-collection-init '(magit dired org-agenda))
 
-  (evil-define-key 'normal magit-mode-map
-    (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC")))
+  (with-eval-after-load 'magit
+    (evil-define-key 'normal magit-mode-map
+      (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC"))
+      (kbd "J") #'magit-section-forward-sibling
+      (kbd "K") #'magit-section-backward-sibling))
 
   ;; Preserve local additions after evil-collection installs its Dired bindings.
   (with-eval-after-load 'dired
@@ -383,29 +388,10 @@ When INNER is non-nil, exclude the heading line."
 
   (with-eval-after-load 'dirvish
     (evil-define-key 'normal dirvish-mode-map
-      (kbd "q") #'dirvish-quit
-      (kbd "?") #'dirvish-dispatch
-      (kbd "a") #'dirvish-quick-access
-      (kbd "r") #'dired-do-rename
-      (kbd "M-f") #'dirvish-history-go-forward
-      (kbd "M-b") #'dirvish-history-go-backward
-      (kbd "f") #'dirvish-fd
-      (kbd "F") #'dirvish-fd-switches
-      (kbd "y") #'dirvish-yank-menu
-      (kbd "Y") #'thy/dired-copy-files-to-clipboard
-      (kbd "W") #'thy/dired-copy-files-to-clipboard
-      (kbd "N") #'dirvish-narrow
-      (kbd "<") #'dired-up-directory
-      (kbd ">") #'dired-find-file
-      (kbd "s") #'consult-line
-      (kbd "S") #'dirvish-quicksort
-      (kbd "M") #'dirvish-mark-menu
-      (kbd "v") #'dirvish-vc-menu
-      (kbd "TAB") #'dirvish-subtree-toggle
-      (kbd "M-t") #'dirvish-layout-toggle
-      (kbd "M-s") #'dirvish-setup-menu
-      (kbd "M-e") #'dirvish-emerge-mode
-      (kbd "M-j") #'dirvish-fd-jump)))
+      (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC")))
+    (dolist (binding thy/dirvish-mode-bindings)
+      (evil-define-key 'normal dirvish-mode-map
+        (kbd (car binding)) (cdr binding)))))
 
 (use-package evil-commentary
   :ensure t
@@ -423,10 +409,8 @@ When INNER is non-nil, exclude the heading line."
 (use-package evil-textobj-tree-sitter
   :ensure t
   :after evil
-  :commands (evil-textobj-tree-sitter-get-textobj)
-  :init
-  ;; Install text object keys eagerly while loading the tree-sitter package lazily.
-  (autoload 'evil-textobj-tree-sitter-get-textobj "evil-textobj-tree-sitter")
+  :demand t
+  :config
   (define-key evil-inner-text-objects-map "f"
               (evil-textobj-tree-sitter-get-textobj "function.inner"))
   (define-key evil-outer-text-objects-map "f"

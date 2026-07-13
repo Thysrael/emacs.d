@@ -79,12 +79,51 @@ end run
 ;; Use E to open files with an external command.
 (use-package dirvish
   :ensure t
+  :demand t
   ;; :vc (:url "https://github.com/alexluigit/dirvish" :lisp-dir "extensions/")
+  :preface
+  (defconst thy/dirvish-mode-bindings
+    '(("q" . dirvish-quit)
+      ("?" . dirvish-dispatch)
+      ("a" . dirvish-quick-access)
+      ("r" . dired-do-rename)
+      ("M-f" . dirvish-history-go-forward)
+      ("M-b" . dirvish-history-go-backward)
+      ("f" . dirvish-fd)
+      ("F" . dirvish-fd-switches-menu)
+      ("y" . dired-do-copy)
+      ("p" . dirvish-yank)
+      ("P" . dirvish-yank-menu)
+      ("Y" . thy/dired-copy-files-to-clipboard)
+      ("W" . thy/dired-copy-files-to-clipboard)
+      ("N" . dirvish-narrow)
+      ("<" . dired-up-directory)
+      (">" . dired-find-file)
+      ("s" . consult-line)
+      ("S" . dirvish-quicksort)
+      ("M" . dirvish-mark-menu)
+      ("v" . dirvish-vc-menu)
+      ("TAB" . dirvish-subtree-toggle)
+      ("M-t" . dirvish-layout-toggle)
+      ("M-s" . dirvish-setup-menu)
+      ("M-e" . dirvish-emerge-mode))
+    "Key bindings shared by regular and Evil Dirvish maps.")
+
+  (autoload 'dirvish-emerge-mode "dirvish-emerge" nil t)
+  (autoload 'dirvish-history-go-backward "dirvish-history" nil t)
+  (autoload 'dirvish-history-go-forward "dirvish-history" nil t)
+  (autoload 'dirvish-narrow "dirvish-narrow" nil t)
+  (autoload 'dirvish-quick-access "dirvish-quick-access" nil t)
+  (autoload 'dirvish-quicksort "dirvish-ls" nil t)
+  (autoload 'dirvish-side "dirvish-side" nil t)
+  (autoload 'dirvish-subtree-toggle "dirvish-subtree" nil t)
+  (autoload 'dirvish-vc-menu "dirvish-vc" nil t)
+  (autoload 'dirvish-yank "dirvish-yank" nil t)
+  (autoload 'dirvish-yank-menu "dirvish-yank" nil t)
   :init
   (when-let* ((dirvish-file (locate-library "dirvish"))
               (dirvish-dir (file-name-directory dirvish-file)))
     (add-to-list 'load-path (expand-file-name "extensions" dirvish-dir)))
-  (dirvish-override-dired-mode)
   :custom-face
   (dirvish-hl-line ((t (:inherit hl-line))))
   (dirvish-collapse-file-face ((t (:height 0.8))))
@@ -133,43 +172,14 @@ end run
   (dirvish-default-layout '(1 0.15 0.55))
   ;; (dirvish-hide-details '(dirvish-side))
   ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
-  :bind
-  (
-   ("<f6>" . dirvish-side)
-   :map dirvish-mode-map          ; Dirvish inherits `dired-mode-map'
-   ("?"   . dirvish-dispatch)     ; contains most of sub-menus in dirvish extensions
-   ;; Navigation.
-   ("a"   . dirvish-quick-access)
-   ("r"   . dired-do-rename)
-   ("M-f" . dirvish-history-go-forward)
-   ("M-b" . dirvish-history-go-backward)
-   ;; fd
-   ("f"   . dirvish-fd)
-   ("F"   . dirvish-fd-switches)
-    ("y"   . dired-do-copy)
-    ("p"   . dirvish-yank)
-    ("P"   . dirvish-yank-menu)
-    ("Y"   . thy/dired-copy-files-to-clipboard)
-   ("W"   . thy/dired-copy-files-to-clipboard)
-   ("N"   . dirvish-narrow)
-   ("<"   . dired-up-directory)
-   (">"   . dired-find-file)
-   ;; Quick sorting.
-   ("s"   . consult-line)
-   ("S"   . dirvish-quicksort)
-   ;; Quick marking.
-   ("M" . dirvish-mark-menu)
-   ;; ("W" . dirvish-copy-file-path)
-   ("v"   . dirvish-vc-menu)      ; remapped `dired-view-file'
-   ("TAB" . dirvish-subtree-toggle)
-   ("M-t" . dirvish-layout-toggle)
-   ("M-s" . dirvish-setup-menu)
-   ("M-e" . dirvish-emerge-mode)
-   ("M-j" . dirvish-fd-jump))
+  :bind ("<f6>" . dirvish-side)
   :hook
   (dirvish-mode . dired-omit-mode)
   ;; (dirvish-setup . dirvish-emerge-mode)
   :config
+  (dirvish-override-dired-mode)
+  (dolist (binding thy/dirvish-mode-bindings)
+    (keymap-set dirvish-mode-map (car binding) (cdr binding)))
   ;; Make side windows behave more naturally with ace-window.
   (with-eval-after-load 'ace-window
     (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)

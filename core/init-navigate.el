@@ -10,8 +10,12 @@
   "Move cursor based on its position in a word."
   (interactive)
   (cond
+   ((eobp) nil)
    ((looking-at "\\w") (thy/forward-word 1))
-   ((looking-at-p "\\s-") (progn (re-search-forward "\\S-") (backward-char)))
+   ((looking-at-p "\\s-")
+    (if (re-search-forward "\\S-" nil t)
+        (backward-char)
+      (goto-char (point-max))))
    (t (forward-char))))
 
 (defun thy/emt-evil-forward-word (orig-fun count)
@@ -44,10 +48,9 @@
 ;; 结构化跳转
 (use-package imenu
   :ensure nil
-  :hook ((prog-mode conf-mode yaml-mode markdown-mode markdown-ts-mode org-mode) . imenu-add-menubar-index)
-  :config
-  (setq imenu-auto-rescan t)
-  )
+  :hook ((prog-mode conf-mode yaml-ts-mode markdown-mode markdown-ts-mode org-mode) . imenu-add-menubar-index)
+  :custom
+  (imenu-auto-rescan t))
 
 ;; 中文分词跳转
 (use-package emt

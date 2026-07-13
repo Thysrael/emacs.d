@@ -13,6 +13,14 @@
   :custom
   (default-input-method "rime")
   (rime-disable-predicates '(rime-predicate-evil-mode-p))
+  (rime-emacs-module-header-root
+   (expand-file-name "../Resources/include/" invocation-directory))
+  (rime-librime-root
+   (cond
+    ((file-directory-p "/opt/homebrew/opt/librime/")
+     "/opt/homebrew/opt/librime/")
+    ((file-directory-p "/usr/local/opt/librime/")
+     "/usr/local/opt/librime/")))
   (rime-show-candidate 'posframe)
   (rime-show-preedit 'inline)
   (rime-share-data-dir

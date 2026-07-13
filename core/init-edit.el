@@ -5,7 +5,7 @@
 (use-package hl-line
   :ensure nil
   :hook ((prog-mode text-mode
-                    yaml-mode conf-mode
+                    conf-mode
                     special-mode org-agenda-mode dired-mode) . hl-line-mode))
 
 ;; Highlight matching delimiters.
@@ -21,7 +21,7 @@
 ;; Color nested delimiters.
 (use-package rainbow-delimiters
   :ensure t
-  :hook ((prog-mode conf-mode yaml-mode) . rainbow-delimiters-mode)
+  :hook ((prog-mode conf-mode yaml-ts-mode) . rainbow-delimiters-mode)
   :config
   (setq rainbow-delimiters-max-face-count 5)
   )
@@ -32,7 +32,7 @@
   :custom-face
   (hl-todo ((t (:inherit default :height 0.9 :width condensed :weight bold :inverse-video t))))
   :hook
-  ((prog-mode conf-mode yaml-mode LaTeX-mode) . hl-todo-mode)
+  ((prog-mode conf-mode yaml-ts-mode LaTeX-mode) . hl-todo-mode)
   :config
   (setq hl-todo-require-punctuation t
         hl-todo-highlight-punctuation ":")
@@ -90,7 +90,7 @@
         ("d" . nil)
         ("s" . nil))
   :hook
-  (((prog-mode yaml-mode) . symbol-overlay-mode))
+  (((prog-mode yaml-ts-mode) . symbol-overlay-mode))
   )
 
 ;; Visualize undo history; navigate with a, e, f, and b.
@@ -159,7 +159,7 @@
 
 (use-package hideshow
   :ensure nil
-  :hook ((prog-mode conf-mode yaml-mode TeX-mode nxml-mode) . hs-minor-mode)
+  :hook ((prog-mode conf-mode yaml-ts-mode TeX-mode nxml-mode) . hs-minor-mode)
   :bind
   ("C-M-o" . thy/hs-toggle-all)
   :config
@@ -290,10 +290,10 @@ begin and end of the block surrounding point."
                  ,(rx (or "#" "=begin"))                        ; Comment start
                  ruby-forward-sexp nil))
   (add-to-list 'hs-special-modes-alist
-                '(yaml-mode "\\s-*\\_<\\(?:[^:]+\\)\\_>"
-                            ""
-                            "#"
-                            thy/fold-hideshow-forward-block-by-indent-fn nil))
+               '(yaml-ts-mode "\\s-*\\_<\\(?:[^:]+\\)\\_>"
+                              ""
+                              "#"
+                              thy/fold-hideshow-forward-block-by-indent-fn nil))
   (add-to-list 'hs-special-modes-alist
                '(matlab-mode "if\\|switch\\|case\\|otherwise\\|while\\|for\\|try\\|catch"
                              "end"
@@ -336,11 +336,3 @@ begin and end of the block surrounding point."
   :bind
   ("C-l" . er/expand-region)
   ("C-M-l" . er/contract-region))
-
-;;; misc
-;; [sudo-edit] edit file with su permissions
-(use-package sudo-edit
-  :ensure t
-  :config
-  (sudo-edit-indicator-mode t)
-  )

@@ -171,6 +171,7 @@
   (load-theme 'doom-dracula t))
 
 (custom-set-faces
+ '(gnus-group-news-low-empty ((t (:inherit gnus-group-mail-1 :weight normal))))
  '(font-lock-function-call-face ((t (:inherit font-lock-function-name-face :slant italic))))
  '(font-lock-number-face ((t (:foreground unspecified :inherit (font-lock-constant-face)))))
  '(font-lock-property-name-face ((t (:inherit font-lock-variable-name-face :slant italic))))

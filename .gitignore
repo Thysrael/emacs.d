@@ -1,4 +1,5 @@
 todo.txt
+.env
 var/
 etc/rime/*
 !etc/rime/default.custom.yaml

@@ -20,6 +20,51 @@
   "Scale the Agent Shell buffer face to 90 percent."
   (face-remap-add-relative 'default :height 0.9))
 
+(defun thy/agent-shell-enable-corfu ()
+  "Use Corfu for Agent Shell's explicit completion requests."
+  (setq-local corfu-auto nil)
+  (corfu-mode 1))
+
+(defun thy/agent-shell-read-buffer (prompt)
+  "Read an Agent Shell buffer with Consult using PROMPT."
+  (require 'agent-shell)
+  (require 'consult)
+  (let ((buffers (agent-shell-buffers)))
+    (unless buffers
+      (user-error "No Agent Shell buffers"))
+    (get-buffer
+     (consult--read (mapcar #'buffer-name buffers)
+                    :prompt prompt
+                    :category 'buffer
+                    :state (consult--buffer-preview)
+                    :sort nil
+                    :require-match t))))
+
+(defun thy/consult-agent-shell-buffer ()
+  "Switch to an Agent Shell buffer with Consult preview."
+  (interactive)
+  (let ((shell-buffer
+         (thy/agent-shell-read-buffer "Switch to Agent Shell: ")))
+    (switch-to-buffer
+     (or (when agent-shell-prefer-viewport-interaction
+           (agent-shell-viewport--buffer
+            :shell-buffer shell-buffer
+            :existing-only t))
+         shell-buffer))))
+
+(defun thy/agent-shell-kill-buffer ()
+  "Select and kill an Agent Shell buffer."
+  (interactive)
+  (kill-buffer (thy/agent-shell-read-buffer "Kill Agent Shell: ")))
+
+(defun thy/agent-shell-restart ()
+  "Restart the current Agent Shell, selecting one when necessary."
+  (interactive)
+  (if (derived-mode-p 'agent-shell-mode)
+      (agent-shell-restart)
+    (with-current-buffer (thy/agent-shell-read-buffer "Restart Agent Shell: ")
+      (agent-shell-restart))))
+
 (use-package acp
   :vc (acp :url "https://github.com/xenodium/acp.el" :rev :newest))
 
@@ -31,9 +76,12 @@
 
 (use-package agent-shell
   :vc (agent-shell :url "https://github.com/xenodium/agent-shell" :rev :newest)
-  :commands (agent-shell agent-shell-toggle)
+  :commands (agent-shell agent-shell-insert-file agent-shell-new-shell
+                          agent-shell-toggle)
   :bind ("C-o" . thy/agent-shell-toggle)
-  :hook (agent-shell-mode . thy/agent-shell-set-buffer-face)
+  :hook
+  ((agent-shell-mode . thy/agent-shell-set-buffer-face)
+   (agent-shell-mode . thy/agent-shell-enable-corfu))
   :preface
   (defun thy/agent-shell-toggle (&optional arg)
     "Create an Agent Shell, or toggle an existing one.
@@ -66,3 +114,11 @@ With prefix ARG, delegate to `agent-shell'."
     (evil-define-key '(normal insert) agent-shell-mode-map
       (kbd "C-t") #'thy/ghostel-toggle-popup
       (kbd "C-o") #'thy/agent-shell-toggle)))
+
+(transient-define-prefix thy/agent-shell-transient ()
+  "Transient for Agent Shell sessions."
+  [[("n" "New" agent-shell-new-shell)
+    ("l" "List" thy/consult-agent-shell-buffer)
+    ("k" "Kill" thy/agent-shell-kill-buffer)]
+   [("r" "Restart" thy/agent-shell-restart)
+    ("f" "File" agent-shell-insert-file)]])

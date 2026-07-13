@@ -2,21 +2,8 @@
 
 ;; Basic Emacs behavior, editing defaults, history, and runtime tuning.
 
-;; macOS GUI/daemon Emacs does not inherit the user's login shell PATH.
-(use-package exec-path-from-shell
-  :ensure t
-  :demand t
-  :if (and (eq system-type 'darwin)
-           (or (memq window-system '(mac ns))
-               (daemonp)))
-  :config
-  (setq exec-path-from-shell-variables
-        '("PATH" "MANPATH" "OPENAI_HORIZON_API_KEY"))
-  (exec-path-from-shell-initialize))
-
 (use-package emacs
   :ensure nil
-  :demand t
   :preface
   (defun thy/kill-region-or-line ()
     "Kill the active region, or the current line when no region is active."
@@ -188,6 +175,7 @@
   :preface
   (defun thy/recentf-add-dired-directory ()
     "Add the current Dired directory to `recentf'."
+    (require 'recentf)
     (recentf-add-file default-directory))
   :bind ("C-x C-r" . recentf-open-files)
   :hook

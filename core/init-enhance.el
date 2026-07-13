@@ -56,7 +56,6 @@
 ;; Add icons to completion candidates.
 (use-package nerd-icons-completion
   :ensure t
-  :after marginalia
   :hook
   ((after-init . nerd-icons-completion-mode)
    (marginalia-mode . nerd-icons-completion-marginalia-setup))
@@ -170,7 +169,6 @@
 (use-package embark-consult
   :ensure t
   :after (embark consult)
-  :hook (embark-collect-mode . consult-preview-at-point-mode)
   )
 
 ;; With `C-u', `consult-ripgrep' can include ignored files.
@@ -185,7 +183,6 @@
   ;; ("C-c I"                               . consult-imenu-multi)
   ;; ("C-c o"                               . consult-outline)
   ("C-c b"                               . consult-bookmark)
-  ("C-c k"                               . consult-kmacro)
   ([remap locate]                        . consult-locate)
   ([remap load-theme]                    . consult-theme)
   ([remap man]                           . consult-man)
@@ -238,14 +235,14 @@
   :hook ((text-mode . goto-address-mode)
          (prog-mode . goto-address-prog-mode)))
 
-(use-package picture-mode
+(use-package picture
   :ensure nil
   :bind
   (:map picture-mode-map
-        ("C-f" . 'right-char)))
+        ("C-f" . right-char)))
 
-(use-package artist-mode
+(use-package artist
   :ensure nil
   :bind
   (:map artist-mode-map
-        ("C-f" . 'right-char)))
+        ("C-f" . right-char)))

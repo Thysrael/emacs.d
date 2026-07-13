@@ -7,24 +7,13 @@
   (c-default-style "linux")
   :bind
   (:map c-mode-map
+        ("C-d" . nil)
+        :map c++-mode-map
         ("C-d" . nil))
-  (:map c++-mode-map
-        ("C-d" . nil))
+  :mode ("\\.isa\\'" . c++-mode)
+  :hook (c-mode . c-toggle-comment-style)
   :config
   (c-set-offset 'case-label '+))
-
-(use-package c-mode
-  :ensure nil
-  :hook
-  (c-mode . (lambda () (c-toggle-comment-style))) ;; 改变默认注释风格
-  )
-
-(use-package c++-mode
-  :ensure nil
-  :mode "\\.isa\\'"
-  :bind
-  (:map c++-mode-map
-        ("C-d" . nil)))
 
 (use-package c-ts-mode
   :ensure nil
@@ -36,9 +25,9 @@
   ((c-ts-mode c++-ts-mode) . c-ts-mode-toggle-comment-style)
   )
 
-(use-package cmake-mode
-  :mode ("CMakeLists\\.txt\\'" "\\.cmake\\'")
-  )
+(use-package cmake-ts-mode
+  :ensure nil
+  :mode ("CMakeLists\\.txt\\'" "\\.cmake\\'"))
 
 (use-package js
   :ensure nil
@@ -46,6 +35,7 @@
   (js-indent-level 2))
 
 (use-package verilog-mode
+  :ensure nil
   :custom
   (verilog-align-ifelse t)
   (verilog-auto-delete-trailing-whitespace t)
@@ -72,7 +62,7 @@
   ;; Indent block comments to the first asterisk, not the second.
   (scala-indent:use-javadoc-style t))
 
-(use-package python-mode
+(use-package python
   :ensure nil
   :mode (("SConstruct\\'" . python-mode)
          ("SConscript\\'" . python-mode)
@@ -85,14 +75,17 @@
 (use-package cuda-mode
   :ensure t)
 
-(use-package yaml-mode
-  :ensure t)
+(use-package yaml-ts-mode
+  :ensure nil
+  :mode "\\.ya?ml\\'")
 
-(use-package typescript-mode
-  :mode (("\\.ets\\'" . typescript-ts-mode))
-  :ensure t
+(use-package typescript-ts-mode
+  :ensure nil
+  :mode (("\\.ts\\'" . typescript-ts-mode)
+         ("\\.tsx\\'" . tsx-ts-mode)
+         ("\\.ets\\'" . typescript-ts-mode))
   :custom
-  (typescript-indent-level 2))
+  (typescript-ts-indent-offset 2))
 
 (use-package dts-mode
   :ensure t)
@@ -100,16 +93,13 @@
 (use-package kconfig-mode
   :ensure t)
 
-(use-package lua-mode
-  :ensure t)
+(use-package lua-ts-mode
+  :ensure nil
+  :mode "\\.lua\\'")
 
-(use-package gnuplot-mode
-  :ensure t
-  :mode ("\\.gp$" . gnuplot-mode)
-  )
-
-(use-package rust-mode
-  :ensure t)
+(use-package rust-ts-mode
+  :ensure nil
+  :mode "\\.rs\\'")
 
 (use-package conf-mode
   :ensure nil

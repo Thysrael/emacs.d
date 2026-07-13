@@ -21,10 +21,8 @@
     (xref-push-marker-stack (point-marker)))
   :config
   (setq
-   xref-search-program 'ripgrep ; 设置工具为 riggrep
-   xref-show-definitions-function #'xref-show-definitions-completing-read
-   xref-show-xrefs-function #'xref-show-definitions-completing-read
-   xref-history-storage 'xref-window-local-history)
+    xref-search-program 'ripgrep ; 设置工具为 riggrep
+    xref-history-storage 'xref-window-local-history)
 
   ;; 这里是一个压栈函数，用于记录光标位置
   (dolist (command '(find-function consult-imenu consult-ripgrep citre-jump))
@@ -48,12 +46,10 @@
   :ensure t
   :init
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate) ; 将后端设置为 dumpjump
-  :config
-  (setq dumb-jump-prefer-searcher 'rg
-        dumb-jump-selector 'completing-read
-        dumb-jump-aggressive t
-        )
-  )
+  :custom
+  (dumb-jump-prefer-searcher 'rg)
+  (dumb-jump-selector 'completing-read)
+  (dumb-jump-aggressive t))
 
 (use-package eglot
   ;; :straight (eglot :type git
@@ -64,6 +60,7 @@
   :custom
   (eglot-ignored-server-capabilities '(:documentOnTypeFormattingProvider))
   (eglot-events-buffer-config '(:size 0 :format full))
+  (eglot-extend-to-xref t)
   (eglot-report-progress nil)
   ;; :custom-face
   ;; (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono"))))
@@ -104,11 +101,10 @@
 ;; 文档信息展示
 (use-package eldoc
   :ensure nil
-  :config
-  (setq eldoc-echo-area-display-truncation-message t
-        eldoc-echo-area-prefer-doc-buffer t
-        eldoc-echo-area-use-multiline-p nil
-        eglot-extend-to-xref t)
+  :custom
+  (eldoc-echo-area-display-truncation-message t)
+  (eldoc-echo-area-prefer-doc-buffer t)
+  (eldoc-echo-area-use-multiline-p nil)
   :bind
   ("M-;" . eldoc))
 
@@ -135,21 +131,16 @@
                   (js-mode . js-ts-mode)
                   (javascript-mode . js-ts-mode)
                   (json-mode . json-ts-mode)
-                  (lua-mode . lua-ts-mode)
                   (php-mode . php-ts-mode)
                   (python-mode . python-ts-mode)
                   (ruby-mode . ruby-ts-mode)
-                  (rust-mode . rust-ts-mode)
                   (sh-mode . bash-ts-mode)
-                  (typescript-mode . typescript-ts-mode)
-                  (tsx-mode . tsx-ts-mode)
                   (css-mode . css-ts-mode)
                   (html-mode . html-ts-mode)
                   (mhtml-mode . mhtml-ts-mode)
                   (markdown-mode . markdown-ts-mode)
                   (gfm-mode . markdown-ts-mode)
-                  (toml-mode . toml-ts-mode)
-                  (yaml-mode . yaml-ts-mode))
+                  (toml-mode . toml-ts-mode))
                 major-mode-remap-alist))
   ;; 使得 org src 可以自动映射到 ts 模式
   (defun thy/remap-org-src-mode (mode)

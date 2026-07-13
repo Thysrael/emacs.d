@@ -24,23 +24,11 @@
   :ensure nil
   :hook
   ((prog-mode . flymake-mode))
-  :bind
-  ("C-c e" . consult-flymake)
   :custom
   (flymake-diagnostic-functions nil)
-  (flymake-show-diagnostics-at-end-of-line 'short)
-  :config
-  (defun thy/flymake-diagnostic-oneliner (diag &optional nopaintp)
-    "Get truncated one-line text string for diagnostic DIAG.
-This is useful for displaying the DIAG's text to the user in
-confined spaces, such as the echo are.  Unless NOPAINTP is t,
-propertize returned text with the `echo-face' property of DIAG's
-type."
-    (let* ((txt (car (split-string (flymake-diagnostic-text diag) "\\:")))
-           (txt (substring txt 0 (cl-loop for i from 0 for a across txt
-                                          when (eq a ?\n) return i))))
-      (if nopaintp txt
-        (propertize txt 'face
-                    (flymake--lookup-type-property
-                      (flymake-diagnostic-type diag) 'echo-face 'flymake-error)))))
-  (advice-add #'flymake-diagnostic-oneliner :override #'thy/flymake-diagnostic-oneliner))
+  (flymake-fringe-indicator-position 'right-fringe)
+  (flymake-show-diagnostics-at-end-of-line 'short))
+
+(use-package consult-flymake
+  :ensure nil
+  :bind ("C-c e" . consult-flymake))
