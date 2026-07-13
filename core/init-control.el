@@ -181,34 +181,17 @@
   ;; (org-habit-scheduled-past-days t)
   ;; ;; org habit show 7 days before today and 7 days after today.
   (org-habit-preceding-days 4)
-  :custom-face
-  ;; (org-habit-alert-face ((t (:background "#ffc107" :weight bold))))
-  ;; (org-habit-alert-future-face ((t (:background "#ffa000" :weight bold))))
-  ;; (org-habit-overdue-face ((t (:background "#e64a19" :weight bold))))
-  ;; (org-habit-overdue-future-face ((t (:background "#bf360c" :weight bold))))
-  ;; (org-habit-clear-face ((t (:background "#009688" :weight bold))))
-  ;; (org-habit-clear-future-face ((t (:background "#00796B" :weight bold))))
-  ;; (org-habit-ready-face ((t (:background "#689F38" :weight bold))))
-  ;; (org-habit-ready-future-face ((t (:background "#CDDC39" :weight bold))))
-
-  (org-habit-alert-face ((t (:background "#edd389" :weight bold))))
-  (org-habit-alert-future-face ((t (:background "#d0bf8f" :weight bold))))
-  (org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
-  (org-habit-overdue-future-face ((t (:background "#8c5353" :weight bold))))
-  (org-habit-clear-face ((t (:background "#418d93" :weight bold))))
-  (org-habit-clear-future-face ((t (:background "#4c7073" :weight bold))))
-  (org-habit-ready-face ((t (:background "#7f9f7f" :weight bold))))
-  (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
-
-  ;; (org-habit-alert-face ((t (:background "#d0d7af" :weight bold))))
-  ;; (org-habit-alert-future-face ((t (:background "#b5c2c1" :weight bold))))
-  ;; (org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
-  ;; (org-habit-overdue-future-face ((t (:background "#7a556f" :weight bold))))
-  ;; (org-habit-clear-face ((t (:background "#3792c2" :weight bold))))
-  ;; (org-habit-clear-future-face ((t (:background "#417297" :weight bold))))
-  ;; (org-habit-ready-face ((t (:background "#6da3a7" :weight bold))))
-  ;; (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
-  )
+  :config
+  (custom-theme-set-faces
+   'user
+   '(org-habit-alert-face ((t (:background "#edd389" :weight bold))))
+   '(org-habit-alert-future-face ((t (:background "#d0bf8f" :weight bold))))
+   '(org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
+   '(org-habit-overdue-future-face ((t (:background "#8c5353" :weight bold))))
+   '(org-habit-clear-face ((t (:background "#418d93" :weight bold))))
+   '(org-habit-clear-future-face ((t (:background "#4c7073" :weight bold))))
+   '(org-habit-ready-face ((t (:background "#7f9f7f" :weight bold))))
+   '(org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))))
 
 ;; 使用 C-{f, b, a, e} 进行移动
 ;; g d 可以选择日期

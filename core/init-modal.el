@@ -349,11 +349,22 @@ When INNER is non-nil, exclude the heading line."
     (when (fboundp 'corfu-quit)
       (add-hook 'evil-insert-state-exit-hook #'corfu-quit))))
 
+(defun thy/evil-collection-restore-org-agenda-leader (mode _maps &rest _)
+  "Restore the global Evil leader when MODE is `org-agenda'."
+  (when (eq mode 'org-agenda)
+    (evil-define-key 'normal org-agenda-mode-map
+      (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC"))
+      (kbd "g") #'org-agenda-redo
+      (kbd "h") #'org-agenda-earlier
+      (kbd "l") #'org-agenda-later)))
+
 (use-package evil-collection
   :ensure t
   :after evil
   :demand t
   :config
+  (add-hook 'evil-collection-setup-hook
+            #'thy/evil-collection-restore-org-agenda-leader)
   (evil-collection-init '(magit dired org-agenda))
 
   (evil-define-key 'normal magit-mode-map
