@@ -200,7 +200,9 @@ When INNER is non-nil, exclude the heading line."
              (fboundp 'eglot-managed-p)
              (eglot-managed-p))
         (eglot-format beg end)
-      (indent-region beg end)))
+      (indent-region beg end))
+    (when (bound-and-true-p ws-butler-mode)
+      (ws-butler-clean-region beg end)))
 
   (evil-define-text-object thy/evil-inner-section (count &optional beg end type)
     "Select the current Org/Markdown section body."

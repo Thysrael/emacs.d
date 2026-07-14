@@ -1,1 +1,0 @@
-((gptel-menu "g*IPADS*"))

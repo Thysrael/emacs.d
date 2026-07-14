@@ -115,16 +115,29 @@
 
 ;; Format code automatically.
 (defun thy/smart-format ()
-  "Indent the active region if selected, otherwise format the buffer using eglot if available."
+  "Format the region or buffer, then trim whitespace on modified lines."
   (interactive)
-  (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p))
-      (if (use-region-p)
-          (eglot-format (region-beginning) (region-end))
-        (eglot-format-buffer))
-    (if (use-region-p)
-        (indent-region (region-beginning) (region-end))
-      (indent-region (point-min) (point-max))))
-  (message "formatting done."))
+  (let* ((regionp (use-region-p))
+         (beg (and regionp (copy-marker (region-beginning))))
+         (end (and regionp (copy-marker (region-end) t))))
+    (unwind-protect
+        (progn
+          (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p))
+              (if regionp
+                  (eglot-format beg end)
+                (eglot-format-buffer))
+            (if regionp
+                (indent-region beg end)
+              (indent-region (point-min) (point-max))))
+          (when (bound-and-true-p ws-butler-mode)
+            (if regionp
+                (ws-butler-clean-region beg end)
+              (ws-butler-before-save)))
+          (message "formatting done."))
+      (when beg
+        (set-marker beg nil))
+      (when end
+        (set-marker end nil)))))
 (global-set-key (kbd "C-c f") #'thy/smart-format)
 
 ;;; Structured editing
