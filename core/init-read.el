@@ -44,6 +44,24 @@
   (defvar-local thy/xlsx-preview-files nil
     "CSV files generated from the current spreadsheet.")
 
+  (defvar-local thy/doc-view-fitting-page nil
+    "Non-nil while fitting the current DocView page to its window.")
+
+  (defun thy/doc-view-fit-page (&rest _)
+    "Fit the current DocView page within the selected window."
+    (when (and (derived-mode-p 'doc-view-mode)
+               (not thy/doc-view-fitting-page)
+               (ignore-errors (image-get-display-property)))
+      (let ((thy/doc-view-fitting-page t))
+        (doc-view-fit-page-to-window))))
+
+  (defun thy/doc-view-fit-frame-windows (frame)
+    "Fit DocView pages displayed in windows on FRAME."
+    (dolist (window (window-list frame 'no-minibuffer))
+      (with-selected-window window
+        (when (derived-mode-p 'doc-view-mode)
+          (thy/doc-view-fit-page)))))
+
   (defun thy/office-preview-cache-directory (source)
     "Return the preview cache directory for Office file SOURCE."
     (let ((directory
@@ -174,4 +192,14 @@
         ("-" . doc-view-shrink))
   :custom
   (doc-view-cache-directory (no-littering-expand-var-file-name "doc-view/"))
-  (doc-view-resolution 200))
+  (doc-view-resolution 200)
+  :config
+  (advice-add #'doc-view-goto-page :after #'thy/doc-view-fit-page)
+  (add-hook 'window-size-change-functions #'thy/doc-view-fit-frame-windows)
+  (with-eval-after-load 'evil
+    (evil-set-initial-state 'doc-view-mode 'motion)
+    (evil-define-key '(normal motion) doc-view-mode-map
+      (kbd "j") #'doc-view-next-page
+      (kbd "k") #'doc-view-previous-page
+      (kbd "=") #'doc-view-enlarge
+      (kbd "-") #'doc-view-shrink)))
