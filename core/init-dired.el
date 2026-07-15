@@ -91,6 +91,7 @@ end run
       ("M-b" . dirvish-history-go-backward)
       ("f" . dirvish-fd)
       ("F" . dirvish-fd-switches-menu)
+      ("o" . dired-do-open)
       ("y" . dired-do-copy)
       ("p" . dirvish-yank)
       ("P" . dirvish-yank-menu)
@@ -108,6 +109,24 @@ end run
       ("M-s" . dirvish-setup-menu)
       ("M-e" . dirvish-emerge-mode))
     "Key bindings shared by regular and Evil Dirvish maps.")
+
+  (defun thy/dirvish-yank-with-tramp-rpc (function command details &optional batch)
+    "Call FUNCTION after preparing remote Dirvish COMMAND for TRAMP RPC.
+DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
+    (pcase-let ((`(,_ ,sources ,destination ,_) details))
+      (when-let* (((and batch
+                        (cl-some #'file-remote-p
+                                 (cons destination sources))))
+                  (rpc-library (locate-library "tramp-rpc"))
+                  (msgpack-library (locate-library "msgpack")))
+        (setq command
+              (prin1-to-string
+               `(progn
+                  (add-to-list 'load-path ,(file-name-directory rpc-library))
+                  (add-to-list 'load-path ,(file-name-directory msgpack-library))
+                  (require 'tramp-rpc)
+                  ,(read command))))))
+    (funcall function command details batch))
 
   (autoload 'dirvish-emerge-mode "dirvish-emerge" nil t)
   (autoload 'dirvish-history-go-backward "dirvish-history" nil t)
@@ -180,6 +199,9 @@ end run
   (dirvish-override-dired-mode)
   (dolist (binding thy/dirvish-mode-bindings)
     (keymap-set dirvish-mode-map (car binding) (cdr binding)))
+  (with-eval-after-load 'dirvish-yank
+    (advice-add #'dirvish-yank--execute
+                :around #'thy/dirvish-yank-with-tramp-rpc))
   ;; Make side windows behave more naturally with ace-window.
   (with-eval-after-load 'ace-window
     (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)
