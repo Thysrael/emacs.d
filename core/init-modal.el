@@ -268,6 +268,12 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
       map)
     "Dynamic SPC prefix map forwarding to C-c * commands.")
 
+  (defun thy/evil-bind-local-leader ()
+    "Bind the leader above mode-specific maps in the current buffer."
+    (when evil-local-mode
+      (evil-local-set-key 'normal (kbd "SPC") thy/evil-leader-command-map)
+      (evil-local-set-key 'motion (kbd "SPC") thy/evil-leader-command-map)))
+
   :init
   (setq evil-respect-visual-line-mode t)
   (setq evil-undo-system 'undo-redo)
@@ -279,6 +285,7 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   :config
   (setq evil-symbol-word-search t)
   (setq evil-want-fine-undo t)
+  (add-hook 'evil-local-mode-hook #'thy/evil-bind-local-leader)
   (evil-mode 1)
 
   ;; Keep yanks visually stable; the pulse feedback already shows what was copied.
@@ -361,10 +368,6 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
                      evil-emacs-state-map))
     (define-key map (kbd "C-j") ctl-x-map))
 
-  ;; Mirror C-c bindings under SPC, with explicit exceptions above.
-  (evil-define-key 'normal 'global
-    (kbd "SPC") thy/evil-leader-command-map)
-
   (with-eval-after-load 'org
     (evil-define-key 'normal org-mode-map
       (kbd "TAB") #'org-cycle
@@ -392,22 +395,20 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   :after evil
   :demand t
   :preface
-  (defun thy/evil-collection-restore-org-agenda-leader (mode _maps &rest _)
-    "Restore the global Evil leader when MODE is `org-agenda'."
+  (defun thy/evil-collection-setup-org-agenda (mode _maps &rest _)
+    "Install local navigation bindings when MODE is `org-agenda'."
     (when (eq mode 'org-agenda)
       (evil-define-key 'normal org-agenda-mode-map
-        (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC"))
         (kbd "g") #'org-agenda-redo
         (kbd "h") #'org-agenda-earlier
         (kbd "l") #'org-agenda-later)))
   :config
   (add-hook 'evil-collection-setup-hook
-            #'thy/evil-collection-restore-org-agenda-leader)
+            #'thy/evil-collection-setup-org-agenda)
   (evil-collection-init '(magit dired org-agenda))
 
   (with-eval-after-load 'magit
     (evil-define-key 'normal magit-mode-map
-      (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC"))
       (kbd "J") #'magit-section-forward-sibling
       (kbd "K") #'magit-section-backward-sibling))
 
@@ -425,8 +426,6 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
       (kbd "o") #'dired-do-open))
 
   (with-eval-after-load 'dirvish
-    (evil-define-key 'normal dirvish-mode-map
-      (kbd "SPC") (lookup-key evil-normal-state-map (kbd "SPC")))
     (dolist (binding thy/dirvish-mode-bindings)
       (evil-collection-define-key 'normal 'dirvish-mode-map
         (kbd (car binding)) (cdr binding)))))
@@ -439,6 +438,7 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   (define-key evil-normal-state-map (kbd "gc") #'evil-commentary)
   (define-key evil-visual-state-map (kbd "gc") #'evil-commentary-line))
 
+;; Add/change/delete pairs with `ys{motion}`, `cs`, and `ds`; use `S` visually.
 (use-package evil-surround
   :ensure t
   :after evil
