@@ -1,12 +1,10 @@
 ;;; -*- lexical-binding: t -*-
 
 (defun thy/agent-shell-cwd ()
-  "Return a project root for Agent Shell, or a private fallback workspace."
+  "Return the current project root or `default-directory' for Agent Shell."
   (or (when-let* ((project (project-current)))
         (project-root project))
-      (let ((workspace (no-littering-expand-var-file-name "agent-shell/workspace/")))
-        (make-directory workspace t)
-        workspace)))
+      default-directory))
 
 (defun thy/agent-shell-cache-dir (&rest components)
   "Return an Agent Shell cache directory built from COMPONENTS under `no-littering'."
@@ -16,6 +14,11 @@
     (make-directory dir t)
     dir))
 
+(defun thy/agent-shell-data-dir (subdir)
+  "Return Agent Shell SUBDIR under `no-littering'."
+  (no-littering-expand-var-file-name
+   (file-name-concat "agent-shell" subdir)))
+
 (defun thy/agent-shell-set-buffer-face ()
   "Scale the Agent Shell buffer face to 90 percent."
   (face-remap-add-relative 'default :height 0.9))
@@ -24,6 +27,27 @@
   "Use Corfu for Agent Shell's explicit completion requests."
   (setq-local corfu-auto nil)
   (corfu-mode 1))
+
+(defun thy/agent-shell-default-high-effort ()
+  "Set OpenCode sessions to high reasoning effort after initialization."
+  (agent-shell-subscribe-to
+   :shell-buffer (current-buffer)
+   :event 'init-session
+   :on-event
+   (lambda (_event)
+     (when-let* (((eq (map-nested-elt (agent-shell--state)
+                                      '(:agent-config :identifier))
+                      'opencode))
+                 (levels (agent-shell--get-available-thought-levels
+                          (agent-shell--state)))
+                 ((seq-some (lambda (level)
+                              (equal (map-elt level :value) "high"))
+                            levels))
+                 ((not (equal (agent-shell--current-thought-level-id
+                               (agent-shell--state))
+                              "high"))))
+       (agent-shell--config-option-set-thought-level-id
+        :thought-level-id "high")))))
 
 (defun thy/agent-shell-read-buffer (prompt)
   "Read an Agent Shell buffer with Consult using PROMPT."
@@ -81,7 +105,8 @@
   :bind ("C-o" . thy/agent-shell-toggle)
   :hook
   ((agent-shell-mode . thy/agent-shell-set-buffer-face)
-   (agent-shell-mode . thy/agent-shell-enable-corfu))
+   (agent-shell-mode . thy/agent-shell-enable-corfu)
+   (agent-shell-mode . thy/agent-shell-default-high-effort))
   :preface
   (defun thy/agent-shell-toggle (&optional arg)
     "Create an Agent Shell, or toggle an existing one.
@@ -98,8 +123,9 @@ With prefix ARG, delegate to `agent-shell'."
     (evil-define-key* '(normal insert) 'global
       (kbd "C-o") #'thy/agent-shell-toggle))
   :config
-  ;; Keep Agent Shell's fallback workspace and cache out of HOME.
+  ;; Keep Agent Shell's generated data under no-littering.
   (setq agent-shell-cwd-function #'thy/agent-shell-cwd)
+  (setq agent-shell-dot-subdir-function #'thy/agent-shell-data-dir)
   (setq agent-shell-header-style 'text)
   (setq agent-shell-session-restore-verbosity 'full)
   (advice-add #'agent-shell-cache-dir :override #'thy/agent-shell-cache-dir)

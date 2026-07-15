@@ -32,18 +32,28 @@
                        (derived-mode-p 'ghostel-mode)))
             (throw 'window window))))))
 
+  (defun thy/ghostel-open (&optional arg)
+    "Open Ghostel at the project root or current directory.
+ARG is passed to `ghostel-project' or `ghostel'."
+    (interactive "P")
+    (require 'ghostel)
+    (if-let* ((project (project-current nil default-directory)))
+        (let ((default-directory (project-root project)))
+          (ghostel-project arg))
+      (let ((ghostel-buffer-name (ghostel-buffer-name-by-directory nil)))
+        (ghostel arg))))
+
   (defun thy/ghostel-toggle-popup ()
-    "Show the project Ghostel popup, or hide it when already visible."
+    "Show the contextual Ghostel popup, or hide it when already visible."
     (interactive)
     (if-let* ((window (thy/ghostel-visible-popup-window)))
         (delete-window window)
-      (ghostel-project)))
+      (thy/ghostel-open)))
 
   (defun thy/ghostel-new ()
-    "Create a new Ghostel terminal for the current project."
+    "Create a new Ghostel terminal for the current context."
     (interactive)
-    (let ((current-prefix-arg '(4)))
-      (call-interactively #'ghostel-project)))
+    (thy/ghostel-open '(4)))
 
   (defun thy/ghostel-list-buffers ()
     "Select a Ghostel buffer with live preview when Consult is available."
