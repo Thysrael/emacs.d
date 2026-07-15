@@ -1,33 +1,25 @@
 ;;; -*- lexical-binding: t -*-
 
 ;; Use a context-aware forward motion for convenient cursor movement.
-(global-set-key (kbd "C-f") #'thy/smart-forward)
-(defun thy/forward-word (&optional arg)
-  "Move forward ARG words using the active `forward-word' remapping."
-  (funcall (or (command-remapping 'forward-word) #'forward-word) (or arg 1)))
+(use-package emacs
+  :ensure nil
+  :preface
+  (defun thy/forward-word (&optional arg)
+    "Move forward ARG words using the active `forward-word' remapping."
+    (funcall (or (command-remapping 'forward-word) #'forward-word) (or arg 1)))
 
-(defun thy/smart-forward ()
-  "Move cursor based on its position in a word."
-  (interactive)
-  (cond
-   ((eobp) nil)
-   ((looking-at "\\w") (thy/forward-word 1))
-   ((looking-at-p "\\s-")
-    (if (re-search-forward "\\S-" nil t)
-        (backward-char)
-      (goto-char (point-max))))
-   (t (forward-char))))
-
-(defun thy/emt-evil-forward-word (orig-fun count)
-  "Call ORIG-FUN with COUNT unless active EMT word motion succeeds."
-  (if (and (bound-and-true-p emt-mode)
-           (fboundp 'emt-forward-word))
-      (condition-case nil
-          (if (emt-forward-word count)
-              0
-            (funcall orig-fun count))
-        (error (funcall orig-fun count)))
-    (funcall orig-fun count)))
+  (defun thy/smart-forward ()
+    "Move cursor based on its position in a word."
+    (interactive)
+    (cond
+     ((eobp) nil)
+     ((looking-at "\\w") (thy/forward-word 1))
+     ((looking-at-p "\\s-")
+      (if (re-search-forward "\\S-" nil t)
+          (backward-char)
+        (goto-char (point-max))))
+     (t (forward-char))))
+  :bind ("C-f" . thy/smart-forward))
 
 ;; 字符跳转
 (use-package avy
@@ -56,8 +48,19 @@
 (use-package emt
   :if (eq system-type 'darwin)
   :vc (emt :url "https://github.com/roife/emt.git"
-            :rev "master")
+           :rev "master")
   :commands (emt-mode emt-forward-word emt-backward-word emt-download-module)
+  :preface
+  (defun thy/emt-evil-forward-word (orig-fun count)
+    "Call ORIG-FUN with COUNT unless active EMT word motion succeeds."
+    (if (and (bound-and-true-p emt-mode)
+             (fboundp 'emt-forward-word))
+        (condition-case nil
+            (if (emt-forward-word count)
+                0
+              (funcall orig-fun count))
+          (error (funcall orig-fun count)))
+      (funcall orig-fun count)))
   :hook (after-init . emt-mode)
   :config
   (with-eval-after-load 'evil

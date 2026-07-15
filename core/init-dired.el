@@ -125,6 +125,10 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
                   (add-to-list 'load-path ,(file-name-directory rpc-library))
                   (add-to-list 'load-path ,(file-name-directory msgpack-library))
                   (require 'tramp-rpc)
+                  (setq tramp-rpc-deploy-local-cache-directory
+                        ,tramp-rpc-deploy-local-cache-directory)
+                  (setq tramp-rpc-deploy-git-build-policy
+                        ',tramp-rpc-deploy-git-build-policy)
                   ,(read command))))))
     (funcall function command details batch))
 

@@ -31,8 +31,143 @@
         ("=" . image-increase-size)
         ("-" . image-decrease-size)))
 
+(use-package csv-mode
+  :ensure t
+  :commands csv-mode)
+
 (use-package doc-view
   :ensure nil
+  :preface
+  (defvar-local thy/office-preview-source-file nil
+    "Office file from which the current read-only preview was generated.")
+
+  (defvar-local thy/xlsx-preview-files nil
+    "CSV files generated from the current spreadsheet.")
+
+  (defun thy/office-preview-cache-directory (source)
+    "Return the preview cache directory for Office file SOURCE."
+    (let ((directory
+           (no-littering-expand-var-file-name
+            (file-name-concat
+             "office-preview"
+             (secure-hash 'sha256 (file-truename source))))))
+      (make-directory directory t)
+      directory))
+
+  (defun thy/office-preview-run (program &rest args)
+    "Run PROGRAM with ARGS, signaling an error when conversion fails."
+    (unless (executable-find program)
+      (user-error "Office preview requires `%s'" program))
+    (with-temp-buffer
+      (let ((status (apply #'call-process program nil t nil args)))
+        (unless (and (integerp status) (zerop status))
+          (error "%s conversion failed: %s"
+                 program (string-trim (buffer-string)))))))
+
+  (defun thy/office-preview-fresh-p (source outputs)
+    "Return non-nil when OUTPUTS exist and are newer than SOURCE."
+    (and outputs
+         (cl-every (lambda (output)
+                     (and (file-exists-p output)
+                          (not (file-newer-than-file-p source output))))
+                   outputs)))
+
+  (defun thy/docx-preview-file (source)
+    "Return a cached Markdown conversion of DOCX file SOURCE."
+    (let* ((directory (thy/office-preview-cache-directory source))
+           (output (file-name-concat directory "preview.md")))
+      (unless (thy/office-preview-fresh-p source (list output))
+        (let ((default-directory directory))
+          (thy/office-preview-run
+           "pandoc" source "--from=docx" "--to=gfm" "--wrap=none"
+           "--extract-media=." (concat "--output=" output))))
+      output))
+
+  (defun thy/xlsx-preview-generate-files (source)
+    "Return CSV files generated from every worksheet in SOURCE."
+    (let* ((directory (thy/office-preview-cache-directory source))
+           (files (directory-files directory t "\\.csv\\'")))
+      (unless (thy/office-preview-fresh-p source files)
+        (mapc #'delete-file files)
+        (let ((profile (make-temp-file "libreoffice-preview-" t)))
+          (unwind-protect
+              (thy/office-preview-run
+               "soffice"
+               (concat "-env:UserInstallation=file://" profile)
+               "--headless" "--convert-to"
+               "csv:Text - txt - csv (StarCalc):44,34,76,1,,0,false,true,true,false,false,-1"
+               "--outdir" directory source)
+            (delete-directory profile t)))
+        (setq files (directory-files directory t "\\.csv\\'")))
+      (or files (error "LibreOffice produced no CSV preview for %s" source))))
+
+  (defun thy/office-preview-set-read-only (source directory)
+    "Mark the current buffer as a read-only preview of SOURCE in DIRECTORY."
+    (setq-local thy/office-preview-source-file source)
+    (setq-local default-directory (file-name-as-directory directory))
+    (setq-local revert-buffer-function #'thy/office-preview-revert)
+    (setq-local buffer-read-only t)
+    (auto-save-mode -1)
+    (set-buffer-modified-p nil))
+
+  (defun thy/docx-preview-mode ()
+    "Display the current DOCX file as read-only Markdown."
+    (let* ((source buffer-file-name)
+           (preview (thy/docx-preview-file source))
+           (mode (alist-get 'markdown-mode major-mode-remap-alist
+                            'markdown-mode)))
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert-file-contents preview))
+      (funcall mode)
+      (thy/office-preview-set-read-only source (file-name-directory preview))))
+
+  (defun thy/xlsx-preview-select-file (files)
+    "Prompt for one worksheet CSV from FILES when necessary."
+    (if (cdr files)
+        (let* ((names (mapcar #'file-name-base files))
+               (name (completing-read "Worksheet: " names nil t)))
+          (nth (seq-position names name #'equal) files))
+      (car files)))
+
+  (defun thy/xlsx-preview-display (source files)
+    "Display one of the worksheet CSV FILES generated from SOURCE."
+    (let ((preview (thy/xlsx-preview-select-file files)))
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert-file-contents preview))
+      (csv-mode)
+      (setq-local thy/xlsx-preview-files files)
+      (thy/office-preview-set-read-only source (file-name-directory preview))))
+
+  (defun thy/xlsx-preview-mode ()
+    "Display the current XLSX file as a read-only CSV worksheet."
+    (let ((source buffer-file-name))
+      (thy/xlsx-preview-display
+       source (thy/xlsx-preview-generate-files source))))
+
+  (defun thy/xlsx-preview-select-sheet ()
+    "Select another worksheet in the current XLSX preview."
+    (interactive)
+    (unless thy/office-preview-source-file
+      (user-error "This is not an XLSX preview"))
+    (thy/xlsx-preview-display thy/office-preview-source-file
+                              thy/xlsx-preview-files))
+
+  (defun thy/office-preview-revert (&optional _ignore-auto _noconfirm)
+    "Regenerate the current Office preview from its source file."
+    (let ((source thy/office-preview-source-file)
+          (inhibit-read-only t))
+      (unless source
+        (user-error "This buffer has no Office preview source"))
+      (pcase (downcase (file-name-extension source))
+        ("docx" (thy/docx-preview-mode))
+        ("xlsx" (thy/xlsx-preview-mode))
+        (_ (user-error "Unsupported Office preview type")))))
+
+  :mode (("\\.docx\\'" . thy/docx-preview-mode)
+         ("\\.xlsx\\'" . thy/xlsx-preview-mode)
+         ("\\.pptx\\'" . doc-view-mode-maybe))
   :bind
   (:map doc-view-mode-map
         ("=" . doc-view-enlarge)

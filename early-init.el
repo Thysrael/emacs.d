@@ -12,7 +12,6 @@
 
 ;; Native compilation settings.
 (setq native-comp-jit-compilation t)
-(setq native-comp-async-report-warnings-errors nil)
 
 (when (fboundp 'startup-redirect-eln-cache)
   (startup-redirect-eln-cache

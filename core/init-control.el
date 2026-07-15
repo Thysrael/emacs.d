@@ -50,11 +50,10 @@
   ;; 预定义好的标签
   (org-tag-alist '((:startgroup)
                    ("read"     . ?r)
-				   ("emacs"    . ?e)
-				   ("study"    . ?s)
+                   ("util"     . ?u)
+				   ("surv"     . ?s)
 				   ("work"     . ?w)
 				   ("blog"     . ?b)
-				   ("linux"    . ?l)
 				   ("misc"     . ?m)
                    ;; ("deprecated" . ?d)
 				   (:endgroup)))
@@ -249,17 +248,17 @@
                   ("zsi" . 4) ("zw" . 5) ("zl" . 6))
                 parse-time-weekdays)))
 
-;; 中国节日设置
-(defun thy/cal-china-x-setup ()
-  "Load and set up cal-china-x while suppressing its missing cookie warning."
-  (let ((warning-suppress-types
-         (cons '(files missing-lexbind-cookie) warning-suppress-types)))
-    (require 'cal-china-x)
-    (cal-china-x-setup)))
-
 (use-package cal-china-x
   :ensure t
-  :hook (after-init . thy/cal-china-x-setup)
+  :preface
+  (defun thy/cal-china-x-setup ()
+    "Load and set up cal-china-x while suppressing its missing cookie warning."
+    (unless (featurep 'cal-china-x)
+      (let ((warning-suppress-types
+             (cons '(files missing-lexbind-cookie) warning-suppress-types)))
+        (require 'cal-china-x)
+        (cal-china-x-setup))))
+  :hook (calendar-mode . thy/cal-china-x-setup)
   :custom-face
   (cal-china-x-important-holiday-face ((t (:background "#ff757f"))))
   (cal-china-x-general-holiday-face ((t (:background "#82aaff"))))

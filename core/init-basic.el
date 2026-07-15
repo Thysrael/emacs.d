@@ -137,8 +137,8 @@
                        for epunc in '("," "." "?" "!" ";" ":" ","
                                       "(" ")" "[" "]" "<" ">" "_")
                        do (define-key key-translation-map
-                            (kbd (concat prefix cpunc))
-                            (kbd (concat prefix epunc)))))
+                                      (kbd (concat prefix cpunc))
+                                      (kbd (concat prefix epunc)))))
 
   (when (eq system-type 'darwin)
     ;; Use Command as Meta in macOS GUI frames.

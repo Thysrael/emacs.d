@@ -14,8 +14,6 @@
   "Update whether the selected window is wide enough for full details."
   (setq +mode-line-enough-width-p
         (> (window-total-width) +mode-line-window-width-limit)))
-(dolist (hook '(after-revert-hook buffer-list-update-hook window-size-change-functions))
-  (add-hook hook #'+mode-line-window-size-change-function))
 
 ;;; Faces
 (defgroup +mode-line nil
@@ -106,7 +104,7 @@
 (defun +mode-line-symbol-overlay-indicator ()
   "Display the number of matches for symbol overlay."
   (when (and (bound-and-true-p symbol-overlay-keywords-alist)
-              (not (bound-and-true-p symbol-overlay-temp-symbol)))
+             (not (bound-and-true-p symbol-overlay-temp-symbol)))
     (let* ((keyword (symbol-overlay-assoc (symbol-overlay-get-symbol t)))
            (symbol (car keyword))
            (before (symbol-overlay-get-list -1 symbol))
@@ -118,23 +116,6 @@
                 " sym "
                 (and (cadr keyword) "in scope "))))))
 
-;;; [project-crumb] Cache project path info.
-(defvar-local +mode-line-project-crumb nil)
-
-(defun +mode-line-update-project-crumb (&rest _)
-  "Cache breadcrumb project crumbs for the mode-line."
-  (setq +mode-line-project-crumb
-        (when (fboundp 'breadcrumb-project-crumbs)
-          (breadcrumb-project-crumbs))))
-
-(dolist (hook '(find-file-hook after-save-hook clone-indirect-buffer-hook
-                               Info-selection-hook window-configuration-change-hook))
-  (add-hook hook #'+mode-line-update-project-crumb))
-
-(dolist (fn '(rename-buffer set-visited-file-name pop-to-buffer popup-create popup-delete))
-  (advice-add fn :after #'+mode-line-update-project-crumb))
-
-
 ;;; Cache remote host name
 (defvar-local +mode-line-remote-host-name nil)
 (defun +mode-line-update-remote-host-name ()
@@ -144,35 +125,8 @@
                                    (file-remote-p default-directory 'host))))
           (when (not (string-equal hostname "localhost"))
             (concat "@" hostname)))))
-(add-hook 'find-file-hook #'+mode-line-update-remote-host-name)
-
-;;; Cache flymake report
-(defvar-local +mode-line-flymake-indicator nil)
-(defun +mode-line-update-flymake (&rest _)
-  "Display flymake info for current buffer."
-  (setq +mode-line-flymake-indicator
-        (when (and flymake-mode (flymake-running-backends))
-          (let* ((err-count (cadadr (flymake--mode-line-counter :error)))
-                 (warning-count (cadadr (flymake--mode-line-counter :warning)))
-                 (note-count (cadadr (flymake--mode-line-counter :note)))
-                 (err (when (and err-count (not (string= err-count "0")))
-                        (propertize err-count 'face '(:inherit compilation-error))))
-                 (warning (when (and warning-count (not (string= warning-count "0")))
-                            (propertize warning-count 'face '(:inherit compilation-warning))))
-                 (note (when (and note-count (not (string= note-count "0")))
-                         (propertize note-count 'face '(:inherit compilation-info))))
-                 (info (string-join (remove nil (list err warning note)) "/")))
-            (when (not (string-empty-p info)) (concat " " info))))))
-(add-hook 'flymake-mode-hook #'+mode-line-update-flymake)
-(with-eval-after-load 'flymake
-  (advice-add #'flymake--handle-report :after #'+mode-line-update-flymake))
 
 ;;; Cache encoding info
-(setq eol-mnemonic-unix "LF"
-      eol-mnemonic-dos "CRLF"
-      eol-mnemonic-mac "CR"
-      eol-mnemonic-undecided "?")
-
 (defvar-local +mode-line-encoding nil)
 (defun +mode-line-update-encoding (&rest _)
   "Get encoding and EOL type of current buffer."
@@ -181,18 +135,14 @@
                            '(coding-category-undecided coding-category-utf-8))
                      (eq (coding-system-eol-type buffer-file-coding-system) 0))
           "%Z")))
-(dolist (hook '(find-file-hook after-change-major-mode-hook))
-  (add-hook hook #'+mode-line-update-encoding))
-(advice-add #'after-insert-file-set-coding :after #'+mode-line-update-encoding)
-(advice-add #'set-buffer-file-coding-system :after #'+mode-line-update-encoding)
 
 
 ;;; [vcs-info] cache for vcs
 (defvar-local +mode-line-vcs-info nil)
 (defun +mode-line-update-vcs-info ()
   "Cache version-control information for the current buffer."
-  (when (and vc-mode buffer-file-name)
-    (setq +mode-line-vcs-info
+  (setq +mode-line-vcs-info
+        (when (and vc-mode buffer-file-name)
           (let* ((backend (vc-backend buffer-file-name))
                  (state   (vc-state buffer-file-name backend))
                  (rev     (if +mode-line-show-common-vc-tools-name
@@ -219,10 +169,6 @@
                     (propertize (concat rev state-symbol)
                                 'face face
                                 'help-echo (get-text-property 1 'help-echo vc-mode)))))))
-(dolist (hook '(find-file-hook after-save-hook))
-  (add-hook hook #'+mode-line-update-vcs-info))
-(with-eval-after-load 'vc
-  (advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info))
 
 
 (defun +nerd-icons-icon-for-buffer ()
@@ -250,6 +196,26 @@
           (+mode-line-symbol-overlay-indicator)
           (+mode-line-use-region-indicator)))
 
+(use-package flymake
+  :ensure nil
+  :defines flymake--state
+  :preface
+  (defun thy/mode-line-flymake-counters ()
+    "Return Flymake counters separated by slashes when Flymake is ready."
+    (when (and (bound-and-true-p flymake-mode)
+               flymake--state
+               (flymake-running-backends))
+      (let (result)
+        (dolist (type '(:error :warning :note))
+          (let ((counter (flymake--mode-line-counter type)))
+            (when counter
+              (when result
+                (setq result (append result '("/"))))
+              ;; Each built-in counter starts with its own spacing element.
+              (setq result (append result (cdr counter))))))
+        (when result
+          (cons " " result))))))
+
 (defun +mode-line-left (active-p meta-face panel-face)
   "Return left mode-line for ACTIVE-P using META-FACE and PANEL-FACE."
   (let ((active-indicators (when active-p (+mode-line-active-indicators))))
@@ -269,7 +235,7 @@
       "  "
       (:propertize mode-name face ,(when active-p '+mode-line-mode-name-active-face))
       (,active-p ,+mode-line-vcs-info (:propertize ,+mode-line-vcs-info face nil))
-      (,active-p ,+mode-line-flymake-indicator)
+      (,active-p (:eval (thy/mode-line-flymake-counters)))
       " "
       +mode-line-encoding
       "%l:%p%%"
@@ -278,23 +244,61 @@
 (defsubst +mode-line-compute ()
   "Formatting active-long mode-line."
   (let* ((meta-face (+mode-line-get-window-name-face))
-          (active-p (mode-line-window-selected-p))
-          (panel-face `(:inherit ,meta-face :inverse-video ,active-p))
-          (lhs (+mode-line-left active-p meta-face panel-face))
-          (rhs (+mode-line-right active-p))
-          (rhs-str (format-mode-line rhs))
-          (rhs-w (string-width rhs-str)))
+         (active-p (mode-line-window-selected-p))
+         (panel-face `(:inherit ,meta-face :inverse-video ,active-p))
+         (lhs (+mode-line-left active-p meta-face panel-face))
+         (rhs (+mode-line-right active-p))
+         (rhs-str (format-mode-line rhs))
+         (rhs-w (string-width rhs-str)))
     `(,lhs
       ,(propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,rhs-w))))
       ,rhs-str)))
 
-(setq-default mode-line-format
-               '((:eval (+mode-line-compute)))
-               header-line-format nil)
+(use-package emacs
+  :ensure nil
+  :init
+  (dolist (hook '(after-revert-hook buffer-list-update-hook window-size-change-functions))
+    (add-hook hook #'+mode-line-window-size-change-function))
+  (add-hook 'find-file-hook #'+mode-line-update-remote-host-name)
+  (setq-default mode-line-format
+                '((:eval (+mode-line-compute)))
+                header-line-format nil))
+
+(use-package mule
+  :ensure nil
+  :init
+  (setq eol-mnemonic-unix "LF"
+        eol-mnemonic-dos "CRLF"
+        eol-mnemonic-mac "CR"
+        eol-mnemonic-undecided "?")
+  (dolist (hook '(find-file-hook after-change-major-mode-hook))
+    (add-hook hook #'+mode-line-update-encoding))
+  (advice-add #'after-insert-file-set-coding :after #'+mode-line-update-encoding)
+  (advice-add #'set-buffer-file-coding-system :after #'+mode-line-update-encoding))
+
+(use-package vc
+  :ensure nil
+  :hook (after-save . +mode-line-update-vcs-info)
+  :config
+  (advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info))
 
 ;;; Breadcrumb project/imenu crumbs for the mode-line.
 (use-package breadcrumb
   :ensure t
+  :preface
+  (defvar-local +mode-line-project-crumb nil)
+
+  (defun +mode-line-update-project-crumb (&rest _)
+    "Cache breadcrumb project crumbs for the mode-line."
+    (setq +mode-line-project-crumb
+          (when (fboundp 'breadcrumb-project-crumbs)
+            (breadcrumb-project-crumbs))))
+  :init
+  (dolist (hook '(find-file-hook after-save-hook clone-indirect-buffer-hook
+                                 Info-selection-hook window-configuration-change-hook))
+    (add-hook hook #'+mode-line-update-project-crumb))
+  (dolist (fn '(rename-buffer set-visited-file-name pop-to-buffer popup-create popup-delete))
+    (advice-add fn :after #'+mode-line-update-project-crumb))
   :custom-face
   (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t :slant italic))))
   (breadcrumb-project-crumbs-face ((t (:slant italic))))

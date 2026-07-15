@@ -75,6 +75,11 @@ ARG is passed to `ghostel-project' or `ghostel'."
             (pop-to-buffer name))
         (pop-to-buffer (completing-read "Ghostel: " names nil t)))))
 
+  (transient-define-prefix thy/ghostel-transient ()
+    "Transient for Ghostel terminals."
+    [("n" "New" thy/ghostel-new)
+     ("l" "List" thy/ghostel-list-buffers)])
+
   (defun thy/ghostel-bind-input-keys ()
     "Bind editing and control keys in every Ghostel input map."
     ;; Ghostel rebuilds some maps, so these keys must be re-applied.
@@ -105,7 +110,7 @@ ARG is passed to `ghostel-project' or `ghostel'."
                     :rev :newest)
   :init
   (when-let* ((evil-ghostel-dir (expand-file-name "evil-ghostel/extensions/evil-ghostel"
-                                                   package-user-dir))
+                                                  package-user-dir))
               ((file-directory-p evil-ghostel-dir)))
     (add-to-list 'load-path evil-ghostel-dir))
   :hook (ghostel-mode . evil-ghostel-mode)
@@ -160,8 +165,3 @@ ARG is passed to `ghostel-project' or `ghostel'."
   :hook (ghostel-mode . thy/ghostel-enable-ime-support)
   :config
   (advice-add #'rime--return :around #'thy/ghostel-forward-rime-return))
-
-(transient-define-prefix thy/ghostel-transient ()
-  "Transient for Ghostel terminals."
-  [("n" "New" thy/ghostel-new)
-   ("l" "List" thy/ghostel-list-buffers)])

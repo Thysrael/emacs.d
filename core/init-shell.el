@@ -10,7 +10,7 @@
   :custom
   ;; 限制 eshell 全屏弹出
   (display-comint-buffer-action '(display-buffer-at-bottom
-                                         (inhibit-same-window . nil)))
+                                  (inhibit-same-window . nil)))
   :bind (("C-t" . project-eshell)
          ("C-c t" . eshell)
          :map eshell-mode-map

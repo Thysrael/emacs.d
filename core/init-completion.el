@@ -15,7 +15,7 @@
         ("RET" . tempel-next)
         ("S-<RET>" . tempel-previous))
   :hook (((prog-mode text-mode) . thy/tempel-setup-capf)
-          ((prog-mode text-mode) . tempel-abbrev-mode))
+         ((prog-mode text-mode) . tempel-abbrev-mode))
   :config
   (defun thy/tempel-setup-capf ()
     "Add Tempel completion to the current buffer."
@@ -29,12 +29,12 @@
   ;; :straight (:files (:defaults "extensions/*.el"))
   :ensure t
   :hook
-   (((LaTeX-mode tex-mode prog-mode conf-mode yaml-ts-mode shell-mode eshell-mode org-mode markdown-mode markdown-ts-mode) . corfu-mode)
+  (((LaTeX-mode tex-mode prog-mode conf-mode yaml-ts-mode shell-mode eshell-mode org-mode markdown-mode markdown-ts-mode) . corfu-mode)
    ((eshell-mode shell-mode) . (lambda () (setq-local corfu-auto nil)))
    )
   :bind
   (:map corfu-map
-         ("RET" . nil))
+        ("RET" . nil))
   :custom
   (corfu-cycle t)
   (corfu-auto t)
@@ -75,7 +75,7 @@
   :ensure t
   :hook
   ((prog-mode . thy/corfu-add-cape-prog-backends)
-    ((LaTeX-mode markdown-mode markdown-ts-mode org-mode) . thy/corfu-add-cape-write-backends))
+   ((LaTeX-mode markdown-mode markdown-ts-mode org-mode) . thy/corfu-add-cape-write-backends))
   :config
   ;; 编程用到的 cape
   (defun thy/corfu-add-cape-prog-backends ()

@@ -10,80 +10,90 @@
   :custom
   (vc-git-diff-switches '("--histogram")))
 
-(defun thy/consult-diff-hunks ()
-  "Browse the current buffer's changed hunks with live preview."
-  (interactive)
-  (require 'consult)
-  (require 'diff-hl)
-  (unless (and buffer-file-name (vc-backend buffer-file-name))
-    (user-error "The buffer is not under version control"))
-  (let ((buffer (current-buffer))
-        candidates)
-    (save-restriction
-      (widen)
-      (diff-hl-update)
-      (let ((hunks
-             (sort (seq-filter
-                    (lambda (overlay) (overlay-get overlay 'diff-hl-hunk))
-                    (overlays-in (point-min) (point-max)))
-                   (lambda (left right)
-                     (< (overlay-start left) (overlay-start right))))))
-        (dolist (overlay hunks)
-          (let* ((start (overlay-start overlay))
-                 (end (overlay-end overlay))
-                 (line (line-number-at-pos start))
-                 (type (overlay-get overlay 'diff-hl-hunk-type))
-                 (summary
-                  (string-trim
-                   (replace-regexp-in-string
-                    "[[:space:]\n]+" " "
-                    (buffer-substring-no-properties start end))))
-                  (label
-                   (propertize
-                    (pcase type
-                      ('change "edit")
-                      ('insert "add")
-                      ('delete "delete")
-                      (_ (symbol-name type)))
-                    'face (intern (format "diff-hl-%s" type))))
-                  (candidate
-                   (format "%-6s %5d  %s"
-                           label line
-                           (if (string-empty-p summary)
-                               "(empty line)"
-                             (truncate-string-to-width
-                              summary 100 nil nil "...")))))
-            (push (consult--location-candidate
-                   candidate (cons buffer start) line line)
-                  candidates)))))
-    (setq candidates (nreverse candidates))
-    (unless candidates
-      (user-error "No changed hunks"))
-    (consult--read candidates
-                   :prompt "Diff hunk: "
-                   :category 'consult-location
-                   :sort nil
-                   :require-match t
-                   :lookup #'consult--lookup-location
-                   :state (consult--location-state candidates))))
-
 (use-package diff-hl
   :ensure t
   :defines desktop-minor-mode-table
+  :preface
+  (defun thy/consult-diff-hunks ()
+    "Browse the current buffer's changed hunks with live preview."
+    (interactive)
+    (require 'consult)
+    (require 'diff-hl)
+    (unless (and buffer-file-name (vc-backend buffer-file-name))
+      (user-error "The buffer is not under version control"))
+    (let ((buffer (current-buffer))
+          candidates)
+      (save-restriction
+        (widen)
+        (diff-hl-update)
+        (let ((hunks
+               (sort (seq-filter
+                      (lambda (overlay) (overlay-get overlay 'diff-hl-hunk))
+                      (overlays-in (point-min) (point-max)))
+                     (lambda (left right)
+                       (< (overlay-start left) (overlay-start right))))))
+          (dolist (overlay hunks)
+            (let* ((start (overlay-start overlay))
+                   (end (overlay-end overlay))
+                   (line (line-number-at-pos start))
+                   (type (overlay-get overlay 'diff-hl-hunk-type))
+                   (summary
+                    (string-trim
+                     (replace-regexp-in-string
+                      "[[:space:]\n]+" " "
+                      (buffer-substring-no-properties start end))))
+                   (label
+                    (propertize
+                     (pcase type
+                       ('change "edit")
+                       ('insert "add")
+                       ('delete "delete")
+                       (_ (symbol-name type)))
+                     'face (intern (format "diff-hl-%s" type))))
+                   (candidate
+                    (format "%-6s %5d  %s"
+                            label line
+                            (if (string-empty-p summary)
+                                "(empty line)"
+                              (truncate-string-to-width
+                               summary 100 nil nil "...")))))
+              (push (consult--location-candidate
+                     candidate (cons buffer start) line line)
+                    candidates)))))
+      (setq candidates (nreverse candidates))
+      (unless candidates
+        (user-error "No changed hunks"))
+      (consult--read candidates
+                     :prompt "Diff hunk: "
+                     :category 'consult-location
+                     :sort nil
+                     :require-match t
+                     :lookup #'consult--lookup-location
+                     :state (consult--location-state candidates))))
+
+  (transient-define-prefix thy/diff-hunk-transient ()
+    "Transient for navigating and acting on diff hunks."
+    [["Navigate"
+      ("n" "Next" diff-hl-next-hunk :transient t)
+      ("p" "Previous" diff-hl-previous-hunk :transient t)
+      ("s" "Show" diff-hl-show-hunk)]
+     ["Act"
+      ("r" "Revert" diff-hl-revert-hunk)
+      ("S" "Stage" diff-hl-stage-current-hunk)]])
   :hook
   ((find-file . diff-hl-mode)
    (vc-dir-mode . diff-hl-dir-mode)
    (dired-mode . diff-hl-dired-mode)
    (focus-in . diff-hl-update-once)
    ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
-          (lambda ()
-            (diff-hl-update-once)
-            (unless (display-graphic-p) (diff-hl-margin-local-mode 1)))))
+    (lambda ()
+      (unless (display-graphic-p) (diff-hl-margin-local-mode 1)))))
   :custom
   (diff-hl-disable-on-remote t)
   (diff-hl-draw-borders nil)
   :bind
-  ("C-c g" . diff-hl-show-hunk)
+  (("C-c g" . thy/consult-diff-hunks)
+   ("C-c G" . thy/diff-hunk-transient))
   :config
   (setq-default fringes-outside-margins t)
 
@@ -95,20 +105,7 @@
 
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
-    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
-
-  (advice-add #'ws-butler-after-save :after #'diff-hl-update-once))
-
-(transient-define-prefix thy/diff-hunk-transient ()
-  "Transient for navigating and acting on diff hunks."
-  [["Navigate"
-    ("n" "Next" diff-hl-next-hunk :transient t)
-    ("p" "Previous" diff-hl-previous-hunk :transient t)
-    ("s" "Show" diff-hl-show-hunk)]
-   ["Act"
-    ("r" "Revert" diff-hl-revert-hunk)
-    ("S" "Stage" diff-hl-stage-current-hunk)]])
-
+    (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
 (use-package magit
   :ensure t
   :bind (("C-c v" . magit)
@@ -143,7 +140,7 @@
   :config
   (defun thy/smerge-try-smerge ()
     "Enable `smerge-mode' when the current file contains conflict markers."
-    (when (and buffer-file-name (vc-backend buffer-file-name))
+    (when buffer-file-name
       (save-excursion
         (goto-char (point-min))
         (when (re-search-forward "^<<<<<<< " nil t)

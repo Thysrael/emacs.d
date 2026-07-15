@@ -39,7 +39,7 @@
                     ("^\\\\begin{[^}]+}" "^\\\\end{[^}]+}")))
       (add-to-list 'ispell-skip-region-alist pair)))
   :hook ((org-mode . thy/org-ispell-skip-region-alist)
-          ((markdown-mode markdown-ts-mode) . thy/markdown-ispell-skip-region-alist))
+         ((markdown-mode markdown-ts-mode) . thy/markdown-ispell-skip-region-alist))
   :custom
   (ispell-dictionary "en_US")
   (ispell-extra-args '("--sug-mode=ultra" "--run-together"))
@@ -110,7 +110,7 @@
          (markdown-ts-mode . thy/markdown-ts-appear-mode))
   :bind
   (:map markdown-ts-mode-map
-         ("C-c C-b" . thy/markdown-ts-insert-bold))
+        ("C-c C-b" . thy/markdown-ts-insert-bold))
   :preface
   (defvar-local thy/markdown-ts-appear-region nil
     "Markers delimiting the region whose Markdown markup is visible.")
@@ -364,14 +364,14 @@
            (subtree (buffer-substring-no-properties source-start source-end))
            (parent-headings (org-get-outline-path))
            (location (or (org-entry-get nil "ARCHIVE" 'inherit)
-                          org-archive-location))
+                         org-archive-location))
            (archive-location (org-archive--compute-location location))
            (archive-file (car archive-location))
            (archive-heading (cdr archive-location))
            (archive-buffer
-             (if (string-empty-p archive-file)
-                 source-buffer
-               (find-file-noselect archive-file)))
+            (if (string-empty-p archive-file)
+                source-buffer
+              (find-file-noselect archive-file)))
            (archive-root
             (unless (string-empty-p archive-heading)
               (unless (string-match-p "\\`\\*+\\s-+" archive-heading)
@@ -386,22 +386,22 @@
                                 parent-headings)))
       (cl-labels
           ((archive-subtree
-            ()
-            (with-current-buffer archive-buffer
-              (org-mode)
-              (if (thy/org-find-or-create-heading-path target-path)
-                  (org-end-of-subtree t t)
-                (goto-char (point-max)))
-              (unless (bolp)
-                (insert "\n"))
-              (insert subtree)
-              (unless (string-suffix-p "\n" subtree)
-                (insert "\n"))
-              (unless (eq source-buffer archive-buffer)
-                (save-buffer)))
-            (with-current-buffer source-buffer
-              (goto-char source-start)
-              (org-cut-subtree))))
+             ()
+             (with-current-buffer archive-buffer
+               (org-mode)
+               (if (thy/org-find-or-create-heading-path target-path)
+                   (org-end-of-subtree t t)
+                 (goto-char (point-max)))
+               (unless (bolp)
+                 (insert "\n"))
+               (insert subtree)
+               (unless (string-suffix-p "\n" subtree)
+                 (insert "\n"))
+               (unless (eq source-buffer archive-buffer)
+                 (save-buffer)))
+             (with-current-buffer source-buffer
+               (goto-char source-start)
+               (org-cut-subtree))))
         (if (eq source-buffer archive-buffer)
             (atomic-change-group
               (archive-subtree))
@@ -458,8 +458,7 @@
 
 (use-package latex
   :ensure auctex
-  :hook ((TeX-mode . prettify-symbols-mode)
-         (TeX-mode . thy/latex-prettify-symbols))
+  :hook (TeX-mode . thy/latex-prettify-symbols)
   :custom
   (TeX-auto-save t)
   (TeX-electric-sub-and-superscript t)

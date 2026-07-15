@@ -26,8 +26,8 @@
 (use-package tramp-rpc
   :after tramp
   :vc (:url "https://github.com/ArthurHeymans/emacs-tramp-rpc"
-       :rev :newest
-       :lisp-dir "lisp")
+            :rev :newest
+            :lisp-dir "lisp")
   :custom
   (tramp-rpc-deploy-local-cache-directory
    (no-littering-expand-var-file-name "tramp-rpc/"))

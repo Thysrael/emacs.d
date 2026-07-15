@@ -34,9 +34,6 @@
   :after rime
   :demand t
   :bind ("<f18>" . thy/sis-switch)
-  :hook
-  (((text-mode prog-mode) . sis-context-mode)
-   ((text-mode prog-mode) . sis-inline-mode))
   :preface
   (defun thy/sis-switch ()
     "Switch input source unless Evil is in a non-input state."

@@ -27,7 +27,8 @@
   :custom
   (flymake-diagnostic-functions nil)
   (flymake-fringe-indicator-position 'right-fringe)
-  (flymake-show-diagnostics-at-end-of-line 'short))
+  (flymake-show-diagnostics-at-end-of-line 'short)
+  (flymake-suppress-zero-counters nil))
 
 (use-package consult-flymake
   :ensure nil

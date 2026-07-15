@@ -103,42 +103,49 @@
   )
 
 ;; Context-aware commenting.
-(defun thy/smart-comment (&optional arg)
-  "Comment the current line or invoke `comment-dwim' with ARG."
-  (interactive "*P")
-  (comment-normalize-vars)
-  (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
-      (comment-or-uncomment-region (line-beginning-position) (line-end-position))
-    (comment-dwim arg)))
-(global-set-key (kbd "C-/") #'thy/smart-comment)
-(setq comment-empty-lines t) ; comment over empty lines
+(use-package newcomment
+  :ensure nil
+  :preface
+  (defun thy/smart-comment (&optional arg)
+    "Comment the current line or invoke `comment-dwim' with ARG."
+    (interactive "*P")
+    (comment-normalize-vars)
+    (if (and (not (region-active-p)) (not (looking-at "[ \t]*$")))
+        (comment-or-uncomment-region (line-beginning-position) (line-end-position))
+      (comment-dwim arg)))
+  :bind ("C-/" . thy/smart-comment)
+  :custom
+  (comment-empty-lines t))
 
 ;; Format code automatically.
-(defun thy/smart-format ()
-  "Format the region or buffer, then trim whitespace on modified lines."
-  (interactive)
-  (let* ((regionp (use-region-p))
-         (beg (and regionp (copy-marker (region-beginning))))
-         (end (and regionp (copy-marker (region-end) t))))
-    (unwind-protect
-        (progn
-          (if (and (bound-and-true-p eglot--managed-mode) (eglot-managed-p))
-              (if regionp
-                  (eglot-format beg end)
-                (eglot-format-buffer))
-            (if regionp
-                (indent-region beg end)
-              (indent-region (point-min) (point-max))))
-          (when (bound-and-true-p ws-butler-mode)
-            (if regionp
-                (ws-butler-clean-region beg end)
-              (ws-butler-before-save)))
-          (message "formatting done."))
-      (when beg
-        (set-marker beg nil))
-      (when end
-        (set-marker end nil)))))
-(global-set-key (kbd "C-c f") #'thy/smart-format)
+(use-package emacs
+  :ensure nil
+  :preface
+  (defun thy/format-region-or-buffer (&optional beg end)
+    "Format BEG to END, or the entire buffer when either is nil."
+    (if (and (fboundp 'eglot-managed-p) (eglot-managed-p))
+        (eglot-format beg end)
+      (indent-region (or beg (point-min)) (or end (point-max))))
+    (when (bound-and-true-p ws-butler-mode)
+      (if (and beg end)
+          (ws-butler-clean-region beg end)
+        (ws-butler-before-save))))
+
+  (defun thy/smart-format ()
+    "Format the region or buffer, then trim whitespace on modified lines."
+    (interactive)
+    (let* ((regionp (use-region-p))
+           (beg (and regionp (copy-marker (region-beginning))))
+           (end (and regionp (copy-marker (region-end) t))))
+      (unwind-protect
+          (progn
+            (thy/format-region-or-buffer beg end)
+            (message "formatting done."))
+        (when beg
+          (set-marker beg nil))
+        (when end
+          (set-marker end nil)))))
+  :bind ("C-c f" . thy/smart-format))
 
 ;;; Structured editing
 ;; Keep delimiters balanced.
@@ -163,7 +170,11 @@
 (use-package ws-butler
   :ensure t
   :hook ((prog-mode markdown-mode markdown-ts-mode) . ws-butler-mode)) ; Remove trailing whitespace with lines touched
-(setq backward-delete-char-untabify-method 'hungry) ; 一次删除多个空格
+
+(use-package simple
+  :ensure nil
+  :custom
+  (backward-delete-char-untabify-method 'hungry)) ; 一次删除多个空格
 
 ;; Treat each component of a camelCase identifier as a word.
 (use-package subword
@@ -195,7 +206,7 @@
              (hs-hide-block))
             (_
              (if (not (hs-already-hidden-p))
-                (hs-hide-block)
+                 (hs-hide-block)
                (hs-hide-level 1)
                (setq this-command 'thy/hs-cycle-children))))
         (hs-hide-level level)
@@ -251,9 +262,9 @@ the last line where predicate holds."
         (when skip (forward-line direction))
         (cl-loop while (and (/= (point) bnd) (funcall predicate base-indent))
                  do (progn
-                       (when before (setq pt (line-beginning-position)))
-                       (forward-line direction)
-                       (unless before (setq pt (line-beginning-position)))))
+                      (when before (setq pt (line-beginning-position)))
+                      (forward-line direction)
+                      (unless before (setq pt (line-beginning-position)))))
         pt)))
 
   (defun thy/fold-hideshow-indent-range (&optional point)
@@ -318,32 +329,32 @@ begin and end of the block surrounding point."
   )
 
 ;; 可以快速选择区域
-(defun thy/er-mark-emt-word ()
-  "Mark the Chinese word at point using `emt' segmentation."
-  (interactive)
-  (when (and (bound-and-true-p emt-mode)
-             (fboundp 'emt--get-bounds-at-point)
-             (fboundp 'emt-split))
-    (condition-case nil
-        (pcase-let* ((`(,beg . ,end) (emt--get-bounds-at-point 'all))
-                     (index (- (point) beg))
-                     (text (buffer-substring-no-properties beg end))
-                     (word-bounds
-                      (catch 'word-bounds
-                        (dolist (bounds (emt-split text))
-                          (let ((word-beg (car bounds))
-                                (word-end (cdr bounds)))
-                            (when (or (and (<= word-beg index) (< index word-end))
-                                      (and (< word-beg index) (<= index word-end)))
-                              (throw 'word-bounds bounds)))))))
-          (when word-bounds
-            (goto-char (+ beg (cdr word-bounds)))
-            (set-mark (point))
-            (goto-char (+ beg (car word-bounds)))))
-      (error nil))))
-
 (use-package expand-region
   :ensure t
+  :preface
+  (defun thy/er-mark-emt-word ()
+    "Mark the Chinese word at point using `emt' segmentation."
+    (interactive)
+    (when (and (bound-and-true-p emt-mode)
+               (fboundp 'emt--get-bounds-at-point)
+               (fboundp 'emt-split))
+      (condition-case nil
+          (pcase-let* ((`(,beg . ,end) (emt--get-bounds-at-point 'all))
+                       (index (- (point) beg))
+                       (text (buffer-substring-no-properties beg end))
+                       (word-bounds
+                        (catch 'word-bounds
+                          (dolist (bounds (emt-split text))
+                            (let ((word-beg (car bounds))
+                                  (word-end (cdr bounds)))
+                              (when (or (and (<= word-beg index) (< index word-end))
+                                        (and (< word-beg index) (<= index word-end)))
+                                (throw 'word-bounds bounds)))))))
+            (when word-bounds
+              (goto-char (+ beg (cdr word-bounds)))
+              (set-mark (point))
+              (goto-char (+ beg (car word-bounds)))))
+        (error nil))))
   :config
   (add-to-list 'er/try-expand-list #'thy/er-mark-emt-word)
   :bind

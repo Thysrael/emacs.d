@@ -3,6 +3,27 @@
 ;; Prefer horizontal splits and manage a few special buffers with built-in rules.
 (use-package window
   :ensure nil
+  :preface
+  (transient-define-prefix thy/window-transient ()
+    "Transient for window and tab commands."
+    [["Tab"
+      ("c" "Switch" tab-switch)
+      ("0" "Close" tab-close)
+      ("2" "New" tab-new)
+      ("r" "Rename" tab-rename :transient t)]
+     ["Winner"
+      ("u" "Undo" winner-undo :transient t)
+      ("U" "Redo" winner-redo :transient t)]
+     ["Desktop"
+      ("S" "Save" desktop-save-in-desktop-dir)
+      ("l" "Load" desktop-read)]
+     ["Resize"
+      ("=" "Grow" enlarge-window :transient t)
+      ("-" "Shrink" shrink-window :transient t)
+      ("+" "Widen" enlarge-window-horizontally :transient t)
+      ("_" "Narrow" shrink-window-horizontally :transient t)]])
+  :bind (("C-c T" . thy/window-transient)
+         ("C-x t" . thy/window-transient))
   :custom
   (split-width-threshold 1)
   (display-buffer-alist
@@ -139,8 +160,8 @@
      "\\*Capture\\*"
      "\\*ChatGPT\\*"
      "\\*IPADS\\*"
-      "\\*chat.*"
-      agent-shell-mode
+     "\\*chat.*"
+     agent-shell-mode
      ;; "\\*Org Agenda\\*"
      "^CAPTURE-.*\\.org*"
 

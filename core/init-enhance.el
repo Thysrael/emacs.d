@@ -130,9 +130,9 @@
 
   (add-to-list 'completion-styles-alist
                '(thy/orderless-basic
-                  thy/orderless-basic-try
-                  thy/orderless-basic-all
-                  "Unholy mix of Orderless and Basic.")))
+                 thy/orderless-basic-try
+                 thy/orderless-basic-all
+                 "Unholy mix of Orderless and Basic.")))
 
 ;; Match Chinese candidates by pinyin initials.
 (use-package pinyinlib

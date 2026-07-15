@@ -21,8 +21,8 @@
     (xref-push-marker-stack (point-marker)))
   :config
   (setq
-    xref-search-program 'ripgrep ; 设置工具为 riggrep
-    xref-history-storage 'xref-window-local-history)
+   xref-search-program 'ripgrep ; 设置工具为 riggrep
+   xref-history-storage 'xref-window-local-history)
 
   ;; 这里是一个压栈函数，用于记录光标位置
   (dolist (command '(find-function consult-imenu consult-ripgrep citre-jump))
