@@ -51,18 +51,30 @@
            :rev "master")
   :commands (emt-mode emt-forward-word emt-backward-word emt-download-module)
   :preface
-  (defun thy/emt-evil-forward-word (orig-fun count)
-    "Call ORIG-FUN with COUNT unless active EMT word motion succeeds."
-    (if (and (bound-and-true-p emt-mode)
-             (fboundp 'emt-forward-word))
-        (condition-case nil
-            (if (emt-forward-word count)
-                0
-              (funcall orig-fun count))
-          (error (funcall orig-fun count)))
-      (funcall orig-fun count)))
+  (defun thy/emt-evil-forward-word-begin (orig-fun count &optional bigword)
+    "Use EMT token boundaries for CJK `evil-forward-word-begin' motions."
+    (if (or bigword
+            (evil-operator-state-p)
+            (not (bound-and-true-p emt-mode))
+            (not (fboundp 'emt-forward-word))
+            (< (or count 1) 0))
+        (funcall orig-fun count bigword)
+      (dotimes (_ (or count 1))
+        (if (and (char-after)
+                 (eq (char-syntax (char-after)) ?w)
+                 (looking-at-p "\\cc\\|\\cj\\|\\ch"))
+            (let ((origin (point)))
+              (if (condition-case nil
+                      (and (emt-forward-word 1)
+                           (/= (point) origin))
+                    (error nil))
+                  (when (looking-at-p "[[:space:]]")
+                    (funcall orig-fun 1 nil))
+                (goto-char origin)
+                (funcall orig-fun 1 nil)))
+          (funcall orig-fun 1 nil)))))
   :hook (after-init . emt-mode)
   :config
   (with-eval-after-load 'evil
-    (advice-add #'evil--forward-word-respect-categories
-                :around #'thy/emt-evil-forward-word)))
+    (advice-add #'evil-forward-word-begin
+                :around #'thy/emt-evil-forward-word-begin)))
