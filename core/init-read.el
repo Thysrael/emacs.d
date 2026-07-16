@@ -28,8 +28,16 @@
   :ensure nil
   :bind
   (:map image-mode-map
-        ("=" . image-increase-size)
-        ("-" . image-decrease-size)))
+         ("=" . image-increase-size)
+         ("-" . image-decrease-size))
+  :custom
+  (image-auto-resize 'fit-window)
+  (image-auto-resize-on-window-resize 0.1)
+  :config
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal motion) image-mode-map
+      (kbd "=") #'image-increase-size
+      (kbd "-") #'image-decrease-size)))
 
 (use-package csv-mode
   :ensure t

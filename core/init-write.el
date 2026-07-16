@@ -118,16 +118,44 @@
   (defvar-local thy/markdown-ts-appear-previous-hide-markup nil
     "Value of `markdown-ts-hide-markup' before appear mode was enabled.")
 
+  (defvar thy/markdown-ts-image-icon nil
+    "Cached image icon used in rendered Markdown links.")
+
+  (defvar thy/markdown-ts-link-icon nil
+    "Cached link icon used in rendered Markdown links.")
+
+  (defun thy/markdown-ts-icon (type)
+    "Return the cached Markdown icon for TYPE."
+    (let* ((variable (if (eq type 'image)
+                         'thy/markdown-ts-image-icon
+                       'thy/markdown-ts-link-icon))
+           (cached (symbol-value variable)))
+      (or cached
+          (set variable
+               (if (require 'nerd-icons nil t)
+                   (nerd-icons-octicon
+                    (if (eq type 'image) "nf-oct-image" "nf-oct-link")
+                    :face 'markdown-ts-link)
+                 (if (eq type 'image) "[image]" "[link]"))))))
+
   (defun thy/markdown-ts-appear--restore ()
     "Restore hidden markup in the previously revealed region."
     (when-let* ((region thy/markdown-ts-appear-region)
                 (beg (marker-position (car region)))
                 (end (marker-position (cdr region))))
-      (font-lock-flush beg end)
-      (font-lock-ensure beg end)
       (set-marker (car region) nil)
       (set-marker (cdr region) nil)
-      (setq thy/markdown-ts-appear-region nil)))
+      (setq thy/markdown-ts-appear-region nil)
+      (font-lock-flush beg end)
+      (font-lock-ensure beg end)))
+
+  (defun thy/markdown-ts-appear-node-visible-p (node)
+    "Return non-nil when NODE overlaps the revealed editing region."
+    (when-let* ((region thy/markdown-ts-appear-region)
+                (beg (marker-position (car region)))
+                (end (marker-position (cdr region))))
+      (and (< (treesit-node-start node) end)
+           (> (treesit-node-end node) beg))))
 
   (defun thy/markdown-ts-appear-bounds ()
     "Return the line or fenced code block bounds at point."
@@ -155,6 +183,11 @@
         (thy/markdown-ts-appear--restore)
         (font-lock-ensure beg end)
         (with-silent-modifications
+          (remove-text-properties beg end '(display nil line-height nil))
+          (dolist (overlay (overlays-in beg end))
+            (when (or (overlay-get overlay 'thy/markdown-ts-image-label)
+                      (overlay-get overlay 'thy/markdown-ts-link-icon))
+              (delete-overlay overlay)))
           (let ((pos beg))
             (while (< pos end)
               (let ((next (next-single-property-change
@@ -188,6 +221,7 @@
                  (eq (char-after (treesit-node-start node)) ?>)))
            (markdown-ts-hide-markup
             (and markdown-ts-hide-markup
+                 (not (thy/markdown-ts-appear-node-visible-p node))
                  (not (or quote-marker-p
                           (member type '("fenced_code_block_delimiter"
                                          "info_string")))))))
@@ -202,6 +236,62 @@
              (line-beginning-position)
              (min (point-max) (1+ (line-end-position)))
              face t))))))
+
+  (defun thy/markdown-ts-fontify-image (function node &rest arguments)
+    "Call FUNCTION and render image NODE with an icon and useful label."
+    (apply function node arguments)
+    (let ((beg (treesit-node-start node))
+          (end (treesit-node-end node)))
+      (dolist (overlay (overlays-in beg end))
+        (when (overlay-get overlay 'thy/markdown-ts-image-label)
+          (delete-overlay overlay)))
+      (when (and markdown-ts-hide-markup
+                 (not (thy/markdown-ts-appear-node-visible-p node))
+                 (not (markdown-ts--outline-invisible-p beg)))
+        (let* ((description
+                (treesit-search-subtree node "\\`image_description\\'"))
+               (destination
+                (treesit-search-subtree node "\\`link_destination\\'"))
+               (url (and destination (treesit-node-text destination t)))
+               (icon (thy/markdown-ts-icon 'image))
+               (overlay (make-overlay beg (min (1+ beg) end) nil t nil)))
+          (with-silent-modifications
+            (when (and (not description) destination)
+              (remove-text-properties (treesit-node-start destination)
+                                      (treesit-node-end destination)
+                                      '(invisible nil)))
+            (when url
+              (markdown-ts--make-link-button beg end url)))
+          (overlay-put overlay 'thy/markdown-ts-image-label t)
+          (overlay-put overlay 'before-string (concat icon " "))
+          (overlay-put overlay 'help-echo url)
+          (overlay-put overlay 'mouse-face 'highlight)
+          (overlay-put overlay 'evaporate t)))))
+
+  (defun thy/markdown-ts-fontify-link (function node &rest arguments)
+    "Call FUNCTION and prefix a non-image link NODE with an icon."
+    (apply function node arguments)
+    (let* ((parent (treesit-node-parent node))
+           (beg (treesit-node-start node))
+           (end (treesit-node-end node)))
+      (dolist (overlay (overlays-in beg end))
+        (when (overlay-get overlay 'thy/markdown-ts-link-icon)
+          (delete-overlay overlay)))
+      (when (and markdown-ts-hide-markup
+                 (not (equal (treesit-node-type parent) "image"))
+                 (not (thy/markdown-ts-appear-node-visible-p node)))
+        (let ((overlay (make-overlay beg (min (1+ beg) end) nil t nil)))
+          (overlay-put overlay 'thy/markdown-ts-link-icon t)
+          (overlay-put overlay 'before-string
+                       (concat (thy/markdown-ts-icon 'link) " "))
+          (overlay-put overlay 'evaporate t)))))
+
+  (defun thy/markdown-ts-fontify-visible-markup (function node &rest arguments)
+    "Call FUNCTION without hiding NODE in the revealed editing region."
+    (let ((markdown-ts-hide-markup
+           (and markdown-ts-hide-markup
+                (not (thy/markdown-ts-appear-node-visible-p node)))))
+      (apply function node arguments)))
 
   (define-minor-mode thy/markdown-ts-appear-mode
     "Reveal nearby Markdown markup while Evil is in insert state."
@@ -251,7 +341,21 @@
   (markdown-ts-table-auto-align t)
   :config
   (advice-add 'markdown-ts--fontify-delimiter :around
-              #'thy/markdown-ts-fontify-delimiter))
+              #'thy/markdown-ts-fontify-delimiter)
+  (advice-add 'markdown-ts--fontify-atx-delimiter :around
+              #'thy/markdown-ts-fontify-visible-markup)
+  (advice-add 'markdown-ts--fontify-atx-heading :around
+              #'thy/markdown-ts-fontify-visible-markup)
+  (advice-add 'markdown-ts--fontify-setext-heading :around
+              #'thy/markdown-ts-fontify-visible-markup)
+  (advice-add 'markdown-ts--fontify-link-destination :around
+              #'thy/markdown-ts-fontify-visible-markup)
+  (advice-add 'markdown-ts--fontify-unordered-list-marker :around
+              #'thy/markdown-ts-fontify-visible-markup)
+  (advice-add 'markdown-ts--fontify-link-node :around
+              #'thy/markdown-ts-fontify-link)
+  (advice-add 'markdown-ts--fontify-image :around
+              #'thy/markdown-ts-fontify-image))
 
 (use-package org
   :ensure nil
