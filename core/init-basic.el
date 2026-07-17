@@ -155,6 +155,13 @@
   ;; Do not persist cursor positions for very long files.
   (add-to-list 'so-long-variable-overrides '(save-place-alist . nil)))
 
+;; Refresh unmodified file buffers after external tools rewrite them.
+(use-package autorevert
+  :ensure nil
+  :hook (after-init . global-auto-revert-mode)
+  :custom
+  (auto-revert-verbose nil))
+
 ;; Remember the last visited position in files across Emacs sessions.
 (use-package saveplace
   :ensure nil
