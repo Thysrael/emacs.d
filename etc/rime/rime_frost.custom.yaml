@@ -1,0 +1,4 @@
+patch:
+  switches/@8/reset: 1
+  pin_cand_filter/@12: "d\t的 地"
+  pin_cand_filter/@18: "l\t了 刘"

@@ -10,6 +10,19 @@
                (fboundp 'rime-lib-finalize))
       (rime-lib-finalize)
       (setq rime--lib-loaded nil)))
+
+  (defun thy/rime-install-customization ()
+    "Install the tracked Rime customization in the user data directory."
+    (let* ((source (expand-file-name "etc/rime/rime_frost.custom.yaml"
+                                     user-emacs-directory))
+           (directory (no-littering-expand-var-file-name "rime/"))
+           (destination (expand-file-name "rime_frost.custom.yaml" directory)))
+      (when (or (not (file-exists-p destination))
+                (file-newer-than-file-p source destination))
+        (make-directory directory t)
+        (copy-file source destination t t))))
+  :init
+  (thy/rime-install-customization)
   :custom
   (default-input-method "rime")
   (rime-disable-predicates '(rime-predicate-evil-mode-p))

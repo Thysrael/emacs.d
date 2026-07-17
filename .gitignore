@@ -3,6 +3,7 @@ todo.txt
 var/
 etc/rime/*
 !etc/rime/default.custom.yaml
+!etc/rime/rime_frost.custom.yaml
 .tags/
 elpha/
 tree-sitter/
