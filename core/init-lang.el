@@ -72,8 +72,11 @@
   (python-indent-guess-indent-offset-verbose nil)
   )
 
-(use-package cuda-mode
-  :ensure t)
+(use-package cuda-ts-mode
+  :vc (cuda-ts-mode :url "https://github.com/Ergus/cuda-ts-mode"
+                    :rev :newest)
+  :mode "\\.cu[h]?\\'"
+  :hook (cuda-ts-mode . c-ts-mode-toggle-comment-style))
 
 (use-package yaml-ts-mode
   :ensure nil
