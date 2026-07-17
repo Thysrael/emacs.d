@@ -564,7 +564,7 @@
   :ensure auctex
   :hook (TeX-mode . thy/latex-prettify-symbols)
   :custom
-  (TeX-auto-save t)
+  (TeX-auto-save nil)
   (TeX-electric-sub-and-superscript t)
   (TeX-parse-self t)
   (TeX-save-query nil)
