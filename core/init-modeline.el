@@ -223,7 +223,7 @@
       (:propertize ,(+mode-line-overwrite-readonly-indicator) face ,panel-face)
       (,active-p (:propertize ,active-indicators face ,panel-face))
       " "
-      ,(or +mode-line-project-crumb
+      ,(or (+mode-line-get-project-crumb)
            `(:propertize "%b" face ,meta-face))
       " "
       (:propertize +mode-line-remote-host-name face +mode-line-host-name-active-face))))
@@ -287,12 +287,20 @@
   :ensure t
   :preface
   (defvar-local +mode-line-project-crumb nil)
+  (defvar-local +mode-line-project-crumb-width nil)
 
   (defun +mode-line-update-project-crumb (&rest _)
     "Cache breadcrumb project crumbs for the mode-line."
-    (setq +mode-line-project-crumb
+    (setq +mode-line-project-crumb-width (window-width)
+          +mode-line-project-crumb
           (when (fboundp 'breadcrumb-project-crumbs)
             (breadcrumb-project-crumbs))))
+
+  (defun +mode-line-get-project-crumb ()
+    "Return project crumbs, refreshing them when the window width changes."
+    (unless (equal +mode-line-project-crumb-width (window-width))
+      (+mode-line-update-project-crumb))
+    +mode-line-project-crumb)
   :init
   (dolist (hook '(find-file-hook after-save-hook clone-indirect-buffer-hook
                                  Info-selection-hook window-configuration-change-hook))
@@ -306,5 +314,5 @@
   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :foreground unspecified))))
   :config
   (setq breadcrumb-imenu-crumb-separator " ⋅ "
-        breadcrumb-project-max-length 0.55
+        breadcrumb-project-max-length 0.4
         breadcrumb-idle-time 10))
