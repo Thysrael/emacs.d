@@ -117,15 +117,23 @@
       ("f" "File" agent-shell-insert-file)]])
 
   (defun thy/agent-shell-toggle (&optional arg)
-    "Create an Agent Shell, or toggle an existing one.
+    "Toggle this context's Agent Shell, or create one when none exists.
 With prefix ARG, delegate to `agent-shell'."
     (interactive "P")
     (if arg
         (agent-shell arg)
       (require 'agent-shell)
-      (if (agent-shell-buffers)
-          (agent-shell-toggle)
-        (agent-shell))))
+      (if-let* ((cwd (thy/agent-shell-cwd))
+                (shell-buffer
+                 (seq-find
+                  (lambda (buffer)
+                    (with-current-buffer buffer
+                      (file-equal-p cwd default-directory)))
+                  (agent-shell-buffers))))
+          (if-let* ((window (get-buffer-window shell-buffer)))
+              (quit-restore-window window 'bury)
+            (agent-shell--display-buffer shell-buffer))
+        (agent-shell '(4)))))
   :init
   (with-eval-after-load 'evil
     (evil-define-key* '(normal insert) 'global
