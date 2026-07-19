@@ -114,7 +114,7 @@
   :custom
   (magit-bury-buffer-function #'thy/magit-kill-buffers)
   (magit-diff-paint-whitespace nil)
-  (magit-diff-refine-hunk nil)
+  (magit-diff-refine-hunk t)
   (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (magit-format-file-function #'magit-format-file-nerd-icons)
   (magit-revision-insert-related-refs nil)
