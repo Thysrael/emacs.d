@@ -179,9 +179,9 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
   (dirvish-hide-cursor t) ; 在 wired 下不方便
   ;; Avoid the `all' function collision in Dirvish 2.3.0 on newer Emacs.
   (dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all)))
-  ;; Use the PDF preview dispatcher.
+  ;; Use media preview dispatchers, including the custom EPS dispatcher below.
   (dirvish-preview-dispatchers
-   '(video image gif audio epub archive font pdf))
+   '(video graffle eps image gif audio epub archive font pdf))
   ;; M-e
   (dirvish-emerge-groups
    '(
@@ -192,7 +192,7 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
      ("Audio"         (extensions "mp3" "flac" "wav" "ape" "aac"))
      ("Archives"      (extensions "gz" "rar" "zip"))
      ("Office"        (extensions "doc" "docx" "xls" "xlsx" "ppt" "pptx"))))
-  (dirvish-default-layout '(1 0.15 0.55))
+  (dirvish-default-layout '(1 0.15 0.35))
   ;; (dirvish-hide-details '(dirvish-side))
   ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
   :bind ("<f6>" . dirvish-side)
@@ -200,6 +200,45 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
   (dirvish-mode . dired-omit-mode)
   ;; (dirvish-setup . dirvish-emerge-mode)
   :config
+  (require 'dirvish-widgets)
+  (add-to-list 'dirvish-image-exts "graffle")
+  (add-to-list 'dirvish-image-exts "eps")
+  (add-to-list 'dirvish-binary-exts "graffle")
+  (add-to-list 'dirvish-binary-exts "eps")
+  (dirvish-define-preview graffle (file ext preview-window)
+    "Preview the JPEG embedded in an OmniGraffle document."
+    (when (equal ext "graffle")
+      (let* ((width (dirvish-media--img-size preview-window))
+             (height (dirvish-media--img-size preview-window 'height))
+             (cache-dir (dirvish--img-thumb-name file width ".graffle"))
+             (cache (expand-file-name "preview.jpeg" cache-dir)))
+        (cond
+         ((and (file-exists-p cache)
+               (not (file-newer-than-file-p file cache)))
+          `(img . ,(create-image cache nil nil
+                                :max-width width :max-height height)))
+         ((not (executable-find "unzip"))
+          '(info . "The `unzip' executable is required to preview Graffle files."))
+         ((zerop (call-process "unzip" nil nil nil "-tqq" file "preview.jpeg"))
+          `(cache . ("unzip" "-qq" "-DD" "-o" ,file "preview.jpeg"
+                     "-d" ,cache-dir)))
+         (t '(info . "This Graffle file has no embedded preview.jpeg."))))))
+  (dirvish-define-preview eps (file ext preview-window)
+    "Preview EPS files using ImageMagick and Ghostscript."
+    :require (dirvish-magick-program)
+    (when (equal ext "eps")
+      (let* ((width (dirvish-media--img-size preview-window))
+             (height (dirvish-media--img-size preview-window 'height))
+             (cache (dirvish--img-thumb-name file width ".png")))
+        (if (and (file-exists-p cache)
+                 (not (file-newer-than-file-p file cache)))
+            `(img . ,(create-image cache nil nil
+                                  :max-width width :max-height height))
+          `(cache . (,dirvish-magick-program
+                     "-density" "144" ,file
+                     "-thumbnail" ,(format "%sx%s" width height)
+                     "-background" "white" "-alpha" "remove"
+                     ,cache))))))
   (dirvish-override-dired-mode)
   (dolist (binding thy/dirvish-mode-bindings)
     (keymap-set dirvish-mode-map (car binding) (cdr binding)))
