@@ -57,7 +57,6 @@
     (thy/setup-fonts))
   :init
   (thy/setup-fonts)
-  (add-to-list 'default-frame-alist '(alpha-background . 98))
   :hook
   ((server-after-make-frame . thy/setup-fonts)
    (window-setup . window-divider-mode))
