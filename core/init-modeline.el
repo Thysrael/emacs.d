@@ -41,7 +41,7 @@
   :group '+mode-line)
 
 (defface +mode-line-host-name-active-face
-  '((t (:inherit (font-lock-function-name-face bold italic))))
+  '((t (:weight bold :slant italic)))
   "The face for host name on the mode-line of an active window."
   :group '+mode-line)
 
@@ -309,7 +309,7 @@
     (advice-add fn :after #'+mode-line-update-project-crumb))
   :custom-face
   (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t :slant italic))))
-  (breadcrumb-project-crumbs-face ((t (:slant italic))))
+  (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :slant italic))))
   (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :slant italic))))
   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :foreground unspecified))))
   :config

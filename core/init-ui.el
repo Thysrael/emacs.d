@@ -6,6 +6,7 @@
   (nerd-icons-font-family "Symbols Nerd Font Mono")
   :config
   (dolist (icon '(("drawio" nerd-icons-mdicon "nf-md-drawing" :face nerd-icons-lpink)
+                  ("plt" nerd-icons-mdicon "nf-md-chart_bell_curve" :face nerd-icons-lblue)
                   ("rst" nerd-icons-mdicon "nf-md-file_document" :face nerd-icons-lpink)
                   ("ets" nerd-icons-sucicon "nf-seti-typescript" :face nerd-icons-blue-alt)))
     (push icon nerd-icons-extension-icon-alist))

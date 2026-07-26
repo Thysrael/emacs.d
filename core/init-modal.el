@@ -275,7 +275,7 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
       (evil-local-set-key 'motion (kbd "SPC") thy/evil-leader-command-map)))
 
   :init
-  (setq evil-respect-visual-line-mode t)
+  (setq evil-respect-visual-line-mode nil)
   (setq evil-undo-system 'undo-redo)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-integration t)
@@ -287,6 +287,13 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   (setq evil-want-fine-undo t)
   (add-hook 'evil-local-mode-hook #'thy/evil-bind-local-leader)
   (evil-mode 1)
+
+  ;; Move by display lines, while operator motions keep logical line semantics.
+  (evil-define-minor-mode-key '(normal visual) 'visual-line-mode
+    (kbd "j") #'evil-next-visual-line
+    (kbd "k") #'evil-previous-visual-line
+    (kbd "g j") #'evil-next-line
+    (kbd "g k") #'evil-previous-line)
 
   ;; Keep yanks visually stable; the pulse feedback already shows what was copied.
   (advice-add #'evil-yank :around #'thy/evil-yank-keep-point)
@@ -313,6 +320,48 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
     :type line
     (when-let* ((bounds (thy/section-bounds)))
       (evil-range (car bounds) (cdr bounds) 'line)))
+
+  (defun thy/evil-select-pair (fallback open close count beg end type inclusive)
+    "Select OPEN and CLOSE around point, or call FALLBACK.
+COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
+    (let* ((origin (point))
+           (outer (ignore-errors
+                    (evil-select-paren open close beg end type count t))))
+      (if (and outer
+               (<= (car outer) origin)
+               (<= origin (cadr outer)))
+          (evil-select-paren open close beg end type count inclusive)
+        (funcall fallback count beg end type))))
+
+  (defmacro thy/evil-define-pair-text-objects
+      (name fallback-inner fallback-outer open close keys description
+            &optional outer-extend)
+    "Define paired Evil text objects NAME for OPEN, CLOSE, and KEYS."
+    (let ((inner (intern (format "thy/evil-inner-%s" name)))
+          (outer (intern (format "thy/evil-a-%s" name))))
+      `(progn
+         (evil-define-text-object ,inner (count &optional beg end type)
+           ,(format "Select inside ASCII or Chinese %s." description)
+           :extend-selection nil
+           (thy/evil-select-pair #',fallback-inner ,open ,close
+                                 count beg end type nil))
+         (evil-define-text-object ,outer (count &optional beg end type)
+           ,(format "Select around ASCII or Chinese %s." description)
+           :extend-selection ,outer-extend
+           (thy/evil-select-pair #',fallback-outer ,open ,close
+                                 count beg end type t))
+         (dolist (key ',keys)
+           (define-key evil-inner-text-objects-map key #',inner)
+           (define-key evil-outer-text-objects-map key #',outer)))))
+
+  (thy/evil-define-pair-text-objects
+   paren evil-inner-paren evil-a-paren ?（ ?） ("b" "(" ")") "parentheses")
+  (thy/evil-define-pair-text-objects
+   bracket evil-inner-bracket evil-a-bracket ?【 ?】 ("[" "]") "brackets")
+  (thy/evil-define-pair-text-objects
+   angle evil-inner-angle evil-a-angle ?《 ?》 ("<" ">") "book-title brackets")
+  (thy/evil-define-pair-text-objects
+   double-quote evil-inner-double-quote evil-a-double-quote ?“ ?” ("\"") "quotes" t)
 
   (evil-set-initial-state 'color-rg-mode 'motion)
   (evil-set-initial-state 'ghostel-mode 'insert)
@@ -376,15 +425,7 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   (with-eval-after-load 'markdown-ts-mode
     (evil-define-key 'normal markdown-ts-mode-map
       (kbd "TAB") #'markdown-ts-outline-cycle
-      (kbd "<tab>") #'markdown-ts-outline-cycle
-      (kbd "H") #'evil-beginning-of-visual-line
-      (kbd "L") #'evil-end-of-visual-line)
-    (evil-define-key 'visual markdown-ts-mode-map
-      (kbd "H") #'evil-beginning-of-visual-line
-      (kbd "L") #'evil-end-of-visual-line)
-    (evil-define-key 'normal markdown-ts-view-mode-map
-      (kbd "H") #'evil-beginning-of-visual-line
-      (kbd "L") #'evil-end-of-visual-line))
+      (kbd "<tab>") #'markdown-ts-outline-cycle))
 
   (with-eval-after-load 'corfu
     (when (fboundp 'corfu-quit)
@@ -408,9 +449,12 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   (evil-collection-init '(magit dired org-agenda))
 
   (with-eval-after-load 'magit
-    (evil-define-key 'normal magit-mode-map
-      (kbd "J") #'magit-section-forward-sibling
-      (kbd "K") #'magit-section-backward-sibling))
+    (with-eval-after-load 'evil-collection-magit
+      (evil-define-key 'normal magit-mode-map
+        (kbd "J") #'magit-section-forward-sibling
+        (kbd "K") #'magit-section-backward-sibling)
+      (evil-define-key 'normal magit-status-mode-map
+        (kbd "g") #'magit-refresh)))
 
   ;; Preserve local additions after evil-collection installs its Dired bindings.
   (with-eval-after-load 'dired
