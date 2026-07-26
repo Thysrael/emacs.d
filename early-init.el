@@ -11,7 +11,7 @@
             (setq gc-cons-percentage 0.1)))
 
 ;; Native compilation settings.
-(setq native-comp-jit-compilation t)
+(setq native-comp-jit-compilation nil)
 
 (when (fboundp 'startup-redirect-eln-cache)
   (startup-redirect-eln-cache

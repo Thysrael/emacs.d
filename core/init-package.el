@@ -54,7 +54,7 @@
         ("nongnu" . 10)
         ("melpa" . 0)))
 
-(setq package-native-compile t)
+(setq package-native-compile nil)
 (setq package-vc-allow-build-commands t)
 
 (defun thy/package-import-default-keyring ()
