@@ -185,5 +185,4 @@
    '(font-lock-preprocessor-face ((t (:foreground unspecified :family "Maple Mono NF CN"))))
    '(font-lock-regexp-grouping-backslash ((t (:foreground unspecified))))
    '(fixed-pitch ((t (:family "Maple Mono NF CN"))))
-   '(variable-pitch ((t (:height 0.9 :family "Symbols Nerd Font Mono"))))
    '(bold ((t (:inherit (font-lock-builtin-face) :weight ultra-bold))))))
