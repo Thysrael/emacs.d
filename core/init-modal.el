@@ -321,6 +321,45 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
     (when-let* ((bounds (thy/section-bounds)))
       (evil-range (car bounds) (cdr bounds) 'line)))
 
+  (defun thy/latex-environment-bounds ()
+    "Return outer and inner bounds of the enclosing LaTeX environment."
+    (unless (derived-mode-p 'LaTeX-mode)
+      (user-error "Not in an AUCTeX LaTeX buffer"))
+    (save-excursion
+      (unless (looking-at (regexp-quote "\\begin{"))
+        ;; AUCTeX needs point away from the closing brace of an environment.
+        (when (or (eq (char-before) ?}) (eq (char-after) ?}))
+          (backward-char 2))
+        (LaTeX-find-matching-begin))
+      (let ((outer-beg (point))
+            outer-end inner-beg inner-end)
+        (forward-sexp)
+        (while (memq (char-after) '(?{ ?\[))
+          (forward-sexp))
+        (when (looking-at "\n[ \t]*")
+          (goto-char (match-end 0)))
+        (setq inner-beg (point))
+        (goto-char (1+ outer-beg))
+        (LaTeX-find-matching-end)
+        (setq outer-end (point))
+        (search-backward "\\end")
+        (when (looking-back "\n[ \t]*" (line-beginning-position 0))
+          (goto-char (match-beginning 0)))
+        (setq inner-end (point))
+        (list outer-beg outer-end inner-beg inner-end))))
+
+  (evil-define-text-object thy/evil-inner-latex-environment
+      (count &optional beg end type)
+    "Select inside the enclosing LaTeX environment."
+    :extend-selection nil
+    (last (thy/latex-environment-bounds) 2))
+
+  (evil-define-text-object thy/evil-a-latex-environment
+      (count &optional beg end type)
+    "Select the enclosing LaTeX environment including delimiters."
+    :extend-selection nil
+    (nbutlast (thy/latex-environment-bounds) 2))
+
   (defun thy/evil-select-pair (fallback open close count beg end type inclusive)
     "Select OPEN and CLOSE around point, or call FALLBACK.
 COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
@@ -369,6 +408,8 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
 
   (define-key evil-inner-text-objects-map "s" #'thy/evil-inner-section)
   (define-key evil-outer-text-objects-map "s" #'thy/evil-a-section)
+  (define-key evil-inner-text-objects-map "e" #'thy/evil-inner-latex-environment)
+  (define-key evil-outer-text-objects-map "e" #'thy/evil-a-latex-environment)
 
   ;; In minibuffers, use Consult history instead of Evil paste-pop state checks.
   (define-key evil-normal-state-map (kbd "M-y") #'thy/evil-paste-pop-or-consult-yank-pop)

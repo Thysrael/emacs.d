@@ -86,10 +86,6 @@
   (custom-theme-set-faces
    'user
    '(markdown-code-face ((t (:inherit nil))))
-   '(markdown-header-face-1 ((t (:inherit org-level-1))))
-   '(markdown-header-face-2 ((t (:inherit org-level-2))))
-   '(markdown-header-face-3 ((t (:inherit org-level-3))))
-   '(markdown-header-face-4 ((t (:inherit org-level-4))))
    '(markdown-pre-face ((t (:inherit org-code))))
    '(markdown-inline-code-face ((t (:inherit markdown-pre-face :extend nil))))
    '(markdown-header-delimiter-face ((t (:foreground "#616161" :height 0.9))))
@@ -110,7 +106,10 @@
          (markdown-ts-mode . thy/markdown-ts-appear-mode))
   :bind
   (:map markdown-ts-mode-map
-        ("C-c C-b" . thy/markdown-ts-insert-bold))
+        ("C-c C-b" . thy/markdown-ts-insert-bold)
+        ("RET" . thy/markdown-ts-newline)
+        ("<return>" . thy/markdown-ts-newline)
+        ("<kp-enter>" . thy/markdown-ts-newline))
   :preface
   (defvar-local thy/markdown-ts-appear-region nil
     "Markers delimiting the region whose Markdown markup is visible.")
@@ -124,19 +123,48 @@
   (defvar thy/markdown-ts-link-icon nil
     "Cached link icon used in rendered Markdown links.")
 
+  (defvar thy/markdown-ts-wikilink-icon nil
+    "Cached Wiki link icon used in rendered Markdown links.")
+
+  (defun thy/markdown-ts-code-languages ()
+    "Return known language names for Markdown fenced code blocks."
+    (let (languages)
+      (dolist (mapping (append (and (boundp 'markdown-ts-code-block-modes)
+                                    markdown-ts-code-block-modes)
+                               (and (boundp 'markdown-code-lang-modes)
+                                    markdown-code-lang-modes)))
+        (push (format "%s" (car mapping)) languages))
+      (dolist (mapping auto-mode-alist)
+        (when (and (symbolp (cdr mapping))
+                   (string-suffix-p "-ts-mode" (symbol-name (cdr mapping))))
+          (push (string-remove-suffix "-ts-mode" (symbol-name (cdr mapping)))
+                languages)))
+      (dolist (mapping major-mode-remap-alist)
+        (dolist (mode (list (car mapping) (cdr mapping)))
+          (when (symbolp mode)
+            (push (string-remove-suffix
+                   "-ts" (string-remove-suffix "-mode" (symbol-name mode)))
+                  languages))))
+      (sort (delete-dups languages) #'string<)))
+
   (defun thy/markdown-ts-icon (type)
     "Return the cached Markdown icon for TYPE."
-    (let* ((variable (if (eq type 'image)
-                         'thy/markdown-ts-image-icon
-                       'thy/markdown-ts-link-icon))
+    (let* ((variable (pcase type
+                       ('image 'thy/markdown-ts-image-icon)
+                       ('wikilink 'thy/markdown-ts-wikilink-icon)
+                       (_ 'thy/markdown-ts-link-icon)))
            (cached (symbol-value variable)))
       (or cached
           (set variable
-               (if (require 'nerd-icons nil t)
-                   (nerd-icons-octicon
-                    (if (eq type 'image) "nf-oct-image" "nf-oct-link")
-                    :face 'markdown-ts-link)
-                 (if (eq type 'image) "[image]" "[link]"))))))
+               (cond
+                ((eq type 'wikilink)
+                 (propertize "◆" 'face 'markdown-ts-link))
+                ((require 'nerd-icons nil t)
+                 (nerd-icons-octicon
+                  (if (eq type 'image) "nf-oct-image" "nf-oct-link")
+                  :face 'markdown-ts-link))
+                ((eq type 'image) "[image]")
+                (t "[link]"))))))
 
   (defun thy/markdown-ts-appear--restore ()
     "Restore hidden markup in the previously revealed region."
@@ -177,27 +205,30 @@
 
   (defun thy/markdown-ts-appear-at-point ()
     "Reveal hidden markup on the current line or fenced code block."
-    (pcase-let ((`(,beg . ,end) (thy/markdown-ts-appear-bounds)))
-      (unless (and thy/markdown-ts-appear-region
-                   (= beg (marker-position (car thy/markdown-ts-appear-region))))
-        (thy/markdown-ts-appear--restore)
-        (font-lock-ensure beg end)
-        (with-silent-modifications
-          (remove-text-properties beg end '(display nil line-height nil))
-          (dolist (overlay (overlays-in beg end))
-            (when (or (overlay-get overlay 'thy/markdown-ts-image-label)
-                      (overlay-get overlay 'thy/markdown-ts-link-icon))
-              (delete-overlay overlay)))
-          (let ((pos beg))
-            (while (< pos end)
-              (let ((next (next-single-property-change
-                           pos 'invisible nil end)))
-                (when (eq (get-text-property pos 'invisible)
-                          'markdown-ts--markup)
-                  (remove-text-properties pos next '(invisible nil)))
-                (setq pos next)))))
-        (setq thy/markdown-ts-appear-region
-              (cons (copy-marker beg) (copy-marker end t))))))
+    (let ((pos (point)))
+      (unless (when-let* ((region thy/markdown-ts-appear-region)
+                          (beg (marker-position (car region)))
+                          (end (marker-position (cdr region))))
+                (and (<= beg pos) (< pos end)))
+        (pcase-let ((`(,beg . ,end) (thy/markdown-ts-appear-bounds)))
+          (thy/markdown-ts-appear--restore)
+          (font-lock-ensure beg end)
+          (with-silent-modifications
+            (remove-text-properties beg end '(display nil line-height nil))
+            (dolist (overlay (overlays-in beg end))
+              (when (or (overlay-get overlay 'thy/markdown-ts-image-label)
+                        (overlay-get overlay 'thy/markdown-ts-link-icon))
+                (delete-overlay overlay)))
+            (let ((markup-pos beg))
+              (while (< markup-pos end)
+                (let ((next (next-single-property-change
+                             markup-pos 'invisible nil end)))
+                  (when (eq (get-text-property markup-pos 'invisible)
+                            'markdown-ts--markup)
+                    (remove-text-properties markup-pos next '(invisible nil)))
+                  (setq markup-pos next)))))
+          (setq thy/markdown-ts-appear-region
+                (cons (copy-marker beg) (copy-marker end t)))))))
 
   (defun thy/markdown-ts-appear-start ()
     "Reveal Markdown markup while Evil is in insert state."
@@ -211,6 +242,65 @@
                (ignore-errors (markdown-ts-at-table-p nil t)))
       (ignore-errors (markdown-ts-table-align-table)))
     (thy/markdown-ts-appear--restore))
+
+  (defun thy/markdown-ts-refontify-fence (beg end _old-length)
+    "Refontify from BEG after editing a Markdown code fence through END."
+    (let ((line-beg (save-excursion
+                      (goto-char beg)
+                      (line-beginning-position)))
+          (line-end (save-excursion
+                      (goto-char end)
+                      (line-end-position))))
+      (when (save-excursion
+              (goto-char line-beg)
+              (re-search-forward
+               "^[ \t]*\\(?:`\\{3,\\}\\|~\\{3,\\}\\)" line-end t))
+        (font-lock-flush line-beg (point-max))
+        (font-lock-ensure line-beg (point-max)))))
+
+  (defun thy/markdown-ts-expand-code-fence ()
+    "Prompt for a language and complete a newly typed code fence."
+    (when (and (eq last-command-event ?`)
+               (eolp)
+               (equal (buffer-substring-no-properties
+                       (line-beginning-position) (point))
+                      "```"))
+      (delete-region (line-beginning-position) (point))
+      (condition-case nil
+          (let ((language
+                 (completing-read "Language: "
+                                  (thy/markdown-ts-code-languages)
+                                  nil nil nil
+                                  'markdown-ts-language-history)))
+            (insert "```" language "\n\n```")
+            (forward-line -1))
+        (quit (insert "```")))))
+
+  (defun thy/markdown-ts-newline ()
+    "Continue a plain ordered or unordered Markdown list."
+    (interactive)
+    (font-lock-ensure (line-beginning-position) (line-end-position))
+    (let ((regexp
+           "^\\([ \t]*\\(?:>[ \t]*\\)*\\)\\([-+*]\\|\\([0-9]+\\)\\([.)]\\)\\)[ \t]+\\(.*\\)$"))
+      (if (or (markdown-ts-at-code-block-p)
+              (not (save-excursion
+                     (goto-char (line-beginning-position))
+                     (re-search-forward regexp (line-end-position) t))))
+          (markdown-ts-newline)
+        (let ((prefix (match-string-no-properties 1))
+              (marker (match-string-no-properties 2))
+              (number (match-string-no-properties 3))
+              (delimiter (match-string-no-properties 4))
+              (content (match-string-no-properties 5)))
+          (if (string-empty-p (string-trim content))
+              (delete-region (line-beginning-position) (line-end-position))
+            (newline)
+            (insert prefix
+                    (if number
+                        (concat (number-to-string (1+ (string-to-number number)))
+                                delimiter)
+                      marker)
+                    " "))))))
 
   (defun thy/markdown-ts-fontify-delimiter (function node &rest arguments)
     "Call FUNCTION while preserving code fences and styling quote markers."
@@ -272,18 +362,44 @@
     "Call FUNCTION and prefix a non-image link NODE with an icon."
     (apply function node arguments)
     (let* ((parent (treesit-node-parent node))
+           (parent-beg (treesit-node-start parent))
+           (parent-end (treesit-node-end parent))
+           (wikilink-p
+            (and (equal (treesit-node-type parent) "shortcut_link")
+                 (> parent-beg (point-min))
+                 (< parent-end (point-max))
+                 (eq (char-before parent-beg) ?\[)
+                 (eq (char-after parent-end) ?\])))
            (beg (treesit-node-start node))
-           (end (treesit-node-end node)))
+           (end (treesit-node-end node))
+           (alias-beg
+            (and wikilink-p
+                 (save-excursion
+                   (goto-char beg)
+                   (search-forward "|" end t))))
+           (icon-beg (or alias-beg beg)))
       (dolist (overlay (overlays-in beg end))
         (when (overlay-get overlay 'thy/markdown-ts-link-icon)
           (delete-overlay overlay)))
       (when (and markdown-ts-hide-markup
                  (not (equal (treesit-node-type parent) "image"))
                  (not (thy/markdown-ts-appear-node-visible-p node)))
-        (let ((overlay (make-overlay beg (min (1+ beg) end) nil t nil)))
+        (when wikilink-p
+          (with-silent-modifications
+            (put-text-property (1- parent-beg) parent-beg
+                               'invisible 'markdown-ts--markup)
+            (put-text-property parent-end (1+ parent-end)
+                               'invisible 'markdown-ts--markup)
+            (when alias-beg
+              (put-text-property beg alias-beg
+                                 'invisible 'markdown-ts--markup))))
+        (let ((overlay (make-overlay icon-beg (min (1+ icon-beg) end)
+                                     nil t nil)))
           (overlay-put overlay 'thy/markdown-ts-link-icon t)
           (overlay-put overlay 'before-string
-                       (concat (thy/markdown-ts-icon 'link) " "))
+                       (concat (thy/markdown-ts-icon
+                                (if wikilink-p 'wikilink 'link))
+                               " "))
           (overlay-put overlay 'evaporate t)))))
 
   (defun thy/markdown-ts-fontify-visible-markup (function node &rest arguments)
@@ -306,21 +422,29 @@
                     #'thy/markdown-ts-appear-start nil t)
           (add-hook 'evil-insert-state-exit-hook
                     #'thy/markdown-ts-appear-stop nil t)
+          (add-hook 'after-change-functions
+                    #'thy/markdown-ts-refontify-fence nil t)
+          (add-hook 'post-self-insert-hook
+                    #'thy/markdown-ts-expand-code-fence nil t)
           (when (eq (bound-and-true-p evil-state) 'insert)
             (thy/markdown-ts-appear-start)))
       (remove-hook 'evil-insert-state-entry-hook
                    #'thy/markdown-ts-appear-start t)
       (remove-hook 'evil-insert-state-exit-hook
                    #'thy/markdown-ts-appear-stop t)
+      (remove-hook 'after-change-functions
+                   #'thy/markdown-ts-refontify-fence t)
+      (remove-hook 'post-self-insert-hook
+                   #'thy/markdown-ts-expand-code-fence t)
       (thy/markdown-ts-appear-stop)
       (unless thy/markdown-ts-appear-previous-hide-markup
         (when markdown-ts-hide-markup
           (markdown-ts-toggle-hide-markup)))))
   :custom-face
-  (markdown-ts-heading-1 ((t (:inherit org-level-1))))
-  (markdown-ts-heading-2 ((t (:inherit org-level-2))))
-  (markdown-ts-heading-3 ((t (:inherit org-level-3))))
-  (markdown-ts-heading-4 ((t (:inherit org-level-4))))
+  (markdown-ts-heading-1 ((t (:inherit org-level-1 :height 1.5))))
+  (markdown-ts-heading-2 ((t (:inherit org-level-2 :height 1.35))))
+  (markdown-ts-heading-3 ((t (:inherit org-level-3 :height 1.2))))
+  (markdown-ts-heading-4 ((t (:inherit org-level-4 :height 1.05))))
   (markdown-ts-code-block
    ((((background light)) (:inherit fixed-pitch :background "#f3f3f3" :extend t))
     (((background dark)) (:inherit fixed-pitch :background "#30323b" :extend t))))
@@ -582,6 +706,85 @@
   (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex --synctex=1%(mode)%' -shell-escape %t" TeX-run-TeX nil t))
   (add-to-list 'TeX-view-program-list '("eaf" eaf-pdf-synctex-forward-view))
   (add-to-list 'TeX-view-program-selection '(output-pdf "eaf")))
+
+(use-package reftex
+  :ensure nil
+  :hook (LaTeX-mode . thy/latex-reftex-setup)
+  :custom
+  (reftex-plug-into-AUCTeX t)
+  :preface
+  (defvar thy/latex-citation-cache (make-hash-table :test #'equal)
+    "Project bibliography cache keyed by project root.")
+
+  (defun thy/latex-project-root ()
+    "Return the current project root or `default-directory'."
+    (expand-file-name
+     (if-let ((project (project-current nil)))
+         (project-root project)
+       default-directory)))
+
+  (defun thy/latex-bibliography-signature (files)
+    "Return a modification signature for bibliography FILES."
+    (mapcar (lambda (file)
+              (let ((attributes (file-attributes file)))
+                (list file
+                      (and attributes (file-attribute-size attributes))
+                      (and attributes
+                           (file-attribute-modification-time attributes)))))
+            files))
+
+  (defun thy/latex-project-citation-keys ()
+    "Return cached citation keys from bibliography files in the project."
+    (let* ((root (thy/latex-project-root))
+           (cached (gethash root thy/latex-citation-cache))
+           (files (or (plist-get cached :files)
+                      (let ((project (project-current nil root)))
+                        (if project
+                            (seq-filter
+                             (lambda (file) (string-suffix-p ".bib" file t))
+                             (project-files project))
+                          (directory-files root t "\\.bib\\'")))))
+           (signature (thy/latex-bibliography-signature files)))
+      (if (equal signature (plist-get cached :signature))
+          (plist-get cached :keys)
+        (let (keys)
+          (require 'bibtex)
+          (dolist (file files)
+            (when (file-readable-p file)
+              (with-temp-buffer
+                (insert-file-contents file)
+                (bibtex-mode)
+                (bibtex-map-entries
+                 (lambda (key _beg _end)
+                   (when key (push key keys)))))))
+          (setq keys (sort (delete-dups keys) #'string<))
+          (puthash root (list :files files :signature signature :keys keys)
+                   thy/latex-citation-cache)
+          keys))))
+
+  (defun thy/latex-project-cite-completion-at-point ()
+    "Complete citation keys from project bibliography files."
+    (when-let* ((macro (car-safe (LaTeX-what-macro)))
+                ((string-match-p
+                  "\\`[[:alpha:]@]*cite[[:alpha:]@*]*\\'" macro))
+                (open (nth 1 (syntax-ppss)))
+                ((eq (char-after open) ?{)))
+      (let ((beg (save-excursion
+                   (if (search-backward "," (1+ open) t)
+                       (forward-char)
+                     (goto-char (1+ open)))
+                   (skip-chars-forward " \t")
+                   (point)))
+            (end (save-excursion
+                   (skip-chars-forward "^,}")
+                   (point))))
+        (list beg end (thy/latex-project-citation-keys) :exclusive 'no))))
+
+  (defun thy/latex-reftex-setup ()
+    "Enable RefTeX and project citation completion."
+    (turn-on-reftex)
+    (add-hook 'completion-at-point-functions
+              #'thy/latex-project-cite-completion-at-point -20 t)))
 
 (use-package cdlatex
   :ensure t

@@ -64,35 +64,27 @@
        "Forward links: ")))
 
   (defun thy/obsidian-expand-wikilink ()
-    "Select and insert an Obsidian link after typing `[['."
+    "Select and insert an Obsidian link after typing `[[' or `【【'."
     (when (and (bound-and-true-p obsidian-mode)
-               (eq last-command-event ?\[)
-               (looking-back "\\[\\[" (line-beginning-position)))
-      (delete-char -2)
-      (condition-case nil
-          (call-interactively #'obsidian-insert-wikilink)
-        (quit (insert "[[")))))
+               (memq last-command-event '(?\[ ?【)))
+      (let* ((fullwidth-p (eq last-command-event ?【))
+             (opening (if fullwidth-p "【【" "[["))
+             (closing (if fullwidth-p ?】 ?\])))
+        (when (looking-back (regexp-quote opening)
+                            (line-beginning-position))
+          (delete-char -2)
+          (when (eq (char-after) closing)
+            (delete-char 1))
+          (condition-case nil
+              (call-interactively #'obsidian-insert-wikilink)
+            (quit (insert opening)))))))
 
   (defun thy/obsidian-setup ()
     "Configure Obsidian editing in the current buffer."
-    (add-hook 'post-self-insert-hook #'thy/obsidian-expand-wikilink nil t)
-    (when (derived-mode-p 'markdown-ts-mode)
-      (font-lock-add-keywords
-       nil '(("\\[\\[\\([^]\n]+\\)\\]\\]" 1 'link prepend)) 'append)
-      (font-lock-flush)))
+    (if obsidian-mode
+        (add-hook 'post-self-insert-hook #'thy/obsidian-expand-wikilink nil t)
+      (remove-hook 'post-self-insert-hook #'thy/obsidian-expand-wikilink t)))
 
-  (defun thy/obsidian-return ()
-    "Follow an Obsidian link at point, or insert a Markdown newline."
-    (interactive)
-    (if (or (markdown-link-p)
-            (markdown-wiki-link-p)
-            (obsidian-backlink-p)
-            (thing-at-point-url-at-point))
-        (obsidian-follow-link-at-point)
-      (call-interactively
-       (if (derived-mode-p 'markdown-ts-mode)
-           #'markdown-ts-newline
-         #'markdown-enter-key))))
   :init
   ;; Obsidian uses elgrep internally; do not persist elgrep state.
   (setq elgrep-data-file nil)
@@ -100,17 +92,11 @@
          (obsidian-mode . thy/obsidian-setup))
   :bind
   (:map obsidian-mode-map
-        ("RET" . thy/obsidian-return)
-        ("<return>" . thy/obsidian-return)
-        ("<kp-enter>" . thy/obsidian-return)
+        ("RET" . nil)
+        ("<return>" . nil)
+        ("<kp-enter>" . nil)
         ("C-c C-o" . obsidian-follow-link-at-point))
   :custom
   (obsidian-directory "~/Documents/obsidian/content/")
   (obsidian-include-hidden-files nil)
-  (obsidian-use-update-timer nil)
-  :config
-  (with-eval-after-load 'evil
-    (evil-define-key 'normal obsidian-mode-map
-      (kbd "RET") #'thy/obsidian-return
-      (kbd "<return>") #'thy/obsidian-return
-      (kbd "<kp-enter>") #'thy/obsidian-return)))
+  (obsidian-use-update-timer nil))

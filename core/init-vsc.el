@@ -91,6 +91,7 @@
   :custom
   (diff-hl-disable-on-remote t)
   (diff-hl-draw-borders nil)
+  (diff-hl-update-async nil)
   :bind
   (("C-c g" . thy/consult-diff-hunks)
    ("C-c G" . thy/diff-hunk-transient))
