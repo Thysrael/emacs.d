@@ -99,4 +99,11 @@
   :custom
   (obsidian-directory "~/Documents/obsidian/content/")
   (obsidian-include-hidden-files nil)
-  (obsidian-use-update-timer nil))
+  (obsidian-use-update-timer nil)
+  :config
+  (dir-locals-set-class-variables
+   'thy/obsidian
+   '((nil . ((thy/markdown-image-default-directory . "img")))))
+  (dir-locals-set-directory-class
+   (file-name-as-directory (expand-file-name obsidian-directory))
+   'thy/obsidian))

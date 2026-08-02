@@ -309,6 +309,30 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
                   (line-end-position))))
     (thy/format-region-or-buffer beg end))
 
+  (defun thy/yank-media-image-available-p ()
+    "Return non-nil when the clipboard contains a supported image."
+    (and (require 'yank-media nil t)
+         (ignore-errors (yank-media--find-matching-media "image/.*"))))
+
+  (evil-define-command thy/evil-paste-after
+      (count &optional register yank-handler)
+    "Yank a clipboard image when supported, otherwise paste with Evil."
+    :suppress-operator t
+    (interactive "*P<x>")
+    (if (and (= (prefix-numeric-value count) 1)
+             (not register)
+             (not (evil-visual-state-p))
+             (thy/yank-media-image-available-p))
+        (condition-case nil
+            (progn
+              (when (and (derived-mode-p 'org-mode)
+                         (null yank-media--registered-handlers))
+                (org-setup-yank-dnd-handlers))
+              (call-interactively #'yank-media))
+          (user-error
+           (evil-paste-after count register yank-handler)))
+      (evil-paste-after count register yank-handler)))
+
   (evil-define-text-object thy/evil-inner-section (count &optional beg end type)
     "Select the current Org/Markdown section body."
     :type line
@@ -414,6 +438,7 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
   ;; In minibuffers, use Consult history instead of Evil paste-pop state checks.
   (define-key evil-normal-state-map (kbd "M-y") #'thy/evil-paste-pop-or-consult-yank-pop)
   (define-key evil-normal-state-map [remap yank-pop] #'thy/evil-paste-pop-or-consult-yank-pop)
+  (define-key evil-normal-state-map "p" #'thy/evil-paste-after)
 
   ;; Normal-state single keys are deliberately tuned for this config, not pure Vim.
   (define-key evil-normal-state-map (kbd ";") #'embark-act)

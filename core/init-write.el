@@ -103,7 +103,8 @@
 (use-package markdown-ts-mode
   :ensure nil
   :hook ((markdown-ts-mode . visual-line-mode)
-         (markdown-ts-mode . thy/markdown-ts-appear-mode))
+         (markdown-ts-mode . thy/markdown-ts-appear-mode)
+         (markdown-ts-mode . thy/markdown-ts-yank-media-setup))
   :bind
   (:map markdown-ts-mode-map
         ("C-c C-b" . thy/markdown-ts-insert-bold)
@@ -125,6 +126,63 @@
 
   (defvar thy/markdown-ts-wikilink-icon nil
     "Cached Wiki link icon used in rendered Markdown links.")
+
+  (defvar thy/markdown-image-directory-history nil
+    "History of directories used for yanked Markdown images.")
+
+  (defvar thy/markdown-image-basename-history nil
+    "History of basenames used for yanked Markdown images.")
+
+  (defvar-local thy/markdown-image-default-directory nil
+    "Default image directory, relative to the current Markdown file.")
+
+  (put 'thy/markdown-image-default-directory 'safe-local-variable
+       #'string-or-null-p)
+
+  (defun thy/markdown-ts-yank-image (mimetype data)
+    "Save image DATA of MIMETYPE and insert a Markdown image link."
+    (unless buffer-file-name
+      (user-error "Save the Markdown buffer before yanking an image"))
+    (let* ((base-directory (file-name-directory buffer-file-name))
+           (default-directory-name
+            (or thy/markdown-image-default-directory
+                (file-name-base buffer-file-name)))
+           (directory-name
+            (read-string "Image directory: " default-directory-name
+                         'thy/markdown-image-directory-history))
+           (directory (expand-file-name directory-name base-directory))
+           (extension
+            (symbol-name (mailcap-mime-type-to-extension mimetype)))
+           (basename
+            (read-string "Image basename: " nil
+                         'thy/markdown-image-basename-history))
+           (filename (concat basename "." extension))
+           (path (expand-file-name filename directory))
+           (relative-path (file-relative-name path base-directory)))
+      (when (or (string-empty-p basename)
+                (member basename '("." ".."))
+                (not (equal basename (file-name-nondirectory basename))))
+        (user-error "Image basename must be a non-empty file basename"))
+      (when (file-exists-p path)
+        (user-error "Image already exists: %s" path))
+      (make-directory directory t)
+      (let ((coding-system-for-write 'emacs-internal))
+        (with-temp-file path
+          (insert data)))
+      (insert "!["
+              (string-replace "]" "\\]" (string-replace "\\" "\\\\" basename))
+              "]" "("
+              (replace-regexp-in-string
+               "[()]" (lambda (match) (concat "\\" match))
+               (url-encode-url relative-path))
+              ")")))
+
+  (defun thy/markdown-ts-yank-media-setup ()
+    "Register the Markdown clipboard image handler."
+    (require 'mailcap)
+    (require 'url-util)
+    (require 'yank-media)
+    (yank-media-handler "image/.*" #'thy/markdown-ts-yank-image))
 
   (defun thy/markdown-ts-code-languages ()
     "Return known language names for Markdown fenced code blocks."
@@ -789,14 +847,6 @@
 (use-package cdlatex
   :ensure t
   :hook (LaTeX-mode . cdlatex-mode))
-
-(use-package outline
-  :ensure nil
-  :hook (LaTeX-mode . outline-minor-mode)
-  :bind
-  (:map outline-minor-mode-map
-        ("C-c C-o" . outline-cycle)
-        ("C-c [" . nil)))
 
 (use-package bibtex
   :ensure nil
