@@ -10,6 +10,7 @@
   :custom
   (ghostel-module-directory
    (no-littering-expand-var-file-name "ghostel/"))
+  (ghostel-module-auto-install 'download)
   (ghostel-shell '("zsh"))
   ;; Remote Ghostel terminals should use zsh too; this does not affect RPC jobs.
   (ghostel-tramp-shells '(("rpc" "zsh")
@@ -75,6 +76,38 @@ ARG is passed to `ghostel-project' or `ghostel'."
             (pop-to-buffer name))
         (pop-to-buffer (completing-read "Ghostel: " names nil t)))))
 
+  (defun thy/ghostel-download-file-with-curl (url destination)
+    "Download HTTPS URL atomically to DESTINATION using curl.
+Return the final URL after redirects."
+    (unless (string-prefix-p "https://" url)
+      (error "Refusing non-HTTPS download URL: %s" url))
+    (let ((curl (or (executable-find "curl")
+                    (error "curl is required to download the Ghostel module")))
+          temporary-file)
+      (make-directory (file-name-directory destination) t)
+      (setq temporary-file (make-temp-file (concat destination ".tmp.")))
+      (unwind-protect
+          (with-temp-buffer
+            (let ((status
+                   (process-file
+                    curl nil t nil
+                    "--fail" "--location" "--silent" "--show-error"
+                    "--proto" "=https" "--proto-redir" "=https"
+                    "--output" temporary-file
+                    "--write-out" "%{url_effective}" url)))
+              (unless (and (zerop status)
+                           (> (file-attribute-size
+                               (file-attributes temporary-file))
+                              0))
+                (error "curl download failed: %s"
+                       (string-trim (buffer-string))))
+              (set-file-modes temporary-file #o755)
+              (rename-file temporary-file destination t)
+              (setq temporary-file nil)
+              (or (string-trim (buffer-string)) url)))
+        (when (and temporary-file (file-exists-p temporary-file))
+          (delete-file temporary-file)))))
+
   (transient-define-prefix thy/ghostel-transient ()
     "Transient for Ghostel terminals."
     [("n" "New" thy/ghostel-new)
@@ -83,22 +116,32 @@ ARG is passed to `ghostel-project' or `ghostel'."
   (defun thy/ghostel-bind-input-keys ()
     "Bind editing and control keys in every Ghostel input map."
     ;; Ghostel rebuilds some maps, so these keys must be re-applied.
-    (dolist (map (list ghostel-char-mode-map
-                       ghostel-line-mode-map
-                       ghostel-semi-char-mode-map))
-      (define-key map (kbd "M-c") #'ghostel-readonly-copy)
-      (define-key map (kbd "M-v") #'ghostel-yank)
-      (define-key map (kbd "C-t") #'thy/ghostel-toggle-popup)
-      (define-key map (kbd "C-o") #'thy/agent-shell-toggle)
-      (define-key map (kbd "C-c") #'ghostel-send-C-c))
-    (with-eval-after-load 'evil
-      (evil-define-key '(normal insert) ghostel-mode-map
-        (kbd "M-c") #'ghostel-readonly-copy
-        (kbd "M-v") #'ghostel-yank
-        (kbd "C-t") #'thy/ghostel-toggle-popup
-        (kbd "C-o") #'thy/agent-shell-toggle
-        (kbd "C-c") #'ghostel-send-C-c)))
+    (let ((bindings '(("M-c" . ghostel-readonly-copy)
+                      ("M-v" . ghostel-yank)
+                      ("C-t" . thy/ghostel-toggle-popup)
+                      ("C-o" . thy/agent-shell-toggle)
+                      ("C-c" . ghostel-send-C-c))))
+      (dolist (map (list ghostel-char-mode-map
+                         ghostel-line-mode-map
+                         ghostel-semi-char-mode-map))
+        (dolist (binding bindings)
+          (define-key map (kbd (car binding)) (cdr binding))))
+      (with-eval-after-load 'evil
+        (dolist (map (delq nil
+                           (list ghostel-mode-map
+                                 (and (boundp 'evil-ghostel-mode-map)
+                                      (symbol-value 'evil-ghostel-mode-map)))))
+          (dolist (binding bindings)
+            (evil-define-key* '(normal insert) map
+              (kbd (car binding)) (cdr binding)))))))
   :config
+  (when (and (eq system-type 'darwin)
+             (not (advice-member-p #'thy/ghostel-download-file-with-curl
+                                   #'ghostel--download-file)))
+    (advice-add #'ghostel--download-file
+                :override #'thy/ghostel-download-file-with-curl))
+  ;; Prefer complete top rows over pixel-exact bottom alignment.
+  (setq ghostel--pixel-anchor-supported-p nil)
   (thy/ghostel-bind-input-keys)
   (advice-add #'ghostel--rebuild-semi-char-keymap
               :after (lambda (&rest _) (thy/ghostel-bind-input-keys)))
@@ -117,12 +160,6 @@ ARG is passed to `ghostel-project' or `ghostel'."
   :config
   (with-eval-after-load 'ghostel
     (thy/ghostel-bind-input-keys))
-  (evil-define-key '(normal insert) evil-ghostel-mode-map
-    (kbd "M-c") #'ghostel-readonly-copy
-    (kbd "M-v") #'ghostel-yank
-    (kbd "C-t") #'thy/ghostel-toggle-popup
-    (kbd "C-o") #'thy/agent-shell-toggle
-    (kbd "C-c") #'ghostel-send-C-c)
   (evil-define-key* 'insert evil-ghostel-mode-map
     (kbd "C-SPC") #'evil-force-normal-state))
 
