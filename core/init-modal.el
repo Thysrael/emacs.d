@@ -526,14 +526,10 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
   (with-eval-after-load 'dired
     (evil-define-key 'normal dired-mode-map
       (kbd "h") #'dired-up-directory
-      (kbd "l") #'dired-find-file
-      (kbd "y") #'dired-do-copy
-      (kbd "p") #'dirvish-yank
-      (kbd "P") #'dirvish-yank-menu
-      (kbd "Y") #'thy/dired-copy-files-to-clipboard
-      (kbd "W") #'thy/dired-copy-files-to-clipboard)
-    (evil-collection-define-key 'normal 'dired-mode-map
-      (kbd "o") #'dired-do-open))
+      (kbd "l") #'dired-find-file)
+    (dolist (binding thy/dirvish-dired-bindings)
+      (evil-collection-define-key 'normal 'dired-mode-map
+        (kbd (car binding)) (cdr binding))))
 
   (with-eval-after-load 'dirvish
     (dolist (binding thy/dirvish-mode-bindings)
