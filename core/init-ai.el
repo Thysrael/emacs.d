@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
+(declare-function acp--start-client "acp")
+
 (use-package acp
   :vc (acp :url "https://github.com/xenodium/acp.el" :rev :newest))
 
@@ -65,8 +67,23 @@
                    ((not (equal (agent-shell--current-thought-level-id
                                  (agent-shell--state))
                                 "high"))))
-         (agent-shell--config-option-set-thought-level-id
-          :thought-level-id "high")))))
+          (agent-shell--config-option-set-thought-level-id
+           :thought-level-id "high")))))
+
+  (defun thy/agent-shell-start-opencode-client (function &rest arguments)
+    "Call FUNCTION with OpenCode's environment available to remote processes."
+    (let ((client (plist-get arguments :client)))
+      (if (and (file-remote-p default-directory)
+               (equal (map-elt client :command)
+                      (car agent-shell-opencode-acp-command)))
+          (cl-progv
+              '(tramp-remote-process-environment)
+              (list (append
+                     agent-shell-opencode-environment
+                     (and (boundp 'tramp-remote-process-environment)
+                          (symbol-value 'tramp-remote-process-environment))))
+            (apply function arguments))
+        (apply function arguments))))
 
   (defun thy/agent-shell-read-buffer (prompt)
     "Read an Agent Shell buffer with Consult using PROMPT."
@@ -148,6 +165,13 @@ With prefix ARG, delegate to `agent-shell'."
   (require 'agent-shell-opencode)
   (setq agent-shell-opencode-authentication
         (agent-shell-opencode-make-authentication :none t))
+  (setq agent-shell-opencode-environment
+        (when-let* ((key (getenv "OPENAI_HORIZON_API_KEY")))
+          (list (concat "OPENAI_HORIZON_API_KEY=" key))))
+  (unless (advice-member-p #'thy/agent-shell-start-opencode-client
+                           #'acp--start-client)
+    (advice-add #'acp--start-client
+                :around #'thy/agent-shell-start-opencode-client))
   (setq agent-shell-preferred-agent-config
         (agent-shell-opencode-make-agent-config))
   (define-key agent-shell-mode-map (kbd "C-t") #'thy/ghostel-toggle-popup)
