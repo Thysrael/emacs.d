@@ -46,6 +46,38 @@
           (goto-char pos))
 	    (set-marker pos nil))))
 
+  (defun thy/evil-open-below (count)
+    "Open below with list continuation, preserving Evil COUNT behavior."
+    (interactive "p")
+    (let ((continuation
+           (cond
+            ((and (derived-mode-p 'org-mode)
+                  (bound-and-true-p org-autolist-mode)
+                  (org-in-item-p))
+             (lambda () (call-interactively #'org-return)))
+            ((and (eq major-mode 'markdown-ts-mode)
+                  (save-excursion
+                    (goto-char (line-beginning-position))
+                    (looking-at-p thy/markdown-list-item-regexp)))
+             (lambda () (call-interactively #'thy/markdown-ts-newline)))
+            ((and (derived-mode-p 'markdown-mode)
+                  (save-excursion
+                    (font-lock-ensure (line-beginning-position)
+                                      (line-end-position))
+                    (when (and (eolp) (> (point) (line-beginning-position)))
+                      (backward-char))
+                    (markdown-cur-list-item-bounds)))
+             (lambda ()
+               (let ((markdown-indent-on-enter 'indent-and-new-item))
+                 (call-interactively #'markdown-enter-key)))))))
+      (if continuation
+          (cl-letf (((symbol-function 'evil-insert-newline-below)
+                     (lambda ()
+                       (goto-char (line-end-position))
+                       (funcall continuation))))
+            (evil-open-below count))
+        (evil-open-below count))))
+
   (defvar-local thy/evil-operator-line-number-overlays nil
     "Overlays showing relative line numbers for a pending Evil operator.")
 
@@ -443,6 +475,7 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
   ;; Normal-state single keys are deliberately tuned for this config, not pure Vim.
   (define-key evil-normal-state-map (kbd ";") #'embark-act)
   (define-key evil-normal-state-map (kbd "P") #'consult-yank-pop)
+  (define-key evil-normal-state-map (kbd "o") #'thy/evil-open-below)
   (define-key evil-normal-state-map (kbd "=") #'thy/evil-format)
   (define-key evil-normal-state-map (kbd "gd") #'xref-find-definitions)
   (define-key evil-normal-state-map (kbd "gr") #'xref-find-references)

@@ -2,7 +2,7 @@
 
 (use-package visual-fill-column
   :ensure t
-  :hook ((markdown-mode markdown-ts-mode markdown-view-mode markdown-ts-view-mode org-mode eww-mode gfm-mode gfm-view-mode LaTeX-mode) . thy/center-text)
+  :hook ((text-mode eww-mode) . thy/center-text)
   :preface
   (defun thy/center-text ()
     "Center text in the current buffer with `visual-fill-column'."
@@ -135,6 +135,10 @@
 
   (defvar-local thy/markdown-image-default-directory nil
     "Default image directory, relative to the current Markdown file.")
+
+  (defconst thy/markdown-list-item-regexp
+    "^\\([ \t]*\\(?:>[ \t]*\\)*\\)\\([-+*]\\|\\([0-9]+\\)\\([.)]\\)\\)[ \t]+\\(.*\\)$"
+    "Regexp matching a plain Markdown list item.")
 
   (put 'thy/markdown-image-default-directory 'safe-local-variable
        #'string-or-null-p)
@@ -338,27 +342,26 @@
     "Continue a plain ordered or unordered Markdown list."
     (interactive)
     (font-lock-ensure (line-beginning-position) (line-end-position))
-    (let ((regexp
-           "^\\([ \t]*\\(?:>[ \t]*\\)*\\)\\([-+*]\\|\\([0-9]+\\)\\([.)]\\)\\)[ \t]+\\(.*\\)$"))
-      (if (or (markdown-ts-at-code-block-p)
-              (not (save-excursion
-                     (goto-char (line-beginning-position))
-                     (re-search-forward regexp (line-end-position) t))))
-          (markdown-ts-newline)
-        (let ((prefix (match-string-no-properties 1))
-              (marker (match-string-no-properties 2))
-              (number (match-string-no-properties 3))
-              (delimiter (match-string-no-properties 4))
-              (content (match-string-no-properties 5)))
-          (if (string-empty-p (string-trim content))
-              (delete-region (line-beginning-position) (line-end-position))
-            (newline)
-            (insert prefix
-                    (if number
-                        (concat (number-to-string (1+ (string-to-number number)))
-                                delimiter)
-                      marker)
-                    " "))))))
+    (if (or (markdown-ts-at-code-block-p)
+            (not (save-excursion
+                   (goto-char (line-beginning-position))
+                   (re-search-forward thy/markdown-list-item-regexp
+                                      (line-end-position) t))))
+        (markdown-ts-newline)
+      (let ((prefix (match-string-no-properties 1))
+            (marker (match-string-no-properties 2))
+            (number (match-string-no-properties 3))
+            (delimiter (match-string-no-properties 4))
+            (content (match-string-no-properties 5)))
+        (if (string-empty-p (string-trim content))
+            (delete-region (line-beginning-position) (line-end-position))
+          (newline)
+          (insert prefix
+                  (if number
+                      (concat (number-to-string (1+ (string-to-number number)))
+                              delimiter)
+                    marker)
+                  " ")))))
 
   (defun thy/markdown-ts-fontify-delimiter (function node &rest arguments)
     "Call FUNCTION while preserving code fences and styling quote markers."
