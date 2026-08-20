@@ -470,6 +470,20 @@
                 (not (thy/markdown-ts-appear-node-visible-p node)))))
       (apply function node arguments)))
 
+  (defun thy/markdown-ts-fontify-atx-delimiter (function node &rest arguments)
+    "Call FUNCTION and hide only the ATX marker and following blanks."
+    (let ((hide-markup-p
+           (and markdown-ts-hide-markup
+                (not (thy/markdown-ts-appear-node-visible-p node)))))
+      (let ((markdown-ts-hide-markup nil))
+        (apply function node arguments))
+      (when hide-markup-p
+        (save-excursion
+          (goto-char (treesit-node-end node))
+          (skip-chars-forward " \t" (line-end-position))
+          (put-text-property (treesit-node-start node) (point)
+                             'invisible 'markdown-ts--markup)))))
+
   (define-minor-mode thy/markdown-ts-appear-mode
     "Reveal nearby Markdown markup while Evil is in insert state."
     :lighter nil
@@ -528,7 +542,7 @@
   (advice-add 'markdown-ts--fontify-delimiter :around
               #'thy/markdown-ts-fontify-delimiter)
   (advice-add 'markdown-ts--fontify-atx-delimiter :around
-              #'thy/markdown-ts-fontify-visible-markup)
+              #'thy/markdown-ts-fontify-atx-delimiter)
   (advice-add 'markdown-ts--fontify-atx-heading :around
               #'thy/markdown-ts-fontify-visible-markup)
   (advice-add 'markdown-ts--fontify-setext-heading :around
