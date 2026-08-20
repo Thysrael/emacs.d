@@ -160,9 +160,10 @@
   (org-deadline-warning-days 7)
   ;; clock report level 增加到 3 ，显示 tag ，隐藏 agenda 文件显示
   (org-agenda-clockreport-parameter-plist '(:link t :hidefiles t :maxlevel 3 :tags t))
-  :custom-face
-  (org-scheduled-today ((t (:foreground "#f1fa8c"))))
-  ;; (org-scheduled ((t (:foreground "#ffb86c"))))
+  :config
+  (custom-theme-set-faces
+   'user
+   `(org-scheduled-today ((t (:foreground ,(doom-color 'warning))))))
   )
 
 ;; 在 agenda 上显示记录

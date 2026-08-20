@@ -83,7 +83,7 @@
   :hook
   ((find-file . diff-hl-mode)
    (vc-dir-mode . diff-hl-dir-mode)
-   (dired-mode . diff-hl-dired-mode)
+   (dired-mode . diff-hl-dired-mode-unless-remote)
    (focus-in . diff-hl-update-once)
    ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
     (lambda ()
