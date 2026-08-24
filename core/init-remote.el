@@ -19,8 +19,7 @@
    '((tramp-direct-async-process . t)))
   (connection-local-set-profiles
    '(:application tramp :protocol "ssh")
-   'remote-direct-async-process)
-  (add-to-list 'tramp-remote-path "~/.opencode/bin"))
+   'remote-direct-async-process))
 
 (use-package tramp-rpc
   :after tramp
