@@ -1,5 +1,9 @@
 ;;; -*- lexical-binding: t; -*-
 
+;; Evil Collection requires these to be set before Evil is loaded.
+(setq evil-want-integration t)
+(setq evil-want-keybinding nil)
+
 (use-package transient
   :ensure nil
   :preface
@@ -310,8 +314,6 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
   (setq evil-respect-visual-line-mode nil)
   (setq evil-undo-system 'undo-redo)
   (setq evil-want-C-u-scroll t)
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
   ;; Evil 1.15 declares this variable without giving it an initial value.
   (setq evil-mode-buffers nil)
   :config

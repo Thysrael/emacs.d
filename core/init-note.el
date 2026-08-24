@@ -85,9 +85,6 @@
         (add-hook 'post-self-insert-hook #'thy/obsidian-expand-wikilink nil t)
       (remove-hook 'post-self-insert-hook #'thy/obsidian-expand-wikilink t)))
 
-  :init
-  ;; Obsidian uses elgrep internally; do not persist elgrep state.
-  (setq elgrep-data-file nil)
   :hook (((markdown-mode markdown-ts-mode markdown-ts-view-mode) . obsidian-enable-minor-mode)
          (obsidian-mode . thy/obsidian-setup))
   :bind

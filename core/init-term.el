@@ -2,15 +2,17 @@
 
 (use-package ghostel
   :ensure t
+  :init
+  ;; Set the install location before a keymap or integration loads Ghostel.
+  (setq ghostel-module-directory
+        (no-littering-expand-var-file-name "ghostel/"))
+  (setq ghostel-module-auto-install 'download)
   :bind
   (("C-t" . thy/ghostel-toggle-popup)
    ("C-c t" . thy/ghostel-transient)
    :map ghostel-semi-char-mode-map
    ("C-g" . keyboard-quit))
   :custom
-  (ghostel-module-directory
-   (no-littering-expand-var-file-name "ghostel/"))
-  (ghostel-module-auto-install 'download)
   (ghostel-shell '("zsh"))
   ;; Remote Ghostel terminals should use zsh too; this does not affect RPC jobs.
   (ghostel-tramp-shells '(("rpc" "zsh")

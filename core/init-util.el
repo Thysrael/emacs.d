@@ -8,7 +8,9 @@
   :ensure t
   :demand t
   :config
-  (setq custom-file (no-littering-expand-var-file-name "custom.el")))
+  (setq custom-file (no-littering-expand-var-file-name "custom.el"))
+  ;; Obsidian loads Elgrep, but this configuration does not persist its UI state.
+  (setq elgrep-data-file nil))
 
 ;; Show color previews in markup and style buffers.
 (use-package rainbow-mode
