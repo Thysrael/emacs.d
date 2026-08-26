@@ -21,6 +21,9 @@
 (setq site-run-file nil)
 (setq inhibit-default-init t)
 
+;; Cache directory contents to avoid probing every entry in `load-path'.
+(setq load-path-filter-function #'load-path-filter-cache-directory-files)
+
 ;; Avoid legacy advice redefinition warnings during startup.
 (setq ad-redefinition-action 'accept)
 
