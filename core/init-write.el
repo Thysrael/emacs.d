@@ -740,7 +740,8 @@
 (use-package gnuplot
   :ensure t
   :mode (("\\.gp\\'" . gnuplot-mode)
-         ("\\.gnuplot\\'" . gnuplot-mode)))
+         ("\\.gnuplot\\'" . gnuplot-mode)
+         ("\\.plt\\'" . gnuplot-mode)))
 
 (use-package org-src
   :ensure nil
