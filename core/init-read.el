@@ -43,6 +43,138 @@
   :ensure t
   :commands csv-mode)
 
+(use-package pdf-tools
+  :ensure t
+  :defer t
+  :preface
+  (defconst thy/pdf-view-scroll-lines 3
+    "Number of lines to scroll a PDF vertically per step.")
+
+  (defconst thy/pdf-view-horizontal-scroll-columns 6
+    "Number of columns to pan a PDF horizontally per step.")
+
+  (defconst thy/pdf-view-pinch-resize-factor 1.1
+    "Scale factor used for each touchpad pinch zoom step.")
+
+  (defvar-local thy/pdf-view-pinch-start-scale nil
+    "PDF scale at the start of the current pinch gesture.")
+
+  (defvar-local thy/pdf-view-pinch-step 0
+    "Zoom step applied during the current PDF pinch gesture.")
+
+  (defun thy/setup-pdf-view-buffer ()
+    "Apply buffer-local touchpad settings for PDF viewing."
+    (setq-local mouse-wheel-tilt-scroll t
+                mouse-wheel-flip-direction t
+                mouse-wheel-scroll-amount
+                (cons thy/pdf-view-horizontal-scroll-columns
+                      (cdr mouse-wheel-scroll-amount))
+                mouse-wheel-scroll-amount-horizontal
+                thy/pdf-view-horizontal-scroll-columns))
+
+  (defun thy/pdf-view-scroll-forward (&optional count)
+    "Scroll forward by COUNT vertical PDF steps."
+    (interactive "p")
+    (let ((lines (* thy/pdf-view-scroll-lines (or count 1))))
+      (if pdf-view-roll-minor-mode
+          (pdf-roll-scroll-forward lines)
+        (pdf-view-next-line-or-next-page lines))))
+
+  (defun thy/pdf-view-scroll-backward (&optional count)
+    "Scroll backward by COUNT vertical PDF steps."
+    (interactive "p")
+    (let ((lines (* thy/pdf-view-scroll-lines (or count 1))))
+      (if pdf-view-roll-minor-mode
+          (pdf-roll-scroll-backward lines)
+        (pdf-view-previous-line-or-previous-page lines))))
+
+  (defun thy/pdf-view-pan-left (&optional count)
+    "Pan the PDF left by COUNT horizontal steps."
+    (interactive "p")
+    (image-backward-hscroll
+     (* thy/pdf-view-horizontal-scroll-columns (or count 1))))
+
+  (defun thy/pdf-view-pan-right (&optional count)
+    "Pan the PDF right by COUNT horizontal steps."
+    (interactive "p")
+    (image-forward-hscroll
+     (* thy/pdf-view-horizontal-scroll-columns (or count 1))))
+
+  (defun thy/pdf-view-copy-page ()
+    "Copy all text from the current PDF page."
+    (interactive)
+    (pdf-view-mark-whole-page)
+    (pdf-view-kill-ring-save))
+
+  (defun thy/pdf-view-pinch (event)
+    "Zoom the PDF according to macOS pinch EVENT."
+    (interactive "e")
+    (unless (eq (event-basic-type event) 'pinch)
+      (error "`thy/pdf-view-pinch' bound to bad event type"))
+    (let ((window (posn-window (nth 1 event)))
+          (dx (nth 2 event))
+          (dy (nth 3 event))
+          (scale (nth 4 event))
+          (angle (nth 5 event)))
+      (when (window-live-p window)
+        (with-selected-window window
+          (when (and (zerop dx) (zerop dy) (zerop angle))
+            (setq thy/pdf-view-pinch-start-scale
+                  (/ (float (car (pdf-view-image-size nil window)))
+                     (car (pdf-cache-pagesize
+                           (pdf-view-current-page window))))
+                  thy/pdf-view-pinch-step 0))
+          (when thy/pdf-view-pinch-start-scale
+            (let ((step
+                   (round (log scale thy/pdf-view-pinch-resize-factor))))
+              (unless (= thy/pdf-view-pinch-step step)
+                (setq thy/pdf-view-pinch-step step
+                      pdf-view-display-size
+                      (* thy/pdf-view-pinch-start-scale
+                         (expt thy/pdf-view-pinch-resize-factor step)))
+                (pdf-view-redisplay window))))))))
+  :hook ((pdf-view-mode . thy/setup-pdf-view-buffer)
+         (pdf-view-mode . pdf-view-roll-minor-mode)
+         (pdf-view-mode . auto-revert-mode))
+  :bind
+  (:map pdf-view-mode-map
+        ([pinch] . thy/pdf-view-pinch))
+  :custom
+  (pdf-view-display-size 'fit-width)
+  (pdf-view-resize-factor 1.2)
+  :init
+  (pdf-loader-install t)
+  :config
+  (with-eval-after-load 'evil
+    (evil-set-initial-state 'pdf-view-mode 'motion)
+    (evil-define-key* '(normal motion) pdf-view-mode-map
+      (kbd "h") #'thy/pdf-view-pan-left
+      (kbd "j") #'thy/pdf-view-scroll-forward
+      (kbd "k") #'thy/pdf-view-scroll-backward
+      (kbd "l") #'thy/pdf-view-pan-right
+      (kbd "gg") #'pdf-view-first-page
+      (kbd "G") #'pdf-view-last-page
+
+      (kbd "/") #'isearch-forward
+      (kbd "n") #'isearch-repeat-forward
+      (kbd "N") #'isearch-repeat-backward
+
+      (kbd "+") #'pdf-view-enlarge
+      (kbd "=") #'pdf-view-enlarge
+      (kbd "-") #'pdf-view-shrink
+
+      (kbd "y") #'pdf-view-kill-ring-save
+      (kbd "Y") #'thy/pdf-view-copy-page
+      (kbd "M-w") #'pdf-view-kill-ring-save
+      (kbd "M-c") #'pdf-view-kill-ring-save ; Command is Meta on macOS.
+
+      ;; Evil's default mouse drag cannot select text rendered by PDF Tools.
+      [down-mouse-1] #'pdf-view-mouse-set-region
+      [M-down-mouse-1] #'pdf-view-mouse-set-region-rectangle
+      [C-down-mouse-1] #'pdf-view-mouse-extend-region
+
+      (kbd "q") #'quit-window)))
+
 (use-package doc-view
   :ensure nil
   :preface
