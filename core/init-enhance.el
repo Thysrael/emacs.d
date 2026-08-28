@@ -198,6 +198,7 @@
   :custom
   (consult-async-min-input 2)
   (consult-narrow-key "<")
+  (consult-preview-partial-size (* 5 1024 1024))
   (register-preview-delay 0.5)
   (register-preview-function #'consult-register-format)
   (xref-show-definitions-function #'consult-xref)
