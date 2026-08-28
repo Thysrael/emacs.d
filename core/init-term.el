@@ -7,6 +7,10 @@
   (setq ghostel-module-directory
         (no-littering-expand-var-file-name "ghostel/"))
   (setq ghostel-module-auto-install 'download)
+  (with-eval-after-load 'dired
+    (keymap-set dired-mode-map "C-t" #'thy/ghostel-toggle-popup))
+  (with-eval-after-load 'evil-collection-dired
+    (keymap-set dired-mode-map "C-t" #'thy/ghostel-toggle-popup))
   :bind
   (("C-t" . thy/ghostel-toggle-popup)
    ("C-c t" . thy/ghostel-transient)

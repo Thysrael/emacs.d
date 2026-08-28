@@ -559,6 +559,9 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
 
   ;; Preserve local additions after evil-collection installs its Dired bindings.
   (with-eval-after-load 'dired
+    (when (fboundp 'thy/ghostel-toggle-popup)
+      (evil-define-key* 'normal dired-mode-map
+        (kbd "C-t") #'thy/ghostel-toggle-popup))
     (evil-define-key 'normal dired-mode-map
       (kbd "h") #'dired-up-directory
       (kbd "l") #'dired-find-file)
@@ -567,6 +570,9 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
         (kbd (car binding)) (cdr binding))))
 
   (with-eval-after-load 'dirvish
+    (when (fboundp 'thy/ghostel-toggle-popup)
+      (evil-define-key* 'normal dirvish-mode-map
+        (kbd "C-t") #'thy/ghostel-toggle-popup))
     (dolist (binding thy/dirvish-mode-bindings)
       (evil-collection-define-key 'normal 'dirvish-mode-map
         (kbd (car binding)) (cdr binding)))))
