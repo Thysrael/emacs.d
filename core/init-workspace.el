@@ -41,6 +41,12 @@
       (concat (propertize " " 'face face)
               (tab-bar-tab-name-format-default tab index))))
   :config
+  ;; Keep tab switching ahead of mode-specific Meta bindings.
+  (keymap-global-set "<thy-tab-next>" #'tab-next)
+  (keymap-global-set "<thy-tab-previous>" #'tab-previous)
+  (define-key key-translation-map (kbd "M-j") (kbd "<thy-tab-next>"))
+  (define-key key-translation-map (kbd "M-k") (kbd "<thy-tab-previous>"))
+
   (custom-theme-set-faces
    'user
    '(tab-bar ((t (:inherit mode-line-inactive :box nil))))
