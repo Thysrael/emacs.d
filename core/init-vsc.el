@@ -14,6 +14,18 @@
   :ensure t
   :defines desktop-minor-mode-table
   :preface
+  (defface thy/vc-change-face
+    '((t (:foreground "#82aaff")))
+    "Face used for changed version-control entries.")
+
+  (defface thy/vc-delete-face
+    '((t (:foreground "#ff757f")))
+    "Face used for deleted version-control entries.")
+
+  (defface thy/vc-insert-face
+    '((t (:foreground "#77e0c6")))
+    "Face used for inserted version-control entries.")
+
   (defun thy/consult-diff-hunks ()
     "Browse the current buffer's changed hunks with live preview."
     (interactive)
@@ -83,7 +95,6 @@
   :hook
   ((find-file . diff-hl-mode)
    (vc-dir-mode . diff-hl-dir-mode)
-   (dired-mode . diff-hl-dired-mode-unless-remote)
    (focus-in . diff-hl-update-once)
    ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
     (lambda ()
@@ -100,9 +111,9 @@
 
   (custom-theme-set-faces
    'user
-   '(diff-hl-change ((t (:background "#82aaff" :foreground "#82aaff"))))
-   '(diff-hl-delete ((t (:background "#ff757f" :foreground "#ff757f"))))
-   '(diff-hl-insert ((t (:background "#77e0c6" :foreground "#77e0c6")))))
+   '(diff-hl-change ((t (:inherit thy/vc-change-face :background "#82aaff"))))
+   '(diff-hl-delete ((t (:inherit thy/vc-delete-face :background "#ff757f"))))
+   '(diff-hl-insert ((t (:inherit thy/vc-insert-face :background "#77e0c6")))))
 
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
@@ -113,6 +124,7 @@
          ("C-c V" . magit-blame-addition))
   :hook ((magit-process-mode . goto-address-mode))
   :custom
+  (magit-auto-revert-immediately nil)
   (magit-bury-buffer-function #'thy/magit-kill-buffers)
   (magit-diff-paint-whitespace nil)
   (magit-diff-refine-hunk t)
