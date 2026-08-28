@@ -85,7 +85,11 @@
     (interactive "p")
     (let ((lines (* thy/pdf-view-scroll-lines (or count 1))))
       (if pdf-view-roll-minor-mode
-          (pdf-roll-scroll-backward lines)
+          (let* ((window (selected-window))
+                 (page (pdf-view-current-page window)))
+            (pdf-roll-scroll-backward lines window)
+            (unless (= page (pdf-view-current-page window))
+              (pdf-roll-redisplay window)))
         (pdf-view-previous-line-or-previous-page lines))))
 
   (defun thy/pdf-view-pan-left (&optional count)
@@ -189,11 +193,13 @@
 
   (defun thy/doc-view-fit-page (&rest _)
     "Fit the current DocView page within the selected window."
-    (when (and (derived-mode-p 'doc-view-mode)
-               (not thy/doc-view-fitting-page)
-               (ignore-errors (image-get-display-property)))
-      (let ((thy/doc-view-fitting-page t))
-        (doc-view-fit-page-to-window))))
+    (let ((display (image-get-display-property)))
+      (when (and (derived-mode-p 'doc-view-mode)
+                 (not thy/doc-view-fitting-page)
+                 (or (imagep display)
+                     (and (listp display) (assq 'image display))))
+        (let ((thy/doc-view-fitting-page t))
+          (doc-view-fit-page-to-window)))))
 
   (defun thy/doc-view-fit-frame-windows (frame)
     "Fit DocView pages displayed in windows on FRAME."
