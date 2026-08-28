@@ -25,6 +25,7 @@
    ([mouse-1] . treemacs-single-click-expand-action))
   :custom
   (treemacs-follow-after-init t)
+  (treemacs-indentation 1)
   (treemacs-is-never-other-window t)
   (treemacs-missing-project-action 'remove)
   (treemacs-no-png-images t)
@@ -34,16 +35,19 @@
    (no-littering-expand-var-file-name "treemacs-persist-at-last-error"))
   (treemacs-sorting 'alphabetic-case-insensitive-asc)
   (treemacs-space-between-root-nodes nil)
-  (treemacs-width 32)
+  (treemacs-width 36)
   :config
-  (custom-theme-set-faces
-   'user
-   '(treemacs-git-modified-face ((t (:inherit thy/vc-change-face))))
-   '(treemacs-git-renamed-face ((t (:inherit thy/vc-change-face))))
-   '(treemacs-git-added-face ((t (:inherit thy/vc-insert-face))))
-   '(treemacs-git-untracked-face ((t (:inherit thy/vc-insert-face))))
-   '(treemacs-git-conflict-face ((t (:inherit thy/vc-delete-face))))
-   '(treemacs-git-ignored-face ((t (:inherit dired-ignored)))))
+  (let ((change (face-foreground 'thy/vc-change-face nil t))
+        (delete (face-foreground 'thy/vc-delete-face nil t))
+        (insert (face-foreground 'thy/vc-insert-face nil t)))
+    (custom-theme-set-faces
+     'user
+     `(treemacs-git-modified-face ((t (:foreground ,change))))
+     `(treemacs-git-renamed-face ((t (:foreground ,change))))
+     `(treemacs-git-added-face ((t (:foreground ,insert))))
+     `(treemacs-git-untracked-face ((t (:foreground ,insert))))
+     `(treemacs-git-conflict-face ((t (:foreground ,delete))))
+     '(treemacs-git-ignored-face ((t (:inherit dired-ignored))))))
   (setq treemacs-collapse-dirs (if treemacs-python-executable 3 0))
   (treemacs-filewatch-mode 1)
   (treemacs-follow-mode 1)
@@ -58,6 +62,22 @@
   :ensure t
   :after treemacs
   :demand t
+  :preface
+  (defun thy/treemacs-compact-nerd-icons ()
+    "Remove unused leading slots from Nerd Icons in the current theme."
+    (dolist (icons (list (treemacs-theme->gui-icons treemacs--current-theme)
+                         (treemacs-theme->tui-icons treemacs--current-theme)))
+      (maphash
+       (lambda (key icon)
+         (cond
+          ((and (or (memq key '(dir-open dir-closed))
+                    (and (stringp key)
+                         (string-match-p "-\\(?:open\\|closed\\)\\'" key)))
+                (string-match "\t" icon))
+           (puthash key (substring icon (match-end 0)) icons))
+          ((string-prefix-p " \t" icon)
+           (puthash key (substring icon 2) icons))))
+       icons)))
   :custom
   (treemacs-nerd-icons-icon-size 1.0)
   :custom-face
@@ -65,7 +85,8 @@
    ((t (:inherit nerd-icons-blue :height 1.1))))
   (treemacs-nerd-icons-file-face ((t (:inherit nerd-icons-blue))))
   :config
-  (treemacs-nerd-icons-config))
+  (treemacs-nerd-icons-config)
+  (thy/treemacs-compact-nerd-icons))
 
 (use-package treemacs-evil
   :ensure t
