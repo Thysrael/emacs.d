@@ -78,9 +78,10 @@ end run
 
 ;; Use E to open files with an external command.
 (use-package dirvish
-  :ensure t
+  :vc (:url "https://github.com/alexluigit/dirvish"
+       :branch "main"
+       :rev :newest)
   :demand t
-  ;; :vc (:url "https://github.com/alexluigit/dirvish" :lisp-dir "extensions/")
   :preface
   (defconst thy/dirvish-dired-bindings
     '(("o" . dired-do-open)
@@ -114,6 +115,23 @@ end run
               ("M-e" . dirvish-emerge-mode)))
     "Key bindings shared by regular and Evil Dirvish maps.")
 
+  (defun thy/git-directory-contents-ignored-p (directory)
+    "Return non-nil when DIRECTORY contains only Git-ignored files."
+    (when (and (file-directory-p directory)
+               (not (file-remote-p directory)))
+      (with-temp-buffer
+        (let ((default-directory (file-name-as-directory directory)))
+          (and (eq 0 (process-file
+                      "git" nil t nil "ls-files" "--cached" "--others"
+                      "--exclude-standard" "--" "."))
+               (= (buffer-size) 0)
+               (progn
+                 (erase-buffer)
+                 (and (eq 0 (process-file
+                             "git" nil t nil "ls-files" "--others" "--ignored"
+                             "--exclude-standard" "--" "."))
+                      (> (buffer-size) 0))))))))
+
   (defun thy/dirvish-yank-with-tramp-rpc (function command details &optional batch)
     "Call FUNCTION after preparing remote Dirvish COMMAND for TRAMP RPC.
 DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
@@ -142,7 +160,6 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
   (autoload 'dirvish-narrow "dirvish-narrow" nil t)
   (autoload 'dirvish-quick-access "dirvish-quick-access" nil t)
   (autoload 'dirvish-quicksort "dirvish-ls" nil t)
-  (autoload 'dirvish-side "dirvish-side" nil t)
   (autoload 'dirvish-subtree-toggle "dirvish-subtree" nil t)
   (autoload 'dirvish-vc-menu "dirvish-vc" nil t)
   (autoload 'dirvish-yank "dirvish-yank" nil t)
@@ -166,26 +183,20 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
      ))
   ;; Dirvish mode line.
   (dirvish-mode-line-format
-   '(:left (sort omit symlink) :right (file-group ":" file-user " " file-time index)))
-  (dirvish-side-mode-line-format
-   '(:right (yank file-size index)))
+   '(:left (sort omit symlink) :right (thy/file-owner " " file-time index)))
   ;; Dirvish file attributes; collapse folds directory contents.
   (dirvish-attributes
-   '(vc-state nerd-icons collapse git-msg file-size))
-  ;; Dirvish side-window attributes.
-  (dirvish-side-attributes
-   '(vc-state nerd-icons collapse))
+   '(thy/vc-ignored nerd-icons collapse git-msg file-size))
   ;; Dirvish header line.
   (dirvish-header-line-format
    '(:left (path) :right (omit yank vc-info free-space)))
   (dirvish-path-separators '("~" "/" "/"))
+  (dirvish-input-throttle 0.05)
   (dirvish-window-fringe 4)
   (dirvish-hide-cursor t) ; 在 wired 下不方便
-  ;; Avoid the `all' function collision in Dirvish 2.3.0 on newer Emacs.
-  (dirvish-yank-sources (lambda () (dirvish-yank--get-srcs 'all)))
-  ;; Use media preview dispatchers, including the custom EPS dispatcher below.
+  ;; Use media preview dispatchers, including the custom dispatchers below.
   (dirvish-preview-dispatchers
-   '(video graffle eps image gif audio epub archive font pdf))
+   '(office video graffle eps image gif audio epub archive font pdf))
   ;; M-e
   (dirvish-emerge-groups
    '(
@@ -197,18 +208,78 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
      ("Archives"      (extensions "gz" "rar" "zip"))
      ("Office"        (extensions "doc" "docx" "xls" "xlsx" "ppt" "pptx"))))
   (dirvish-default-layout '(1 0.15 0.35))
-  ;; (dirvish-hide-details '(dirvish-side))
   ;; (dirvish-preview-disabled-exts '("bin" "exe" "gpg" "elc" "eln" "pdf"))
-  :bind ("<f6>" . dirvish-side)
   :hook
   (dirvish-mode . dired-omit-mode)
   ;; (dirvish-setup . dirvish-emerge-mode)
   :config
   (require 'dirvish-widgets)
+  (require 'dirvish-vc)
+  (dirvish-define-mode-line thy/file-owner
+    "Group and user of the file at point."
+    (when-let* ((group (dirvish--format-file-attr 'group-id))
+                (user (dirvish--format-file-attr 'user-id)))
+      (pcase-let ((`(,gid . ,face) group)
+                  (`(,uid . ,_) user))
+        (unless (dirvish-prop :remote)
+          (when (integerp gid)
+            (setq gid (or (group-name gid) gid)))
+          (when (integerp uid)
+            (setq uid (or (user-login-name uid) uid))))
+        (propertize (format "%s:%s" gid uid) 'face face))))
+  (dirvish-define-attribute thy/vc-ignored
+    "Dim file names ignored by version control."
+    :when (and (symbolp (dirvish-prop :vc-backend))
+               (not (dirvish-prop :remote)))
+    (when (and
+           (eq (dirvish-attribute-cache f-name :vc-state) 'ignored)
+           (or (not (and (eq (dirvish-prop :vc-backend) 'Git)
+                          (eq (car f-type) 'dir)))
+                (eq (dirvish-attribute-cache
+                        f-name :thy/git-ignore-state
+                      (if (or (eq 0 (ignore-errors
+                                      (process-file
+                                       "git" nil nil nil "-C"
+                                       (file-name-directory f-name)
+                                       "check-ignore" "-q" "--" f-name)))
+                              (thy/git-directory-contents-ignored-p f-name))
+                          'ignored
+                        'visible))
+                    'ignored)))
+      (let ((ov (make-overlay f-beg f-end)))
+        (overlay-put ov 'face 'dired-ignored)
+        `(ov . ,ov))))
   (add-to-list 'dirvish-image-exts "graffle")
   (add-to-list 'dirvish-image-exts "eps")
   (add-to-list 'dirvish-binary-exts "graffle")
   (add-to-list 'dirvish-binary-exts "eps")
+  (dirvish-define-preview office (file ext preview-window)
+    "Preview Office documents without blocking Dirvish."
+    (cond
+     ((member ext '("doc" "docx"))
+      (if-let* ((textutil (executable-find "textutil")))
+          `(shell . (,textutil "-convert" "txt" "-stdout"
+                               "-encoding" "UTF-8" "--" ,file))
+        '(info . "The `textutil' executable is required for Word previews.")))
+     ((member ext '("ppt" "pptx"))
+      '(info . "PowerPoint preview is disabled."))
+     ((member ext '("xls" "xlsx"))
+      (if-let* ((quicklook (executable-find "qlmanage")))
+          (let* ((width (dirvish-media--img-size preview-window))
+                 (height (dirvish-media--img-size preview-window 'height))
+                 (cache-dir (dirvish--img-thumb-name
+                             file width ".quicklook"))
+                 (cache (expand-file-name
+                         (concat (file-name-nondirectory file) ".png")
+                         cache-dir)))
+            (make-directory cache-dir t)
+            (if (and (file-exists-p cache)
+                     (not (file-newer-than-file-p file cache)))
+                `(img . ,(create-image cache nil nil
+                                       :max-width width :max-height height))
+              `(cache . (,quicklook "-t" "-s" ,(number-to-string width)
+                                    "-o" ,cache-dir ,file))))
+        '(info . "Quick Look is required for spreadsheet previews.")))))
   (dirvish-define-preview graffle (file ext preview-window)
     "Preview the JPEG embedded in an OmniGraffle document."
     (when (equal ext "graffle")
@@ -249,14 +320,6 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
   (with-eval-after-load 'dirvish-yank
     (advice-add #'dirvish-yank--execute
                 :around #'thy/dirvish-yank-with-tramp-rpc))
-  ;; Make side windows behave more naturally with ace-window.
-  (with-eval-after-load 'ace-window
-    (define-advice aw-ignored-p (:around (orig-fn window) dirvish-advice)
-      (or (funcall orig-fn window)
-          (and (> (length (window-list)) 2)
-               (functionp 'dirvish-side--session-visible-p)
-               (eq window (dirvish-side--session-visible-p)))))
-    (push 'dirvish-misc-mode aw-ignored-buffers))
   )
 
 ;; [dired-x] Extra Dired functionality
