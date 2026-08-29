@@ -5,8 +5,12 @@
   :bind
   (:map dired-mode-map
         ("C-c C-p" . wdired-change-to-wdired-mode)
+        ("z" . dired-do-compress)
+        ("Z" . dired-do-compress-to)
         ("W" . thy/dired-copy-files-to-clipboard))
   :custom
+  (dired-compress-directory-default-suffix ".zip")
+  (dired-compress-file-default-suffix ".zip")
   ;; Always delete and copy recursively
   (dired-recursive-deletes 'top)
   (dired-recursive-copies 'always)
@@ -27,6 +31,9 @@
     (setq insert-directory-program gls
           dired-use-ls-dired t))
   (setq delete-by-moving-to-trash t)
+  (with-eval-after-load 'dired-aux
+    (add-to-list 'dired-compress-file-alist
+                 '("\\.zip\\'" . "zip -j %o %i")))
   (defun thy/dired-copy-files-to-clipboard ()
     "Copy marked Dired files to the system clipboard as file objects."
     (interactive)
@@ -85,6 +92,8 @@ end run
   :preface
   (defconst thy/dirvish-dired-bindings
     '(("o" . dired-do-open)
+      ("z" . dired-do-compress)
+      ("Z" . dired-do-compress-to)
       ("y" . dired-do-copy)
       ("p" . dirvish-yank)
       ("P" . dirvish-yank-menu)
