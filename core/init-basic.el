@@ -161,7 +161,8 @@
   :hook (after-init . global-auto-revert-mode)
   :custom
   (auto-revert-remote-files t)
-  (auto-revert-verbose nil))
+  (auto-revert-verbose nil)
+  (global-auto-revert-non-file-buffers t))
 
 ;; Remember the last visited position in files across Emacs sessions.
 (use-package saveplace

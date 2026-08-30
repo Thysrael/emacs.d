@@ -2,9 +2,26 @@
 
 (use-package dired
   :ensure nil
+  :preface
+  (defun thy/dired-create-file-or-directory (path)
+    "Create PATH as a directory when it ends in slash, or as an empty file."
+    (interactive
+     (list (read-file-name "Create file or directory: " default-directory)))
+    (let* ((directory-p (string-suffix-p "/" path))
+           (target (expand-file-name
+                    (if directory-p (directory-file-name path) path))))
+      (when (or (file-exists-p target) (file-symlink-p target))
+        (user-error "%s already exists" (abbreviate-file-name target)))
+      (if directory-p
+          (make-directory target t)
+        (make-empty-file target t))
+      (revert-buffer t t)
+      (dired-goto-file target)
+      (message "Created %s" (abbreviate-file-name target))))
   :bind
   (:map dired-mode-map
         ("C-c C-p" . wdired-change-to-wdired-mode)
+        ("a" . thy/dired-create-file-or-directory)
         ("z" . dired-do-compress)
         ("Z" . dired-do-compress-to)
         ("W" . thy/dired-copy-files-to-clipboard))
@@ -18,6 +35,7 @@
   (dired-dwim-target t)
   ;; Ask whether destination dirs should get created when copying/removing files.
   (dired-create-destination-dirs 'ask)
+  (dired-create-destination-dirs-on-trailing-dirsep t)
   ;; symlink
   (dired-hide-details-hide-symlink-targets nil)
   (dired-listing-switches (if (executable-find "gls")
@@ -92,6 +110,7 @@ end run
   :preface
   (defconst thy/dirvish-dired-bindings
     '(("o" . dired-do-open)
+      ("a" . thy/dired-create-file-or-directory)
       ("z" . dired-do-compress)
       ("Z" . dired-do-compress-to)
       ("y" . dired-do-copy)
@@ -104,7 +123,6 @@ end run
   (defconst thy/dirvish-mode-bindings
     (append '(("q" . dirvish-quit)
               ("?" . dirvish-dispatch)
-              ("a" . dirvish-quick-access)
               ("r" . dired-do-rename)
               ("M-f" . dirvish-history-go-forward)
               ("M-b" . dirvish-history-go-backward)
