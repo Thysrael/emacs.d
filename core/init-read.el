@@ -63,10 +63,8 @@
     "Zoom step applied during the current PDF pinch gesture.")
 
   (defun thy/setup-pdf-view-buffer ()
-    "Apply buffer-local settings for PDF viewing."
-    ;; Wait for polling instead of reacting while another process writes the PDF.
-    (setq-local auto-revert-use-notify nil
-                mouse-wheel-tilt-scroll t
+    "Apply buffer-local touchpad settings for PDF viewing."
+    (setq-local mouse-wheel-tilt-scroll t
                 mouse-wheel-flip-direction t
                 mouse-wheel-scroll-amount
                 (cons thy/pdf-view-horizontal-scroll-columns
@@ -140,7 +138,8 @@
                          (expt thy/pdf-view-pinch-resize-factor step)))
                 (pdf-view-redisplay window))))))))
   :hook ((pdf-view-mode . thy/setup-pdf-view-buffer)
-         (pdf-view-mode . pdf-view-roll-minor-mode))
+         (pdf-view-mode . pdf-view-roll-minor-mode)
+         (pdf-view-mode . auto-revert-mode))
   :bind
   (:map pdf-view-mode-map
         ([pinch] . thy/pdf-view-pinch))
