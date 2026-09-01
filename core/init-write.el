@@ -54,7 +54,10 @@
   :mode ("\\.md\\'" . gfm-mode)
   :bind
   (:map markdown-mode-map
-        ("C-c C-b" . markdown-insert-bold))
+        ("C-c C-b" . markdown-insert-bold)
+        ("C-c C-e" . thy/markdown-export-pdf)
+   :map gfm-view-mode-map
+        ("C-c C-e" . thy/markdown-export-pdf))
   :hook ((gfm-mode markdown-ts-mode markdown-ts-view-mode) . thy/set-prose-line-spacing)
   :custom
   (markdown-asymmetric-header t)
@@ -65,6 +68,66 @@
   (markdown-italic-underscore t)
   (markdown-nested-imenu-heading-index t)
   :preface
+  (defconst thy/markdown-pdf-stylesheet
+    (no-littering-expand-etc-file-name "markdown-pdf/github.css")
+    "GitHub-style CSS used when exporting Markdown to PDF.")
+
+  (defun thy/markdown-export-pdf ()
+    "Export the current Markdown file to a GitHub-style PDF."
+    (interactive)
+    (unless buffer-file-name
+      (user-error "Save this Markdown buffer before exporting it"))
+    (dolist (program '("pandoc" "weasyprint"))
+      (unless (executable-find program)
+        (user-error "Markdown PDF export requires `%s'" program)))
+    (unless (file-readable-p thy/markdown-pdf-stylesheet)
+      (user-error "Markdown PDF stylesheet is missing: %s"
+                  thy/markdown-pdf-stylesheet))
+    (save-buffer)
+    (let* ((source (file-truename buffer-file-name))
+           (output (concat (file-name-sans-extension source) ".pdf"))
+           (log-buffer
+            (get-buffer-create
+             (format "*Markdown PDF: %s*" (file-name-nondirectory source))))
+           (running (get-buffer-process log-buffer)))
+      (when (process-live-p running)
+        (user-error "A PDF export is already running for this file"))
+      (with-current-buffer log-buffer
+        (let ((inhibit-read-only t))
+          (erase-buffer)
+          (insert (format "Exporting %s\n\n" source))))
+      (make-process
+       :name "markdown-pdf-export"
+       :buffer log-buffer
+       :command
+       (list "pandoc" source
+             "--from=gfm"
+             "--to=html5"
+             "--standalone"
+             "--embed-resources"
+             (concat "--resource-path=" (file-name-directory source))
+             (concat "--css=" thy/markdown-pdf-stylesheet)
+             "--syntax-highlighting=pygments"
+             "--pdf-engine=weasyprint"
+             (concat "--metadata=pagetitle:"
+                     (file-name-base source))
+             "--output" output)
+       :coding 'utf-8-unix
+       :noquery t
+       :sentinel
+       (lambda (process _event)
+         (when (memq (process-status process) '(exit signal))
+           (if (zerop (process-exit-status process))
+               (let ((pdf-buffer (find-file-noselect output)))
+                 (with-current-buffer pdf-buffer
+                   (unless (verify-visited-file-modtime pdf-buffer)
+                     (revert-buffer t t)))
+                 (display-buffer pdf-buffer)
+                 (message "Exported Markdown PDF: %s" output))
+             (display-buffer (process-buffer process))
+             (message "Markdown PDF export failed; see %s"
+                      (buffer-name (process-buffer process)))))))))
+
   (defun thy/set-prose-line-spacing ()
     "Use slightly looser line spacing in prose buffers."
     (setq line-spacing 0.25))
@@ -108,9 +171,12 @@
   :bind
   (:map markdown-ts-mode-map
         ("C-c C-b" . thy/markdown-ts-insert-bold)
+        ("C-c C-e" . thy/markdown-export-pdf)
         ("RET" . thy/markdown-ts-newline)
         ("<return>" . thy/markdown-ts-newline)
-        ("<kp-enter>" . thy/markdown-ts-newline))
+        ("<kp-enter>" . thy/markdown-ts-newline)
+   :map markdown-ts-view-mode-map
+        ("C-c C-e" . thy/markdown-export-pdf))
   :preface
   (defvar-local thy/markdown-ts-appear-region nil
     "Markers delimiting the region whose Markdown markup is visible.")
