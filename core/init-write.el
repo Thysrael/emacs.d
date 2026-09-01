@@ -85,11 +85,29 @@
                   thy/markdown-pdf-stylesheet))
     (save-buffer)
     (let* ((source (file-truename buffer-file-name))
-           (output (concat (file-name-sans-extension source) ".pdf"))
+           (default-output (concat (file-name-sans-extension source) ".pdf"))
+           (output
+            (expand-file-name
+             (read-file-name "Export PDF to: "
+                             (file-name-directory source)
+                             default-output nil
+                             (file-name-nondirectory default-output))))
+           (output (if (file-name-extension output)
+                       output
+                     (concat output ".pdf")))
            (log-buffer
             (get-buffer-create
              (format "*Markdown PDF: %s*" (file-name-nondirectory source))))
            (running (get-buffer-process log-buffer)))
+      (unless (string-equal (downcase (or (file-name-extension output) "")) "pdf")
+        (user-error "PDF output must use the .pdf extension"))
+      (unless (file-directory-p (file-name-directory output))
+        (user-error "Output directory does not exist: %s"
+                    (file-name-directory output)))
+      (when (and (file-exists-p output)
+                 (not (y-or-n-p (format "Overwrite %s? "
+                                        (abbreviate-file-name output)))))
+        (user-error "PDF export cancelled"))
       (when (process-live-p running)
         (user-error "A PDF export is already running for this file"))
       (with-current-buffer log-buffer
