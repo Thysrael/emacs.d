@@ -304,9 +304,7 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
 
   (defun thy/evil-bind-local-leader ()
     "Bind the leader above mode-specific maps in the current buffer."
-    ;; Message buffers keep Evil's ordinary Space binding.
-    (when (and evil-local-mode
-               (not (derived-mode-p 'message-mode 'messages-buffer-mode)))
+    (when evil-local-mode
       (evil-local-set-key 'normal (kbd "SPC") thy/evil-leader-command-map)
       (evil-local-set-key 'motion (kbd "SPC") thy/evil-leader-command-map)))
 
@@ -327,6 +325,10 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
    (evil-operator-state-exit . thy/evil-hide-operator-line-numbers))
   :config
   (evil-mode 1)
+  ;; Some startup buffers enable Evil before the local binding hook is installed.
+  (dolist (buffer (buffer-list))
+    (with-current-buffer buffer
+      (thy/evil-bind-local-leader)))
 
   ;; Move by display lines, while operator motions keep logical line semantics.
   (evil-define-minor-mode-key '(normal visual) 'visual-line-mode
