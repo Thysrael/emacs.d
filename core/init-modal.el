@@ -1,9 +1,6 @@
 ;;; -*- lexical-binding: t; -*-
 
 ;; Evil Collection requires these to be set before Evil is loaded.
-(setq evil-want-integration t)
-(setq evil-want-keybinding nil)
-
 (use-package transient
   :ensure nil
   :preface
@@ -32,6 +29,7 @@
 
 (use-package evil
   :ensure t
+  ;; Later declarations need Evil's global state and keymaps immediately.
   :demand t
   :preface
   (defun thy/evil-paste-pop-or-consult-yank-pop ()
@@ -306,20 +304,28 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
 
   (defun thy/evil-bind-local-leader ()
     "Bind the leader above mode-specific maps in the current buffer."
-    (when evil-local-mode
+    ;; Message buffers keep Evil's ordinary Space binding.
+    (when (and evil-local-mode
+               (not (derived-mode-p 'message-mode 'messages-buffer-mode)))
       (evil-local-set-key 'normal (kbd "SPC") thy/evil-leader-command-map)
       (evil-local-set-key 'motion (kbd "SPC") thy/evil-leader-command-map)))
 
+  :custom
+  (evil-respect-visual-line-mode nil)
+  (evil-symbol-word-search t)
+  (evil-undo-system 'undo-redo)
+  (evil-want-C-u-scroll t)
+  (evil-want-fine-undo t)
+  (evil-want-integration t)
+  (evil-want-keybinding nil)
   :init
-  (setq evil-respect-visual-line-mode nil)
-  (setq evil-undo-system 'undo-redo)
-  (setq evil-want-C-u-scroll t)
   ;; Evil 1.15 declares this variable without giving it an initial value.
   (setq evil-mode-buffers nil)
+  :hook
+  ((evil-local-mode . thy/evil-bind-local-leader)
+   (evil-operator-state-entry . thy/evil-show-operator-line-numbers)
+   (evil-operator-state-exit . thy/evil-hide-operator-line-numbers))
   :config
-  (setq evil-symbol-word-search t)
-  (setq evil-want-fine-undo t)
-  (add-hook 'evil-local-mode-hook #'thy/evil-bind-local-leader)
   (evil-mode 1)
 
   ;; Move by display lines, while operator motions keep logical line semantics.
@@ -331,8 +337,6 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
 
   ;; Keep yanks visually stable; the pulse feedback already shows what was copied.
   (advice-add #'evil-yank :around #'thy/evil-yank-keep-point)
-  (add-hook 'evil-operator-state-entry-hook #'thy/evil-show-operator-line-numbers)
-  (add-hook 'evil-operator-state-exit-hook #'thy/evil-hide-operator-line-numbers)
 
   (evil-define-operator thy/evil-format (beg end type)
     "Format text from BEG to END using Evil motion TYPE."
@@ -535,6 +539,7 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
 (use-package evil-collection
   :ensure t
   :after evil
+  ;; Initialize integrations as soon as the startup-loaded Evil is available.
   :demand t
   :preface
   (defun thy/evil-collection-setup-org-agenda (mode _maps &rest _)
@@ -544,9 +549,9 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
         (kbd "g") #'org-agenda-redo
         (kbd "h") #'org-agenda-earlier
         (kbd "l") #'org-agenda-later)))
+  :hook
+  (evil-collection-setup . thy/evil-collection-setup-org-agenda)
   :config
-  (add-hook 'evil-collection-setup-hook
-            #'thy/evil-collection-setup-org-agenda)
   (evil-collection-init '(magit dired org-agenda))
 
   (with-eval-after-load 'magit
@@ -581,9 +586,11 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
   :ensure t
   :after evil
   :commands (evil-commentary evil-commentary-line)
-  :init
-  (define-key evil-normal-state-map (kbd "gc") #'evil-commentary)
-  (define-key evil-visual-state-map (kbd "gc") #'evil-commentary-line))
+  :bind
+  (:map evil-normal-state-map
+        ("gc" . evil-commentary)
+   :map evil-visual-state-map
+        ("gc" . evil-commentary-line)))
 
 ;; Add/change/delete pairs with `ys{motion}`, `cs`, and `ds`; use `S` visually.
 (use-package evil-surround
@@ -594,6 +601,7 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
 (use-package evil-textobj-tree-sitter
   :ensure t
   :after evil
+  ;; Install generated text objects into Evil's shared maps immediately.
   :demand t
   :config
   (define-key evil-inner-text-objects-map "f"
