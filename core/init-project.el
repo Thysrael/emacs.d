@@ -3,6 +3,7 @@
 (use-package project
   :ensure nil
   :custom
+  (project-list-file (no-littering-expand-var-file-name "projects.eld"))
   (project-vc-merge-submodules nil))
 
 (use-package treemacs
