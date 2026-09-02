@@ -229,6 +229,12 @@
   (defvar-local thy/markdown-ts-appear-region nil
     "Markers delimiting the semantic Markdown source currently visible.")
 
+  (defvar-local thy/markdown-ts-appear-last-point nil
+    "Buffer position checked by the most recent appear update.")
+
+  (defvar-local thy/markdown-ts-appear-last-tick nil
+    "Buffer modification tick checked by the most recent appear update.")
+
   (defun thy/markdown-ts-appear-region-visible-p (beg end)
     "Return non-nil when BEG through END overlaps visible Markdown source."
     (when-let* ((region thy/markdown-ts-appear-region)
@@ -367,7 +373,9 @@
                                 (progn
                                   (put-text-property
                                    beg end 'display
-                                   (thy/markdown-ts-math-image svg))
+                                   (or (alist-get
+                                        'thy/markdown-ts-math-image data)
+                                       (thy/markdown-ts-math-image svg)))
                                   (put-text-property
                                    beg end 'thy/markdown-ts-math-state
                                    (list 'rendered key)))
@@ -380,6 +388,10 @@
 
   (defun thy/markdown-ts-math-finish-render (key data)
     "Cache MathJax DATA for KEY and complete its waiting requests."
+    (when-let* ((svg (alist-get 'svg data)))
+      (push (cons 'thy/markdown-ts-math-image
+                  (thy/markdown-ts-math-image svg))
+            data))
     (unless (alist-get 'transient data)
       (when (>= (hash-table-count thy/markdown-ts-math-cache) 512)
         (clrhash thy/markdown-ts-math-cache))
@@ -695,8 +707,7 @@
                                "task_list_marker_unchecked"
                                "task_list_marker_checked"
                                "pipe_table_header" "pipe_table_row"
-                               "pipe_table_delimiter_row"
-                               "fenced_code_block" "thematic_break"
+                               "pipe_table_delimiter_row" "thematic_break"
                                "link_reference_definition")))
                 (setq structural-node node))
               (setq node (and node (treesit-node-parent node)))))
@@ -729,8 +740,8 @@
                       (treesit-node-end marker))))
              ((or "task_list_marker_unchecked" "task_list_marker_checked"
                   "pipe_table_header" "pipe_table_row"
-                  "pipe_table_delimiter_row" "fenced_code_block"
-                  "thematic_break" "link_reference_definition")
+                  "pipe_table_delimiter_row" "thematic_break"
+                  "link_reference_definition")
               (cons (treesit-node-start structural-node)
                     (treesit-node-end structural-node))))
            ;; Keep malformed markup stable while its closing syntax is typed.
@@ -751,23 +762,30 @@
 
   (defun thy/markdown-ts-appear-at-point ()
     "Reveal source for the rendered Markdown element at point."
-    (save-restriction
-      (widen)
-      (let* ((bounds (thy/markdown-ts-appear-bounds))
-             (beg (car-safe bounds))
-             (end (cdr-safe bounds))
-             (region thy/markdown-ts-appear-region)
-             (old-beg (and region (marker-position (car region))))
-             (old-end (and region (marker-position (cdr region)))))
-        (unless (if bounds
-                    (and old-beg old-end (= beg old-beg) (= end old-end))
-                  (null region))
-          (thy/markdown-ts-appear--restore)
-          (when bounds
-            (setq thy/markdown-ts-appear-region
-                  (cons (copy-marker beg) (copy-marker end t)))
-            (font-lock-flush beg end)
-            (font-lock-ensure beg end))))))
+    (let ((position (point))
+          (tick (buffer-chars-modified-tick)))
+      (unless (and (equal position thy/markdown-ts-appear-last-point)
+                   (equal tick thy/markdown-ts-appear-last-tick))
+        (save-restriction
+          (widen)
+          (let* ((bounds (unless (markdown-ts-at-code-block-p)
+                           (thy/markdown-ts-appear-bounds)))
+                 (beg (car-safe bounds))
+                 (end (cdr-safe bounds))
+                 (region thy/markdown-ts-appear-region)
+                 (old-beg (and region (marker-position (car region))))
+                 (old-end (and region (marker-position (cdr region)))))
+            (unless (if bounds
+                        (and old-beg old-end (= beg old-beg) (= end old-end))
+                      (null region))
+              (thy/markdown-ts-appear--restore)
+              (when bounds
+                (setq thy/markdown-ts-appear-region
+                      (cons (copy-marker beg) (copy-marker end t)))
+                (font-lock-flush beg end)
+                (font-lock-ensure beg end)))))
+        (setq thy/markdown-ts-appear-last-point position)
+        (setq thy/markdown-ts-appear-last-tick tick))))
 
   (defun thy/markdown-ts-appear-start ()
     "Reveal Markdown markup while Evil is in insert state."
@@ -777,6 +795,8 @@
   (defun thy/markdown-ts-appear-stop ()
     "Hide Markdown markup after leaving Evil insert state."
     (remove-hook 'post-command-hook #'thy/markdown-ts-appear-at-point t)
+    (setq thy/markdown-ts-appear-last-point nil)
+    (setq thy/markdown-ts-appear-last-tick nil)
     (when (and (fboundp 'markdown-ts-at-table-p)
                (ignore-errors (markdown-ts-at-table-p nil t)))
       (ignore-errors (markdown-ts-table-align-table)))
