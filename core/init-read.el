@@ -148,6 +148,9 @@
   (pdf-view-resize-factor 1.2)
   :init
   (pdf-loader-install t)
+  ;; PDF Tools defines this map in the `pdf-view' subfeature, after `pdf-tools'.
+  (with-eval-after-load 'pdf-view
+    (define-key pdf-view-mode-map (kbd "g") #'thy/pdf-view-revert))
   :config
   (with-eval-after-load 'evil
     (evil-set-initial-state 'pdf-view-mode 'motion)
@@ -157,6 +160,7 @@
       (kbd "k") #'thy/pdf-view-scroll-backward
       (kbd "l") #'thy/pdf-view-pan-right
       (kbd "gg") #'pdf-view-first-page
+      (kbd "gr") #'thy/pdf-view-revert
       (kbd "G") #'pdf-view-last-page
 
       (kbd "/") #'isearch-forward
@@ -184,6 +188,9 @@
   :preface
   (defvar-local thy/office-preview-source-file nil
     "Office file from which the current read-only preview was generated.")
+
+  (defvar-local thy/office-preview-process nil
+    "LibreOffice process generating the current PDF preview.")
 
   (defvar-local thy/xlsx-preview-files nil
     "CSV files generated from the current spreadsheet.")
@@ -233,19 +240,200 @@
     (and outputs
          (cl-every (lambda (output)
                      (and (file-exists-p output)
-                          (not (file-newer-than-file-p source output))))
-                   outputs)))
+                           (not (file-newer-than-file-p source output))))
+                    outputs)))
 
-  (defun thy/docx-preview-file (source)
-    "Return a cached Markdown conversion of DOCX file SOURCE."
+  (defun thy/office-preview-file-signature (file)
+    "Return the modification time and size of FILE."
+    (when-let* ((attributes (file-attributes file 'string)))
+      (list (file-attribute-modification-time attributes)
+            (file-attribute-size attributes))))
+
+  (defun thy/office-pdf-preview-cancel ()
+    "Cancel the PDF conversion requested by the current buffer."
+    (when (process-live-p thy/office-preview-process)
+      (process-put thy/office-preview-process 'thy/cancelled t)
+      (delete-process thy/office-preview-process)))
+
+  (defun thy/office-pdf-preview-display (source output source-buffer)
+    "Display cached PDF OUTPUT for Office SOURCE, replacing SOURCE-BUFFER."
+    (let* ((existing (get-file-buffer output))
+           (preview-buffer (find-file-noselect output)))
+      (with-current-buffer preview-buffer
+        (when (and existing (derived-mode-p 'pdf-view-mode))
+          (pdf-view-revert-buffer :ignore-auto :noconfirm))
+        (setq-local thy/office-preview-source-file source)
+        (setq-local thy/office-preview-process nil)
+        (setq-local default-directory (file-name-directory source))
+        (add-hook 'kill-buffer-hook #'thy/office-pdf-preview-cancel nil t)
+        (when (fboundp '+mode-line-update-project-crumb)
+          (+mode-line-update-project-crumb))
+        (rename-buffer
+         (format "%s [PDF preview]" (file-name-nondirectory source)) t))
+      (if (buffer-live-p source-buffer)
+          (progn
+            (dolist (window (get-buffer-window-list source-buffer nil t))
+              (set-window-buffer window preview-buffer))
+            (kill-buffer source-buffer))
+        (display-buffer preview-buffer))))
+
+  (defun thy/office-pdf-preview-finish
+      (process source signature output generated workspace source-buffer)
+    "Finish Office PDF PROCESS and display its OUTPUT for SOURCE.
+SIGNATURE identifies SOURCE when conversion started.  GENERATED is
+LibreOffice's output, WORKSPACE contains its temporary files, and
+SOURCE-BUFFER is the buffer that requested the preview."
+    (when (memq (process-status process) '(exit signal))
+      (let ((retry nil))
+        (unwind-protect
+            (cond
+             ((process-get process 'thy/cancelled))
+             ((not (equal signature
+                          (thy/office-preview-file-signature source)))
+              (setq retry (and (buffer-live-p source-buffer)
+                               (file-exists-p source)))
+              (message "Office source changed; restarting PDF preview..."))
+             ((and (zerop (process-exit-status process))
+                   (file-exists-p generated))
+              (rename-file generated output t)
+              (if (and (buffer-live-p source-buffer)
+                       (with-current-buffer source-buffer
+                         (derived-mode-p 'pdf-view-mode)))
+                  (with-current-buffer source-buffer
+                    (pdf-view-revert-buffer :ignore-auto :noconfirm)
+                    (setq-local thy/office-preview-source-file source)
+                    (setq-local thy/office-preview-process nil)
+                    (setq-local default-directory (file-name-directory source))
+                    (add-hook 'kill-buffer-hook
+                              #'thy/office-pdf-preview-cancel nil t)
+                    (when (fboundp '+mode-line-update-project-crumb)
+                      (+mode-line-update-project-crumb)))
+                (thy/office-pdf-preview-display
+                 source output source-buffer))
+              (message "Generated PDF preview for %s"
+                       (file-name-nondirectory source)))
+             (t
+              (when-let* ((buffer (process-buffer process)))
+                (display-buffer buffer))
+              (message "Unable to generate PDF preview for %s"
+                       (file-name-nondirectory source))))
+          (when (buffer-live-p source-buffer)
+            (with-current-buffer source-buffer
+              (setq thy/office-preview-process nil)))
+          (ignore-errors (delete-directory workspace t)))
+        (when retry
+          (run-at-time
+           0 nil
+           (lambda ()
+             (when (buffer-live-p source-buffer)
+               (thy/office-pdf-preview-start
+                source source-buffer t))))))))
+
+  (defun thy/office-pdf-preview-start (source source-buffer &optional force)
+    "Display a cached PDF for Office SOURCE, converting it when needed.
+SOURCE-BUFFER requested the preview.  With FORCE, regenerate the PDF."
     (let* ((directory (thy/office-preview-cache-directory source))
-           (output (file-name-concat directory "preview.md")))
-      (unless (thy/office-preview-fresh-p source (list output))
-        (let ((default-directory directory))
-          (thy/office-preview-run
-           "pandoc" source "--from=docx" "--to=gfm" "--wrap=none"
-           "--extract-media=." (concat "--output=" output))))
-      output))
+           (output (file-name-concat directory "preview.pdf")))
+      (if (and (not force)
+               (thy/office-preview-fresh-p source (list output)))
+          (run-at-time
+           0 nil
+           (lambda ()
+             (when (buffer-live-p source-buffer)
+               (thy/office-pdf-preview-display
+                source output source-buffer))))
+        (unless (executable-find "soffice")
+          (user-error "Office preview requires `soffice'"))
+        (let* ((name
+                (format "office-pdf-%s"
+                        (substring (secure-hash 'sha256 source) 0 12)))
+               (existing (get-process name)))
+          (when (process-live-p existing)
+            (user-error
+             "A PDF preview is already being generated for this file"))
+          (let* ((workspace (make-temp-file "office-pdf-preview-" t))
+                 (profile
+                  (if (seq-some
+                       (lambda (process)
+                         (and (process-live-p process)
+                              (process-get process 'thy/office-pdf-preview)))
+                       (process-list))
+                      (file-name-concat workspace "profile")
+                    (no-littering-expand-var-file-name
+                     "office-preview/libreoffice-profile/")))
+                 (staging (file-name-concat workspace "output"))
+                 (generated
+                  (file-name-concat
+                   staging (concat (file-name-base source) ".pdf")))
+                 (signature (thy/office-preview-file-signature source))
+                 (log-buffer
+                  (get-buffer-create
+                   (format "*Office PDF: %s*"
+                           (file-name-nondirectory source)))))
+            (condition-case error-data
+                (progn
+                  (make-directory profile t)
+                  (make-directory staging)
+                  (with-current-buffer log-buffer
+                    (let ((inhibit-read-only t))
+                      (erase-buffer)))
+                  (let ((process
+                         (make-process
+                          :name name
+                          :buffer log-buffer
+                          :command
+                          (list
+                           "soffice"
+                           (concat "-env:UserInstallation=file://" profile)
+                           "--headless" "--norestore" "--nologo"
+                           "--nodefault" "--nofirststartwizard"
+                           "--convert-to" "pdf"
+                           "--outdir" staging source)
+                          :connection-type 'pipe
+                          :noquery t
+                          :sentinel
+                          (lambda (process _event)
+                            (thy/office-pdf-preview-finish
+                             process source signature output generated
+                             workspace source-buffer)))))
+                    (process-put process 'thy/office-pdf-preview t)
+                    (when (buffer-live-p source-buffer)
+                      (with-current-buffer source-buffer
+                        (setq-local thy/office-preview-process process)))
+                    (message "Generating PDF preview for %s..."
+                             (file-name-nondirectory source))))
+              (error
+               (ignore-errors (delete-directory workspace t))
+               (signal (car error-data) (cdr error-data)))))))))
+
+  (define-derived-mode thy/office-pdf-preview-mode special-mode
+    "Office-PDF"
+    "Generate and display the current Office document with PDF Tools."
+    (let ((source buffer-file-name))
+      (unless source
+        (user-error "This buffer is not visiting an Office document"))
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert (format "Generating PDF preview for %s...\n"
+                        (file-name-nondirectory source))))
+      (set-buffer-modified-p nil)
+      (add-hook 'kill-buffer-hook #'thy/office-pdf-preview-cancel nil t)
+      (thy/office-pdf-preview-start source (current-buffer))))
+
+  (defun thy/office-pdf-preview-refresh ()
+    "Regenerate the PDF preview from its Office source file."
+    (interactive)
+    (unless thy/office-preview-source-file
+      (user-error "This PDF is not an Office preview"))
+    (thy/office-pdf-preview-start
+     thy/office-preview-source-file (current-buffer) t))
+
+  (defun thy/pdf-view-revert ()
+    "Regenerate an Office preview, or revert a regular PDF buffer."
+    (interactive)
+    (if thy/office-preview-source-file
+        (thy/office-pdf-preview-refresh)
+      (revert-buffer)))
 
   (defun thy/xlsx-preview-generate-files (source)
     "Return CSV files generated from every worksheet in SOURCE."
@@ -273,18 +461,6 @@
     (setq-local buffer-read-only t)
     (auto-save-mode -1)
     (set-buffer-modified-p nil))
-
-  (defun thy/docx-preview-mode ()
-    "Display the current DOCX file as read-only Markdown."
-    (let* ((source buffer-file-name)
-           (preview (thy/docx-preview-file source))
-           (mode (alist-get 'markdown-mode major-mode-remap-alist
-                            'markdown-mode)))
-      (let ((inhibit-read-only t))
-        (erase-buffer)
-        (insert-file-contents preview))
-      (funcall mode)
-      (thy/office-preview-set-read-only source (file-name-directory preview))))
 
   (defun thy/xlsx-preview-select-file (files)
     "Prompt for one worksheet CSV from FILES when necessary."
@@ -325,13 +501,11 @@
       (unless source
         (user-error "This buffer has no Office preview source"))
       (pcase (downcase (file-name-extension source))
-        ("docx" (thy/docx-preview-mode))
         ("xlsx" (thy/xlsx-preview-mode))
         (_ (user-error "Unsupported Office preview type")))))
 
-  :mode (("\\.docx\\'" . thy/docx-preview-mode)
-         ("\\.xlsx\\'" . thy/xlsx-preview-mode)
-         ("\\.pptx\\'" . doc-view-mode-maybe))
+  :mode (("\\.\\(?:docx?\\|pptx?\\)\\'" . thy/office-pdf-preview-mode)
+         ("\\.xlsx\\'" . thy/xlsx-preview-mode))
   :bind
   (:map doc-view-mode-map
         ("=" . doc-view-enlarge)
