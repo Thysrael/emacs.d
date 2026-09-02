@@ -986,18 +986,11 @@
       (apply function node arguments)))
 
   (defun thy/markdown-ts-fontify-atx-delimiter (function node &rest arguments)
-    "Call FUNCTION and hide only the ATX marker and following blanks."
-    (let ((hide-markup-p
+    "Call FUNCTION, revealing NODE when it is in the appear region."
+    (let ((markdown-ts-hide-markup
            (and markdown-ts-hide-markup
                 (not (thy/markdown-ts-appear-node-visible-p node)))))
-      (let ((markdown-ts-hide-markup nil))
-        (apply function node arguments))
-      (when hide-markup-p
-        (save-excursion
-          (goto-char (treesit-node-end node))
-          (skip-chars-forward " \t" (line-end-position))
-          (put-text-property (treesit-node-start node) (point)
-                             'invisible 'markdown-ts--markup)))))
+      (apply function node arguments)))
 
   (define-minor-mode thy/markdown-ts-appear-mode
     "Reveal semantic Markdown source while Evil is in insert state."

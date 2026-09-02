@@ -171,16 +171,7 @@
 ;; Remember the last visited position in files across Emacs sessions.
 (use-package saveplace
   :ensure nil
-  :preface
-  (defun thy/save-place-alist-to-file-with-prin1 (fn)
-    "Call FN while using `prin1' instead of `pp' for save-place state."
-    (cl-letf (((symbol-function #'pp) #'prin1))
-      (funcall fn)))
-  :hook (after-init . save-place-mode)
-  :config
-  ;; `save-place-alist-to-file' pretty-prints its cache with `pp', which is
-  ;; expensive and unnecessary for machine-written state.
-  (advice-add #'save-place-alist-to-file :around #'thy/save-place-alist-to-file-with-prin1))
+  :hook (after-init . save-place-mode))
 
 ;; Open recently visited files with C-x C-r.
 (use-package recentf

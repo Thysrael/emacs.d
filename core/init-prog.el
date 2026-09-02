@@ -139,13 +139,7 @@
                   (markdown-mode . markdown-ts-mode)
                   (gfm-mode . markdown-ts-mode)
                   (toml-mode . toml-ts-mode))
-                major-mode-remap-alist))
-  ;; 使得 org src 可以自动映射到 ts 模式
-  (defun thy/remap-org-src-mode (mode)
-    "Make `org-src-get-lang-mode' respect `major-mode-remap-alist'."
-    (alist-get mode major-mode-remap-alist mode))
-  (advice-add #'org-src-get-lang-mode :filter-return #'thy/remap-org-src-mode)
-  )
+                major-mode-remap-alist)))
 
 ;; (use-package stickyfunc-enhance
 ;;   :straight t
