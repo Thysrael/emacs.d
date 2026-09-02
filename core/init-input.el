@@ -2,7 +2,6 @@
 
 (use-package rime
   :ensure t
-  :demand t
   :preface
   (defun thy/rime-finalize ()
     "Finalize librime before Emacs unloads its dynamic module."
@@ -23,6 +22,8 @@
         (copy-file source destination t t))))
   :init
   (thy/rime-install-customization)
+  :hook
+  (kill-emacs . thy/rime-finalize)
   :custom
   (default-input-method "rime")
   (rime-disable-predicates '(rime-predicate-evil-mode-p))
@@ -38,19 +39,21 @@
   (rime-show-preedit 'inline)
   (rime-share-data-dir
    (expand-file-name "~/projects/dotfiles/rime/rime-frost/"))
-  (rime-user-data-dir (no-littering-expand-var-file-name "rime/"))
-  :config
-  (add-hook 'kill-emacs-hook #'thy/rime-finalize))
+  (rime-user-data-dir (no-littering-expand-var-file-name "rime/")))
 
 (use-package sis
   :ensure t
   :after rime
+  ;; Activate the global input-state modes as soon as Rime first loads.
   :demand t
   :bind ("<f18>" . thy/sis-switch)
+  :hook
+  (enable-theme-functions . thy/sis-update-other-cursor-color)
   :preface
   (defun thy/sis-switch ()
     "Switch input source unless Evil is in a non-input state."
     (interactive)
+    (require 'rime)
     (if (rime-predicate-evil-mode-p)
         (sis-set-english)
       (sis-switch)))
@@ -65,7 +68,6 @@
   :config
   (sis-ism-lazyman-config nil "rime" 'native)
   (thy/sis-update-other-cursor-color)
-  (add-hook 'enable-theme-functions #'thy/sis-update-other-cursor-color)
   (sis-global-cursor-color-mode 1)
   (sis-global-respect-mode 1)
   (sis-global-context-mode 1)

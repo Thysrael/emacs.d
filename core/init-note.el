@@ -30,7 +30,16 @@
 
 (use-package obsidian
   :ensure t
-  :commands (obsidian-backlinks obsidian-file-metadata obsidian-file-p)
+  :commands (obsidian-backlinks
+             obsidian-capture
+             obsidian-daily-note
+             obsidian-file-metadata
+             obsidian-file-p
+             obsidian-find-tag
+             obsidian-follow-link-at-point
+             obsidian-insert-wikilink
+             obsidian-jump-back
+             obsidian-rescan-cache)
   :preface
   (defun thy/consult-obsidian-linked-note (files prompt)
     "Select one of FILES with Consult preview using PROMPT."

@@ -1,9 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
-(declare-function acp--start-client "acp")
-
 (use-package acp
-  :vc (acp :url "https://github.com/xenodium/acp.el" :rev :newest))
+  :vc (acp :url "https://github.com/xenodium/acp.el" :rev :newest)
+  :functions acp--start-client)
 
 (use-package shell-maker
   :vc (shell-maker :url "https://github.com/xenodium/shell-maker" :rev :newest)
@@ -15,7 +14,10 @@
   :vc (agent-shell :url "https://github.com/xenodium/agent-shell" :rev :newest)
   :commands (agent-shell agent-shell-insert-file agent-shell-new-shell
                          agent-shell-toggle)
-  :bind ("C-o" . thy/agent-shell-toggle)
+  :bind
+  (("C-o" . thy/agent-shell-toggle)
+   :map agent-shell-mode-map
+   ("C-o" . thy/agent-shell-toggle))
   :hook
   ((agent-shell-mode . thy/agent-shell-set-buffer-face)
    (agent-shell-mode . thy/agent-shell-enable-corfu)
@@ -155,12 +157,12 @@ With prefix ARG, delegate to `agent-shell'."
   (with-eval-after-load 'evil
     (evil-define-key* '(normal insert) 'global
       (kbd "C-o") #'thy/agent-shell-toggle))
+  :custom
+  (agent-shell-cwd-function #'thy/agent-shell-cwd)
+  (agent-shell-dot-subdir-function #'thy/agent-shell-data-dir)
+  (agent-shell-header-style 'text)
+  (agent-shell-session-restore-verbosity 'full)
   :config
-  ;; Keep Agent Shell's generated data under no-littering.
-  (setq agent-shell-cwd-function #'thy/agent-shell-cwd)
-  (setq agent-shell-dot-subdir-function #'thy/agent-shell-data-dir)
-  (setq agent-shell-header-style 'text)
-  (setq agent-shell-session-restore-verbosity 'full)
   (advice-add #'agent-shell-cache-dir :override #'thy/agent-shell-cache-dir)
   (require 'agent-shell-opencode)
   (setq agent-shell-opencode-authentication
@@ -175,7 +177,6 @@ With prefix ARG, delegate to `agent-shell'."
   (setq agent-shell-preferred-agent-config
         (agent-shell-opencode-make-agent-config))
   (define-key agent-shell-mode-map (kbd "C-t") #'thy/ghostel-toggle-popup)
-  (define-key agent-shell-mode-map (kbd "C-o") #'thy/agent-shell-toggle)
   (with-eval-after-load 'evil
     (evil-define-key '(normal insert) agent-shell-mode-map
       (kbd "C-t") #'thy/ghostel-toggle-popup

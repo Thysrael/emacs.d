@@ -64,6 +64,7 @@
 ;; Flexible minibuffer matching styles.
 (use-package orderless
   :ensure t
+  ;; `completion-styles' immediately refers to functions installed below.
   :demand t
   :custom
   (completion-category-defaults nil)
@@ -154,16 +155,15 @@
 ;; Embark is especially useful for org-headline candidates.
 (use-package embark
   :ensure t
+  :commands embark-prefix-help-command
   :bind (("C-;" . embark-act)
          ("C-c ; e" . embark-export)
          ("C-c ; c" . embark-collect)
          :map embark-general-map
          ("/" . consult-line)
          ("g" . consult-ripgrep))
-  :defines (wgrep-change-to-wgrep-mode)
-  :init
-  (setq prefix-help-command 'embark-prefix-help-command)
-  )
+  :custom
+  (prefix-help-command #'embark-prefix-help-command))
 
 ;; Integrate Embark collections with Consult preview.
 (use-package embark-consult
@@ -204,9 +204,6 @@
   (xref-show-definitions-function #'consult-xref)
   (xref-show-xrefs-function #'consult-xref)
   :config
-  ;; Replace multi-occur with consult-multi-occur.
-  (advice-add #'multi-occur :override #'consult-multi-occur)
-
   ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
 

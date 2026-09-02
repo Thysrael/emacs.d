@@ -26,10 +26,9 @@
   :ensure t
   :bind
   ("C-h" . avy-goto-char-2)
-  :config
-  (setq avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
-  (setq avy-background t) ; 在跳转时背景变黑
-  )
+  :custom
+  (avy-timeout-seconds 0.3) ; 0.3 秒后如果不连续击键，那么进入选择阶段
+  (avy-background t)) ; 在跳转时背景变黑
 
 ;; 增强 C-e 使得其可以在关键位置进行循环移动
 (use-package mwim

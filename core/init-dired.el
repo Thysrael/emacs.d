@@ -106,6 +106,7 @@ end run
   :vc (:url "https://github.com/alexluigit/dirvish"
        :branch "main"
        :rev :newest)
+  ;; Install the global Dired override before the first Dired buffer opens.
   :demand t
   :preface
   (defconst thy/dirvish-dired-bindings

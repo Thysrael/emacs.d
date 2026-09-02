@@ -2,6 +2,9 @@
 
 (use-package comint
   :ensure nil
+  :commands comint-truncate-buffer
+  :hook
+  (compilation-filter . comint-truncate-buffer)
   :custom
   (comint-buffer-maximum-size 2048)
   (comint-prompt-read-only t))
@@ -11,10 +14,7 @@
   :custom
   (compilation-always-kill t)
   (compilation-ask-about-save nil)
-  (compilation-scroll-output 'first-error)
-  :config
-  (autoload 'comint-truncate-buffer "comint" nil t)
-  (add-hook 'compilation-filter-hook #'comint-truncate-buffer))
+  (compilation-scroll-output 'first-error))
 
 (use-package quickrun
   :ensure t

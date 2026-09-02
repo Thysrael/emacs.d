@@ -19,11 +19,10 @@
   (defun thy/xref-push-marker-stack (&rest _)
     "Push the current position to `xref' marker stack."
     (xref-push-marker-stack (point-marker)))
+  :custom
+  (xref-search-program 'ripgrep)
+  (xref-history-storage 'xref-window-local-history)
   :config
-  (setq
-   xref-search-program 'ripgrep ; 设置工具为 riggrep
-   xref-history-storage 'xref-window-local-history)
-
   ;; 这里是一个压栈函数，用于记录光标位置
   (dolist (command '(find-function consult-imenu consult-ripgrep citre-jump))
     (advice-add command :before #'thy/xref-push-marker-stack))
@@ -44,8 +43,8 @@
 ;; 基于正则匹配的后端
 (use-package dumb-jump
   :ensure t
-  :init
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate) ; 将后端设置为 dumpjump
+  :hook
+  (xref-backend-functions . dumb-jump-xref-activate) ; 将后端设置为 dumpjump
   :custom
   (dumb-jump-prefer-searcher 'rg)
   (dumb-jump-selector 'completing-read)
@@ -62,13 +61,12 @@
   (eglot-events-buffer-config '(:size 0 :format full))
   (eglot-extend-to-xref t)
   (eglot-report-progress nil)
+  (eglot-connect-timeout 10)
+  (eglot-autoshutdown t)
   ;; :custom-face
   ;; (eglot-highlight-symbol-face ((t (:inherit bold :family "JetBrainsMono"))))
   ;; :hook ((c-ts-mode c++-ts-mode) . eglot-ensure)
   :config
-  (setq eglot-events-buffer-size 0
-        eglot-connect-timeout 10
-        eglot-autoshutdown t)
   ;; (transient-define-prefix transient-hydra ()
   ;;   ["Eglot Menu"
   ;;    [
@@ -93,7 +91,7 @@
 ;; C-M-., rember it!
 (use-package consult-eglot
   :ensure t
-  :after consult eglot
+  :after eglot
   :bind (:map eglot-mode-map
               ([remap xref-find-apropos] . consult-eglot-symbols)
               ))
@@ -112,10 +110,10 @@
 ;; 新的 ts 语法高亮支持
 (use-package treesit
   :ensure nil
-  :demand t
   :custom
   (treesit-font-lock-level 4)
-  :config
+  :init
+  ;; Install remaps before the first source file without eagerly loading Treesit.
   (setq major-mode-remap-alist
         (append '((c-mode . c-ts-mode)
                   (c++-mode . c++-ts-mode)

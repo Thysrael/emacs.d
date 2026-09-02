@@ -5,7 +5,9 @@
   :ensure nil
   :bind
   (("M-t" . tab-new)
-   ("M-w" . tab-close))
+   ("M-w" . tab-close)
+   ("<thy-tab-next>" . tab-next)
+   ("<thy-tab-previous>" . tab-previous))
   :custom
   (tab-bar-auto-width t)
   (tab-bar-auto-width-max nil)
@@ -17,6 +19,15 @@
   (tab-bar-tab-hints t)
   (tab-bar-tab-name-format-function #'thy/tab-bar-tab-name-format)
   (tab-bar-tab-name-function #'thy/tab-bar-tab-name)
+  :custom-face
+  (tab-bar ((t (:inherit mode-line-inactive :box nil))))
+  (tab-bar-tab
+   ((t (:inherit mode-line
+        :foreground "#f8f8f2" :background "#6272a4"
+        :weight bold :underline nil :box nil))))
+  (tab-bar-tab-inactive
+   ((t (:inherit mode-line-inactive
+        :weight normal :underline nil :box nil))))
   :preface
   (defun thy/tab-bar-tab-name ()
     "Return the current tab name with its remote host and window count."
@@ -42,18 +53,5 @@
               (tab-bar-tab-name-format-default tab index))))
   :config
   ;; Keep tab switching ahead of mode-specific Meta bindings.
-  (keymap-global-set "<thy-tab-next>" #'tab-next)
-  (keymap-global-set "<thy-tab-previous>" #'tab-previous)
   (define-key key-translation-map (kbd "M-j") (kbd "<thy-tab-next>"))
-  (define-key key-translation-map (kbd "M-k") (kbd "<thy-tab-previous>"))
-
-  (custom-theme-set-faces
-   'user
-   '(tab-bar ((t (:inherit mode-line-inactive :box nil))))
-   '(tab-bar-tab
-     ((t (:inherit mode-line
-          :foreground "#f8f8f2" :background "#6272a4"
-          :weight bold :underline nil :box nil))))
-   '(tab-bar-tab-inactive
-     ((t (:inherit mode-line-inactive
-          :weight normal :underline nil :box nil))))))
+  (define-key key-translation-map (kbd "M-k") (kbd "<thy-tab-previous>")))

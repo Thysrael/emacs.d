@@ -36,18 +36,20 @@
   (treemacs-sorting 'alphabetic-case-insensitive-asc)
   (treemacs-space-between-root-nodes nil)
   (treemacs-width 36)
+  :custom-face
+  (treemacs-git-modified-face
+   ((t (:inherit thy/vc-change-face :foreground unspecified))))
+  (treemacs-git-renamed-face
+   ((t (:inherit thy/vc-change-face :foreground unspecified))))
+  (treemacs-git-added-face
+   ((t (:inherit thy/vc-insert-face :foreground unspecified))))
+  (treemacs-git-untracked-face
+   ((t (:inherit thy/vc-insert-face :foreground unspecified))))
+  (treemacs-git-conflict-face
+   ((t (:inherit thy/vc-delete-face :foreground unspecified))))
+  (treemacs-git-ignored-face
+   ((t (:inherit dired-ignored :foreground unspecified))))
   :config
-  (let ((change (face-foreground 'thy/vc-change-face nil t))
-        (delete (face-foreground 'thy/vc-delete-face nil t))
-        (insert (face-foreground 'thy/vc-insert-face nil t)))
-    (custom-theme-set-faces
-     'user
-     `(treemacs-git-modified-face ((t (:foreground ,change))))
-     `(treemacs-git-renamed-face ((t (:foreground ,change))))
-     `(treemacs-git-added-face ((t (:foreground ,insert))))
-     `(treemacs-git-untracked-face ((t (:foreground ,insert))))
-     `(treemacs-git-conflict-face ((t (:foreground ,delete))))
-     '(treemacs-git-ignored-face ((t (:inherit dired-ignored))))))
   (setq treemacs-collapse-dirs (if treemacs-python-executable 3 0))
   (treemacs-filewatch-mode 1)
   (treemacs-follow-mode 1)
@@ -61,6 +63,7 @@
 (use-package treemacs-nerd-icons
   :ensure t
   :after treemacs
+  ;; This demand is relative to Treemacs and does not load it at startup.
   :demand t
   :preface
   (defun thy/treemacs-compact-nerd-icons ()
@@ -90,5 +93,6 @@
 
 (use-package treemacs-evil
   :ensure t
-  :demand t
-  :after (treemacs evil))
+  :after (treemacs evil)
+  ;; Load the integration as soon as both deferred dependencies are present.
+  :demand t)

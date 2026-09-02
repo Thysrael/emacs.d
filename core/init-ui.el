@@ -93,9 +93,7 @@
 
 (use-package pixel-scroll
   :ensure nil
-  :demand t
-  :config
-  (pixel-scroll-precision-mode 1))
+  :hook (after-init . pixel-scroll-precision-mode))
 
 (use-package mwheel
   :ensure nil
@@ -109,8 +107,8 @@
 (use-package fringe
   :ensure nil
   :if (display-graphic-p)
-  :demand t
-  :config
+  :init
+  ;; These fringe APIs are built-in primitives, so `require' is unnecessary.
   (fringe-mode '(5 . 8))
   (define-fringe-bitmap 'right-curly-arrow
     [#b00110000
@@ -167,6 +165,7 @@
 
 (use-package doom-themes
   :ensure t
+  ;; Apply the selected theme during startup.
   :demand t
   :custom
   (doom-themes-enable-bold t)

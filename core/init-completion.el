@@ -3,9 +3,8 @@
 ;;; 代码补全
 (use-package dabbrev
   :ensure nil
-  :config
-  (setq dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'"))
-  )
+  :custom
+  (dabbrev-ignored-buffer-regexps '("\\.\\(?:pdf\\|jpe?g\\|png\\)\\'")))
 
 ;;; corfu & tempel 方案
 (use-package tempel
@@ -15,14 +14,14 @@
         ("RET" . tempel-next)
         ("S-<RET>" . tempel-previous))
   :hook (((prog-mode text-mode) . thy/tempel-setup-capf)
-         ((prog-mode text-mode) . tempel-abbrev-mode))
+          ((prog-mode text-mode) . tempel-abbrev-mode))
+  :custom
+  (tempel-path (no-littering-expand-etc-file-name "tempel-templates"))
   :config
   (defun thy/tempel-setup-capf ()
     "Add Tempel completion to the current buffer."
     (add-hook 'completion-at-point-functions #'tempel-complete nil t))
 
-  (setq tempel-trigger-prefix "`"
-        tempel-path (no-littering-expand-etc-file-name "tempel-templates"))
   )
 
 (use-package corfu
@@ -47,6 +46,7 @@
 (use-package corfu-history
   :ensure nil
   :after corfu
+  ;; Enable this global extension whenever Corfu first loads.
   :demand t
   :config
   (corfu-history-mode 1)
@@ -57,6 +57,7 @@
 (use-package corfu-popupinfo
   :ensure nil
   :after corfu
+  ;; Enable this global extension whenever Corfu first loads.
   :demand t
   :custom
   (corfu-popupinfo-delay '(1.0 . 1.0))

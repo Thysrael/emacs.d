@@ -12,7 +12,6 @@
 
 (use-package diff-hl
   :ensure t
-  :defines desktop-minor-mode-table
   :preface
   (defface thy/vc-change-face
     '((t (:foreground "#82aaff")))
@@ -97,8 +96,12 @@
    (vc-dir-mode . diff-hl-dir-mode)
    (focus-in . diff-hl-update-once)
    ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
-    (lambda ()
-      (unless (display-graphic-p) (diff-hl-margin-local-mode 1)))))
+     (lambda ()
+       (unless (display-graphic-p) (diff-hl-margin-local-mode 1)))))
+  :custom-face
+  (diff-hl-change ((t (:inherit thy/vc-change-face :background "#82aaff"))))
+  (diff-hl-delete ((t (:inherit thy/vc-delete-face :background "#ff757f"))))
+  (diff-hl-insert ((t (:inherit thy/vc-insert-face :background "#77e0c6"))))
   :custom
   (diff-hl-disable-on-remote t)
   (diff-hl-draw-borders nil)
@@ -108,12 +111,6 @@
    ("C-c G" . thy/diff-hunk-transient))
   :config
   (setq-default fringes-outside-margins t)
-
-  (custom-theme-set-faces
-   'user
-   '(diff-hl-change ((t (:inherit thy/vc-change-face :background "#82aaff"))))
-   '(diff-hl-delete ((t (:inherit thy/vc-delete-face :background "#ff757f"))))
-   '(diff-hl-insert ((t (:inherit thy/vc-insert-face :background "#77e0c6")))))
 
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)

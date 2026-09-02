@@ -50,6 +50,12 @@
   :custom
   ;; Use autosave files so recovery remains possible after crashes.
   (auto-save-default t)
+  ;; Keep autosaves under the no-littering autosave directory, with a TRAMP-safe
+  ;; name so remote and local autosave files do not conflict.
+  (auto-save-file-name-transforms
+   `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+      ,(concat auto-save-list-file-prefix "tramp-\\2") t)
+     (".*" ,auto-save-list-file-prefix t)))
   ;; Kill subprocesses directly when quitting Emacs.
   (confirm-kill-processes nil)
   ;; Do not prompt when visiting a new file path.
@@ -79,6 +85,16 @@
   ;; Treat Chinese punctuation as sentence endings.
   (sentence-end "\\([。！？]\\|……\\|[.?!][]\"')}]*\\($\\|[ \t]\\)\\)[ \t\n]*")
   (sentence-end-double-space nil)
+  ;; Prefer left-to-right layout for ordinary text.
+  (bidi-paragraph-direction 'left-to-right)
+  ;; Default editing behavior for new buffers.
+  (fill-column 100)
+  (indent-tabs-mode nil)
+  (tab-width 4)
+  ;; Default long-line display behavior for new buffers.
+  (truncate-lines t)
+  (truncate-partial-width-windows nil)
+  (word-wrap t)
   ;; Make Tab indent the current line or active region.
   (tab-always-indent t)
   ;; Disambiguate buffers with the same file name using path components.
@@ -90,14 +106,8 @@
   ;; Preserve large deletions in autosave data.
   (setq auto-save-include-big-deletions t)
 
-  ;; Reject remote host probing in file-at-point helpers.
-  (setq ffap-machine-p-known 'reject)
-
   ;; Use a larger process read chunk for LSPs and other external tools.
   (setq read-process-output-max (* 3 1024 1024))
-
-  ;; Hide server client instructions in client frames.
-  (setq server-client-instructions nil)
 
   ;; `tabify' should only convert indentation spaces.
   (setq tabify-regexp "^\t* [ \t]+")
@@ -105,27 +115,9 @@
   ;; Use a simple ASCII ellipsis for truncated text.
   (setq truncate-string-ellipsis "...")
 
-  ;; Keep autosaves under the no-littering autosave directory, with a TRAMP-safe
-  ;; name so remote and local autosave files do not conflict.
-  (setq auto-save-file-name-transforms
-        `(("\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
-           ,(concat auto-save-list-file-prefix "tramp-\\2") t)
-          (".*" ,auto-save-list-file-prefix t)))
-
-  ;; Prefer left-to-right layout and skip bidirectional text scanning for speed.
+  ;; Skip bidirectional text scanning for speed.
   (setq-default bidi-display-reordering t)
   (setq-default bidi-inhibit-bpa t)
-  (setq-default bidi-paragraph-direction 'left-to-right)
-
-  ;; Default editing behavior for new buffers.
-  (setq-default fill-column 100)
-  (setq-default indent-tabs-mode nil)
-  (setq-default tab-width 4)
-
-  ;; Default long-line display behavior for new buffers.
-  (setq-default truncate-lines t)
-  (setq-default truncate-partial-width-windows nil)
-  (setq-default word-wrap t)
   (setq-default word-wrap-by-category t)
 
   (set-language-environment "UTF-8")
@@ -147,6 +139,18 @@
 
   ;; Speed up auto-save recovery prompts by avoiding `sit-for' delays.
   (advice-add #'after-find-file :around #'thy/after-find-file-without-sit-for))
+
+(use-package ffap
+  :ensure nil
+  :init
+  ;; Set this even while FFAP remains deferred.
+  (setq ffap-machine-p-known 'reject))
+
+(use-package server
+  :ensure nil
+  :init
+  ;; Server clients can connect before the deferred library is configured.
+  (setq server-client-instructions nil))
 ;; Improve behavior for files that contain extremely long lines.
 (use-package so-long
   :ensure nil
@@ -216,7 +220,9 @@
                    if (stringp item)
                    collect (cons reg (substring-no-properties item))
                    else collect (cons reg item))))
-  :hook (after-init . savehist-mode)
+  :hook
+  ((after-init . savehist-mode)
+   (savehist-save . thy/savehist-strip-text-properties))
   :custom
   (savehist-additional-variables '(mark-ring
                                    global-mark-ring
@@ -226,8 +232,6 @@
                                    kill-ring))
   (savehist-autosave-interval 300)
   :config
-  ;; Reduce savehist cache size by dropping text properties from large saved values.
-  (add-hook 'savehist-save-hook #'thy/savehist-strip-text-properties)
   (with-eval-after-load 'vertico
     (add-to-list 'savehist-additional-variables 'vertico-repeat-history)))
 
