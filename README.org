@@ -1,5 +1,9 @@
 #+TITLE: EMO
 
+[[file:assets/demo.svg]]
+
+[[file:assets/appear.gif]]
+
 * 选择
 
 在我结束了大三和保研的事情后，我希望我可以干一些自己想干的事情。配置一款“我自己”的编辑器再次被我提上日程。
