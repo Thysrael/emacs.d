@@ -68,24 +68,35 @@
   ("C-c k" . org-capture)
   :config
   (defun thy/org-top-headings ()
-    "Get the names of the headings in the current org file."
-    (save-excursion
-      (goto-char (point-min))
-      (let ((headings nil))
-
-        (while (re-search-forward "^[\\*]+ \\([^\\[\n]+\\)" nil t)
-          (let ((heading (match-string-no-properties 1)))
-            (add-to-list 'headings heading t)))
-        headings)))
+    "Return completion candidates for top-level headings in this Org file."
+    (let ((counts (make-hash-table :test #'equal)) entries)
+      (org-with-wide-buffer
+       (org-map-entries
+        (lambda ()
+          (when (= (org-outline-level) 1)
+            (let ((title (org-get-heading t t t t)))
+              (puthash title (1+ (gethash title counts 0)) counts)
+              (push (list title (line-number-at-pos) (point-marker)) entries))))
+        nil nil))
+      (mapcar
+       (lambda (entry)
+         (pcase-let ((`(,title ,line ,marker) entry))
+           (cons (if (> (gethash title counts) 1)
+                     (format "%s (line %d)" title line)
+                   title)
+                 marker)))
+       (nreverse entries))))
 
   (defun thy/org-select-top-level-heading ()
-    "Visit all headings in the current file."
+    "Move below a selected top-level heading in the current Org file."
     (interactive)
-    (goto-char (point-min))
-    (let ((choice (completing-read "Heading: " (thy/org-top-headings))))
-      (goto-char (point-min))
-      (re-search-forward (format "^[\\*]+ %s" choice))
-      (forward-line 1)))
+    (let ((headings (thy/org-top-headings)))
+      (unless headings
+        (user-error "No top-level headings in this Org file"))
+      (let* ((choice (completing-read "Heading: " headings nil t))
+             (marker (alist-get choice headings nil nil #'equal)))
+        (goto-char marker)
+        (forward-line 1))))
   (defun thy/org-priority-cookie ()
     "Return the default Org priority cookie."
     (format "[#%c]" org-default-priority))
@@ -133,6 +144,24 @@
   :ensure nil
   :bind
   ("C-c a" . org-agenda)
+  :hook
+  (org-agenda-finalize . thy/org-agenda-fontify-clockreport-headlines)
+  :custom-face
+  (org-scheduled-today ((t (:foreground ,(doom-color 'warning)))))
+  :preface
+  (defun thy/org-agenda-fontify-clockreport-headlines ()
+    "Display clock report headlines like ordinary agenda entries."
+    (when org-agenda-clockreport-mode
+      (save-excursion
+        (goto-char (point-min))
+        (while (re-search-forward org-link-bracket-re nil t)
+          (when (and (match-beginning 2)
+                     (save-excursion
+                       (goto-char (match-beginning 0))
+                       (beginning-of-line)
+                       (looking-at-p "[[:blank:]]*|")))
+            (add-face-text-property
+             (match-beginning 2) (match-end 2) 'default))))))
   :custom
   (org-agenda-files
    '("~/Documents/org/agenda.org"))
@@ -159,12 +188,7 @@
   ;; 提前 n 天截止日期到期告警
   (org-deadline-warning-days 7)
   ;; clock report level 增加到 3 ，显示 tag ，隐藏 agenda 文件显示
-  (org-agenda-clockreport-parameter-plist '(:link t :hidefiles t :maxlevel 3 :tags t))
-  :config
-  (custom-theme-set-faces
-   'user
-   `(org-scheduled-today ((t (:foreground ,(doom-color 'warning))))))
-  )
+  (org-agenda-clockreport-parameter-plist '(:link t :hidefiles t :maxlevel 3 :tags t)))
 
 ;; 在 agenda 上显示记录
 ;; ! means not done. * means done.
@@ -177,7 +201,17 @@
 (use-package org-habit
   :ensure nil
   :after org-agenda
+  ;; Agenda checks for the habit functions while constructing its view.
   :demand t
+  :custom-face
+  (org-habit-alert-face ((t (:background "#edd389" :weight bold))))
+  (org-habit-alert-future-face ((t (:background "#d0bf8f" :weight bold))))
+  (org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
+  (org-habit-overdue-future-face ((t (:background "#8c5353" :weight bold))))
+  (org-habit-clear-face ((t (:background "#418d93" :weight bold))))
+  (org-habit-clear-future-face ((t (:background "#4c7073" :weight bold))))
+  (org-habit-ready-face ((t (:background "#7f9f7f" :weight bold))))
+  (org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))
   :custom
   (org-habit-show-habits t)
   (org-habit-graph-column 50)
@@ -185,18 +219,7 @@
   (org-habit-show-done-always-green t)
   ;; (org-habit-scheduled-past-days t)
   ;; ;; org habit show 7 days before today and 7 days after today.
-  (org-habit-preceding-days 4)
-  :config
-  (custom-theme-set-faces
-   'user
-   '(org-habit-alert-face ((t (:background "#edd389" :weight bold))))
-   '(org-habit-alert-future-face ((t (:background "#d0bf8f" :weight bold))))
-   '(org-habit-overdue-face ((t (:background "#8b3c3c" :weight bold))))
-   '(org-habit-overdue-future-face ((t (:background "#8c5353" :weight bold))))
-   '(org-habit-clear-face ((t (:background "#418d93" :weight bold))))
-   '(org-habit-clear-future-face ((t (:background "#4c7073" :weight bold))))
-   '(org-habit-ready-face ((t (:background "#7f9f7f" :weight bold))))
-   '(org-habit-ready-future-face ((t (:background "#5f7f5f" :weight bold))))))
+  (org-habit-preceding-days 4))
 
 ;; 使用 C-{f, b, a, e} 进行移动
 ;; g d 可以选择日期
