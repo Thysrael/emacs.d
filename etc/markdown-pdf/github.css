@@ -238,6 +238,25 @@ video {
   max-width: 100%;
 }
 
+img.math-inline,
+img.math-display {
+  background: transparent;
+}
+
+img.math-inline {
+  display: inline;
+  margin: 0 0.08em;
+  max-width: none;
+  vertical-align: -0.25em;
+}
+
+img.math-display {
+  break-inside: avoid;
+  display: block;
+  margin: 1em auto;
+  max-width: 100%;
+}
+
 figure {
   text-align: center;
 }
