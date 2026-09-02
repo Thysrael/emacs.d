@@ -2,18 +2,8 @@
 
 (eval-when-compile (require 'subr-x))
 
-;; show encodings for UTF-8:LF
-(defvar +mode-line-show-common-encodings nil)
 ;; show VC tools name for Git
 (defvar +mode-line-show-common-vc-tools-name nil)
-
-;;; Window width
-(defconst +mode-line-window-width-limit 90)
-(defvar-local +mode-line-enough-width-p nil)
-(defun +mode-line-window-size-change-function (&rest _)
-  "Update whether the selected window is wide enough for full details."
-  (setq +mode-line-enough-width-p
-        (> (window-total-width) +mode-line-window-width-limit)))
 
 ;;; Faces
 (defgroup +mode-line nil
@@ -256,21 +246,21 @@
 
 (use-package emacs
   :ensure nil
+  :hook
+  (find-file . +mode-line-update-remote-host-name)
+  :custom
+  (mode-line-format '((:eval (+mode-line-compute))))
   :init
-  (dolist (hook '(after-revert-hook buffer-list-update-hook window-size-change-functions))
-    (add-hook hook #'+mode-line-window-size-change-function))
-  (add-hook 'find-file-hook #'+mode-line-update-remote-host-name)
-  (setq-default mode-line-format
-                '((:eval (+mode-line-compute)))
-                header-line-format nil))
+  (setq-default header-line-format nil))
 
 (use-package mule
   :ensure nil
+  :custom
+  (eol-mnemonic-unix "LF")
+  (eol-mnemonic-dos "CRLF")
+  (eol-mnemonic-mac "CR")
+  (eol-mnemonic-undecided "?")
   :init
-  (setq eol-mnemonic-unix "LF"
-        eol-mnemonic-dos "CRLF"
-        eol-mnemonic-mac "CR"
-        eol-mnemonic-undecided "?")
   (dolist (hook '(find-file-hook after-change-major-mode-hook))
     (add-hook hook #'+mode-line-update-encoding))
   (advice-add #'after-insert-file-set-coding :after #'+mode-line-update-encoding)
@@ -294,7 +284,10 @@
     (setq +mode-line-project-crumb-width (window-width)
           +mode-line-project-crumb
           (when (fboundp 'breadcrumb-project-crumbs)
-            (breadcrumb-project-crumbs))))
+            (let ((buffer-file-name
+                   (or (bound-and-true-p thy/office-preview-source-file)
+                       buffer-file-name)))
+              (breadcrumb-project-crumbs)))))
 
   (defun +mode-line-get-project-crumb ()
     "Return project crumbs, refreshing them when the window width changes."
@@ -307,12 +300,13 @@
     (add-hook hook #'+mode-line-update-project-crumb))
   (dolist (fn '(rename-buffer set-visited-file-name pop-to-buffer popup-create popup-delete))
     (advice-add fn :after #'+mode-line-update-project-crumb))
+  :custom
+  (breadcrumb-imenu-crumb-separator " ⋅ ")
+  (breadcrumb-project-max-length 0.4)
   :custom-face
   (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t :slant italic))))
   (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :slant italic))))
   (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :slant italic))))
   (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :foreground unspecified))))
   :config
-  (setq breadcrumb-imenu-crumb-separator " ⋅ "
-        breadcrumb-project-max-length 0.4
-        breadcrumb-idle-time 10))
+  (setq breadcrumb-idle-time 10))
