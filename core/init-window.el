@@ -83,12 +83,11 @@
   :commands (winner-undo winner-redo)
   :custom
   (winner-dont-bind-my-keys t)
+  (winner-boring-buffers
+   '("*Completions*" "*Compile-Log*" "*inferior-lisp*" "*Fuzzy Completions*"
+     "*Apropos*" "*Help*" "*cvs*" "*Buffer List*" "*Ibuffer*"
+     "*esh command on file*"))
   :hook (after-init . winner-mode)
-  :config
-  (setq winner-boring-buffers
-        '("*Completions*" "*Compile-Log*" "*inferior-lisp*" "*Fuzzy Completions*"
-          "*Apropos*" "*Help*" "*cvs*" "*Buffer List*" "*Ibuffer*"
-          "*esh command on file*"))
   )
 
 ;; Let `display-buffer-alist' control the Ibuffer window placement.
@@ -103,6 +102,10 @@
   :hook
   (emacs-startup . popper-mode)
   :custom
+  (popper-mode-line
+   '(:eval `(:propertize " POP |"
+                         face (:inherit ,(+mode-line-get-window-name-face)
+                                        :inverse-video ,(mode-line-window-selected-p)))))
   (popper-window-height
    (lambda (window)
      (let ((height (floor (* 0.45 (frame-height (window-frame window))))))
@@ -163,7 +166,7 @@
      "\\*chat.*"
      agent-shell-mode
      ;; "\\*Org Agenda\\*"
-     "^CAPTURE-.*\\.org*"
+     "^CAPTURE-.*\\.org\\'"
 
      image-mode
      helpful-mode
@@ -173,13 +176,6 @@
 	 ))
 
   :config
-  ;; Mode-line indicator.
-  (with-eval-after-load 'popper
-    (setq popper-mode-line
-          '(:eval `(:propertize " POP |"
-                                face (:inherit ,(+mode-line-get-window-name-face)
-                                               :inverse-video ,(mode-line-window-selected-p))))))
-
   ;; Enable indicator in minibuffer.
   (popper-echo-mode 1)
 
@@ -212,23 +208,25 @@
   :ensure t
   :unless thy/on-server
   :hook ((after-init . auto-dim-other-buffers-mode)
-         (auto-dim-other-buffers-mode . thy/auto-dim-other-buffers-auto-set-face))
+          (auto-dim-other-buffers-mode . thy/auto-dim-other-buffers-auto-set-face)
+          (enable-theme-functions . thy/auto-dim-other-buffers-auto-set-face))
+  :custom
+  (auto-dim-other-buffers-dim-on-focus-out t)
+  (auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
   :config
-  (setq auto-dim-other-buffers-dim-on-focus-out t
-        auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
-
   (defun thy/auto-dim-other-buffers-auto-set-face (&rest _)
     "Update the inactive-window dimming face after theme changes."
     (set-face-background 'auto-dim-other-buffers-face (face-background 'mode-line)))
-  (advice-add #'enable-theme :after #'thy/auto-dim-other-buffers-auto-set-face)
   )
 
 ;; Highlight jump targets and copied text briefly.
 (use-package pulse
   :ensure nil
   :custom-face
-  (pulse-highlight-start-face ((t (:inherit isearch :extend t))))
-  (pulse-highlight-face ((t (:inherit lazy-highlight :extend t))))
+  (pulse-highlight-start-face
+   ((t (:inherit isearch :background unspecified :extend t))))
+  (pulse-highlight-face
+   ((t (:inherit lazy-highlight :background unspecified :extend t))))
   :hook
   (((dumb-jump-after-jump imenu-after-jump) . thy/recenter-and-pulse)
    ((bookmark-after-jump magit-diff-visit-file next-error) . thy/recenter-and-pulse-line))

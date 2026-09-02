@@ -12,19 +12,17 @@
 (use-package paren
   :ensure nil
   :custom-face (show-paren-match ((t (:underline t))))
-  :config
-  (setq show-paren-when-point-inside-paren t
-        show-paren-when-point-in-periphery t
-        show-paren-context-when-offscreen t)
-  )
+  :custom
+  (show-paren-when-point-inside-paren t)
+  (show-paren-when-point-in-periphery t)
+  (show-paren-context-when-offscreen t))
 
 ;; Color nested delimiters.
 (use-package rainbow-delimiters
   :ensure t
   :hook ((prog-mode conf-mode yaml-ts-mode) . rainbow-delimiters-mode)
-  :config
-  (setq rainbow-delimiters-max-face-count 5)
-  )
+  :custom
+  (rainbow-delimiters-max-face-count 5))
 
 ;; Highlight TODO, BUG, and similar keywords.
 (use-package hl-todo
@@ -32,11 +30,12 @@
   :custom-face
   (hl-todo ((t (:inherit default :height 0.9 :width condensed :weight bold :inverse-video t))))
   :hook
-  ((prog-mode conf-mode yaml-ts-mode LaTeX-mode) . hl-todo-mode)
+  (((prog-mode conf-mode yaml-ts-mode LaTeX-mode) . hl-todo-mode)
+   (enable-theme-functions . thy/hl-update-keyword-faces))
+  :custom
+  (hl-todo-require-punctuation t)
+  (hl-todo-highlight-punctuation ":")
   :config
-  (setq hl-todo-require-punctuation t
-        hl-todo-highlight-punctuation ":")
-
   (defun thy/hl-todo-add-keywords (keys color)
     "Add or update hl-todo KEYS using COLOR."
     (dolist (keyword keys)
@@ -50,14 +49,14 @@
     (thy/hl-todo-add-keywords '("BUG" "DEFECT" "ISSUE") (face-foreground 'error))
     (thy/hl-todo-add-keywords '("WORKAROUND" "HACK" "TRICK") (face-foreground 'warning)))
   (thy/hl-update-keyword-faces)
-  (advice-add #'enable-theme :after #'thy/hl-update-keyword-faces)
   )
 
 ;; Display indentation guides.
 (use-package indent-bars
   ;; :straight (indent-bars :type git :host github :repo "jdtsmith/indent-bars")
   :ensure t
-  :hook (prog-mode . indent-bars-mode)
+  :hook ((prog-mode . indent-bars-mode)
+         (enable-theme-functions . thy/indent-bars-auto-set-faces))
   :config
   (setq indent-bars-display-on-blank-lines nil
         indent-bars-width-frac 0.2)
@@ -68,7 +67,6 @@
     "Refresh indent-bars faces after a theme change."
     (when indent-bars-mode
       (indent-bars-reset)))
-  (advice-add #'enable-theme :after #'thy/indent-bars-auto-set-faces)
   )
 
 ;;; Refactoring
@@ -96,11 +94,10 @@
 ;; Visualize undo history; navigate with a, e, f, and b.
 (use-package vundo
   :ensure t
-  :config
-  (setq vundo-compact-display t)
   :bind
   ("C-c u" . vundo)
-  )
+  :custom
+  (vundo-compact-display t))
 
 ;; Context-aware commenting.
 (use-package newcomment
@@ -186,6 +183,8 @@
   :hook ((prog-mode conf-mode yaml-ts-mode TeX-mode nxml-mode) . hs-minor-mode)
   :bind
   ("C-M-o" . thy/hs-toggle-all)
+  :custom
+  (hs-set-up-overlay #'thy/hs-display-code-line-counts)
   :config
   ;; More functions
   ;; @see https://karthinks.com/software/simple-folding-with-hideshow/
@@ -231,8 +230,6 @@
                              (propertize (concat " ... L" lines " ") 'face '(:inherit shadow :height 0.8 :box t))
                              " "))
                    )))
-  (setq hs-set-up-overlay #'thy/hs-display-code-line-counts)
-
   ;; hide-show by indentation
   (defun thy/fold--hideshow-empty-line-p (_)
     "Return non-nil when the current line is empty."

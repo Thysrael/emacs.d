@@ -3,6 +3,10 @@
 (require 'package)
 (require 'subr-x)
 
+;; This must be set before loading use-package.
+(setq use-package-enable-imenu-support t)
+(require 'use-package)
+
 (defun thy/package-load-env-file (file)
   "Load KEY=VALUE entries from FILE into the process environment."
   (when (file-readable-p file)
@@ -101,4 +105,40 @@
 ;; use-package settings.
 (setq use-package-always-defer t)
 (setq use-package-expand-minimally t)
-(setq use-package-enable-imenu-support t)
+
+;; Work around Emacs bug#77928, which makes `:custom-face' weaker than themes.
+(defun thy/apply-face-override (definition)
+  "Apply face override DEFINITION and mark its face as customized."
+  (apply #'face-spec-set definition)
+  (put (car definition) 'face-modified t))
+
+(defun thy/use-package-handler-custom-face-override (name _keyword args rest state)
+  "Expand ARGS as face overrides, then process REST for package NAME and STATE."
+  (use-package-concat
+   (mapcar (lambda (definition)
+             `(progn
+                (thy/apply-face-override (backquote ,definition))
+                ;; A deferred package may define the face after this declaration.
+                (with-eval-after-load ',name
+                  (thy/apply-face-override (backquote ,definition)))))
+           args)
+   (use-package-process-keywords name rest state)))
+
+(let* ((probe
+        '(use-package thy/custom-face-probe
+           :no-require t
+           :custom-face
+           (thy/custom-face-probe ((t (:weight bold))))))
+       (broken-handler
+        (string-match-p
+         "\\_<face-defface-spec\\_>"
+         (prin1-to-string (macroexpand-1 probe)))))
+  (if broken-handler
+      (unless (advice-member-p #'thy/use-package-handler-custom-face-override
+                               #'use-package-handler/:custom-face)
+        (advice-add #'use-package-handler/:custom-face :override
+                    #'thy/use-package-handler-custom-face-override))
+    (when (advice-member-p #'thy/use-package-handler-custom-face-override
+                           #'use-package-handler/:custom-face)
+      (advice-remove #'use-package-handler/:custom-face
+                     #'thy/use-package-handler-custom-face-override))))
