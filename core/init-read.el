@@ -44,7 +44,11 @@
   :commands csv-mode)
 
 (use-package pdf-tools
-  :ensure t
+  :vc (pdf-tools
+       :url "https://codeberg.org/rahguzar/pdf-tools.git"
+       :branch "upstream-child-frame-preview"
+       :lisp-dir "lisp"
+       :rev :newest)
   :defer t
   :preface
   (defconst thy/pdf-view-scroll-lines 3
@@ -151,6 +155,8 @@
   ;; PDF Tools defines this map in the `pdf-view' subfeature, after `pdf-tools'.
   (with-eval-after-load 'pdf-view
     (define-key pdf-view-mode-map (kbd "g") #'thy/pdf-view-revert))
+  (with-eval-after-load 'pdf-isearch
+    (define-key pdf-isearch-active-mode-map (kbd "<escape>") #'isearch-exit))
   :config
   (with-eval-after-load 'evil
     (evil-set-initial-state 'pdf-view-mode 'motion)
@@ -163,6 +169,7 @@
       (kbd "gr") #'thy/pdf-view-revert
       (kbd "G") #'pdf-view-last-page
 
+      (kbd "s") #'isearch-forward
       (kbd "/") #'isearch-forward
       (kbd "n") #'isearch-repeat-forward
       (kbd "N") #'isearch-repeat-backward
