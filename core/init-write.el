@@ -155,7 +155,7 @@
 
   (defun thy/set-prose-line-spacing ()
     "Use slightly looser line spacing in prose buffers."
-    (setq line-spacing 0.25))
+    (setq line-spacing '(0.125 . 0.125)))
 
   (defun thy/toggle-markdown-mode ()
     "Toggle between the active Markdown editing and viewing modes."
@@ -206,19 +206,39 @@
                      ("bash" . shell-script-mode)))
     (add-to-list 'markdown-code-lang-modes mapping)))
 
+(use-package mathjax
+  :ensure t
+  :defer t)
+
 (use-package markdown-ts-appear
   :vc (markdown-ts-appear
        :url "https://github.com/Thysrael/markdown-ts-appear"
        :rev :newest)
   :hook (markdown-ts-mode . markdown-ts-appear-mode)
   :custom
-  (markdown-ts-appear-trigger 'evil-insert))
+  (markdown-ts-appear-trigger 'evil-insert)
+  (markdown-ts-appear-enable-math-preview t)
+  (markdown-ts-appear-link-icon '("" . "↗"))
+  (markdown-ts-appear-image-icon '("" . "▧"))
+  (markdown-ts-appear-wikilink-icon "◆")
+  (markdown-ts-appear-code-fence-style 'connected)
+  (markdown-ts-appear-label-caps nil)
+  (markdown-ts-appear-render-callouts t)
+  (markdown-ts-appear-block-quote-marker "▎")
+  (markdown-ts-appear-table-style 'unicode)
+  :custom-face
+  (markdown-ts-appear-block-quote
+   ((((background light)) (:background "#f3f3f3" :extend t))
+    (((background dark)) (:background "#30323b" :extend t)))))
 
 (use-package markdown-ts-mode
   :ensure nil
   :hook ((markdown-ts-mode . visual-line-mode)
          (markdown-ts-mode . thy/markdown-ts-editing-setup)
          (markdown-ts-mode . thy/markdown-ts-yank-media-setup))
+  :custom
+  (markdown-ts-unchecked-checkbox '("󰄱" . "□"))
+  (markdown-ts-checked-checkbox '("󰄲" . "■"))
   :bind
   (:map markdown-ts-mode-map
         ("C-c C-b" . thy/markdown-ts-insert-bold)
