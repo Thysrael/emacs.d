@@ -214,22 +214,28 @@
   :vc (markdown-ts-appear
        :url "https://github.com/Thysrael/markdown-ts-appear"
        :rev :newest)
-  :hook (markdown-ts-mode . markdown-ts-appear-mode)
+  :hook ((markdown-ts-mode . markdown-ts-appear-mode)
+         (markdown-ts-appear-mode . thy/markdown-ts-appear-setup))
+  :preface
+  (defun thy/markdown-ts-appear-setup ()
+    "Reveal Markdown source only while Evil is in insert state."
+    (if markdown-ts-appear-mode
+        (progn
+          (add-hook 'evil-insert-state-entry-hook #'markdown-ts-appear-start nil t)
+          (add-hook 'evil-insert-state-exit-hook #'markdown-ts-appear-stop nil t)
+          (unless (eq (bound-and-true-p evil-state) 'insert)
+            (markdown-ts-appear-stop)))
+      (remove-hook 'evil-insert-state-entry-hook #'markdown-ts-appear-start t)
+      (remove-hook 'evil-insert-state-exit-hook #'markdown-ts-appear-stop t)))
   :custom
-  (markdown-ts-appear-trigger 'evil-insert)
   (markdown-ts-appear-enable-math-preview t)
-  (markdown-ts-appear-link-icon '("" . "↗"))
-  (markdown-ts-appear-image-icon '("" . "▧"))
+  (markdown-ts-appear-link-icon "")
+  (markdown-ts-appear-image-icon "")
   (markdown-ts-appear-wikilink-icon "◆")
   (markdown-ts-appear-code-fence-style 'connected)
-  (markdown-ts-appear-label-caps nil)
   (markdown-ts-appear-render-callouts t)
   (markdown-ts-appear-block-quote-marker "▎")
-  (markdown-ts-appear-table-style 'unicode)
-  :custom-face
-  (markdown-ts-appear-block-quote
-   ((((background light)) (:background "#f3f3f3" :extend t))
-    (((background dark)) (:background "#30323b" :extend t)))))
+  (markdown-ts-appear-table-style 'unicode))
 
 (use-package markdown-ts-mode
   :ensure nil
@@ -394,6 +400,9 @@
                     marker)
                   " ")))))
   :custom-face
+  (markdown-ts-block-quote
+   ((((background light)) (:background "#f3f3f3" :extend t))
+    (((background dark)) (:background "#30323b" :extend t))))
   (markdown-ts-heading-1 ((t (:inherit org-level-1 :height 1.5))))
   (markdown-ts-heading-2 ((t (:inherit org-level-2 :height 1.35))))
   (markdown-ts-heading-3 ((t (:inherit org-level-3 :height 1.2))))
