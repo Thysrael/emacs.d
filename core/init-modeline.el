@@ -67,7 +67,7 @@
 
 (defun +mode-line-region-key (beg end)
   "Return cache key for region stats between BEG and END."
-  (list beg end (point) (mark t) (buffer-chars-modified-tick)
+  (list beg end (buffer-chars-modified-tick)
         (and (boundp 'emt--lib-loaded) emt--lib-loaded)))
 
 (defun +mode-line-use-region-indicator ()
@@ -80,7 +80,7 @@
         (setq +mode-line-region-cache-key key
               +mode-line-region-cache-value
               (concat "| L" (number-to-string (count-lines beg end))
-                      " C" (number-to-string (abs (- (mark t) (point))))
+                      " C" (number-to-string (- end beg))
                       " W" (number-to-string (+mode-line-count-words beg end))
                       " ")))
       +mode-line-region-cache-value)))
@@ -95,12 +95,11 @@
   "Display the number of matches for symbol overlay."
   (when (and (bound-and-true-p symbol-overlay-keywords-alist)
              (not (bound-and-true-p symbol-overlay-temp-symbol)))
-    (let* ((keyword (symbol-overlay-assoc (symbol-overlay-get-symbol t)))
-           (symbol (car keyword))
-           (before (symbol-overlay-get-list -1 symbol))
-           (after (symbol-overlay-get-list 1 symbol))
-           (count (length before)))
-      (when (symbol-overlay-assoc symbol)
+    (when-let* ((keyword (symbol-overlay-assoc (symbol-overlay-get-symbol t))))
+      (let* ((symbol (car keyword))
+             (before (symbol-overlay-get-list -1 symbol))
+             (after (symbol-overlay-get-list 1 symbol))
+             (count (length before)))
         (concat "| " (number-to-string (1+ count))
                 "/" (number-to-string (+ count (length after)))
                 " sym "
@@ -129,7 +128,7 @@
 
 ;;; [vcs-info] cache for vcs
 (defvar-local +mode-line-vcs-info nil)
-(defun +mode-line-update-vcs-info ()
+(defun +mode-line-update-vcs-info (&rest _)
   "Cache version-control information for the current buffer."
   (setq +mode-line-vcs-info
         (when (and vc-mode buffer-file-name)
@@ -266,39 +265,49 @@
   (advice-add #'after-insert-file-set-coding :after #'+mode-line-update-encoding)
   (advice-add #'set-buffer-file-coding-system :after #'+mode-line-update-encoding))
 
-(use-package vc
+(use-package vc-hooks
   :ensure nil
   :hook (after-save . +mode-line-update-vcs-info)
   :config
+  (advice-add #'vc-mode-line :after #'+mode-line-update-vcs-info)
   (advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info))
 
 ;;; Breadcrumb project/imenu crumbs for the mode-line.
 (use-package breadcrumb
   :ensure t
   :preface
-  (defvar-local +mode-line-project-crumb nil)
-  (defvar-local +mode-line-project-crumb-width nil)
+  (defvar-local thy/mode-line-project-crumb-cache nil)
 
   (defun +mode-line-update-project-crumb (&rest _)
-    "Cache breadcrumb project crumbs for the mode-line."
-    (setq +mode-line-project-crumb-width (window-width)
-          +mode-line-project-crumb
-          (when (fboundp 'breadcrumb-project-crumbs)
-            (let ((buffer-file-name
-                   (or (bound-and-true-p thy/office-preview-source-file)
-                       buffer-file-name)))
-              (breadcrumb-project-crumbs)))))
+    "Invalidate project crumbs in all windows showing the current buffer."
+    (setq thy/mode-line-project-crumb-cache nil)
+    (force-mode-line-update))
 
   (defun +mode-line-get-project-crumb ()
-    "Return project crumbs, refreshing them when the window width changes."
-    (unless (equal +mode-line-project-crumb-width (window-width))
-      (+mode-line-update-project-crumb))
-    +mode-line-project-crumb)
+    "Return project crumbs cached for the current buffer and window."
+    (when (fboundp 'breadcrumb-project-crumbs)
+      (unless thy/mode-line-project-crumb-cache
+        (setq thy/mode-line-project-crumb-cache
+              (make-hash-table :test #'eq :weakness 'key))
+        ;; Project discovery can change even when the file name stays the same.
+        (add-hook 'window-buffer-change-functions
+                  #'+mode-line-update-project-crumb nil t))
+      (let* ((window (selected-window))
+             (buffer-file-name
+              (or (bound-and-true-p thy/office-preview-source-file)
+                  buffer-file-name))
+             (key (list (buffer-name) buffer-file-name default-directory
+                        (window-width window)))
+             (cached (gethash window thy/mode-line-project-crumb-cache)))
+        (unless (equal key (car cached))
+          (setq cached (cons key (breadcrumb-project-crumbs)))
+          (puthash window cached thy/mode-line-project-crumb-cache))
+        (cdr cached))))
   :init
   (dolist (hook '(find-file-hook after-save-hook clone-indirect-buffer-hook
-                                 Info-selection-hook window-configuration-change-hook))
+                                 Info-selection-hook))
     (add-hook hook #'+mode-line-update-project-crumb))
-  (dolist (fn '(rename-buffer set-visited-file-name pop-to-buffer popup-create popup-delete))
+  (dolist (fn '(rename-buffer set-visited-file-name))
     (advice-add fn :after #'+mode-line-update-project-crumb))
   :custom
   (breadcrumb-imenu-crumb-separator " ⋅ ")
