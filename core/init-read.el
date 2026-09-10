@@ -193,6 +193,9 @@
 (use-package doc-view
   :ensure nil
   :preface
+  (defconst thy/office-pdf-preview-cache-stamp "pdf-native-fonts-v1"
+    "Marker for PDF previews generated with the current font backend.")
+
   (defvar-local thy/office-preview-source-file nil
     "Office file from which the current read-only preview was generated.")
 
@@ -232,12 +235,22 @@
       (make-directory directory t)
       directory))
 
+  (defun thy/office-preview-with-fonts (function &rest args)
+    "Call FUNCTION with ARGS using native macOS fonts for Office conversion."
+    ;; The default headless backend can miss system fonts on macOS.
+    (let ((process-environment
+           (if (eq system-type 'darwin)
+               (cons "SAL_USE_VCLPLUGIN=osx" process-environment)
+             process-environment)))
+      (apply function args)))
+
   (defun thy/office-preview-run (program &rest args)
     "Run PROGRAM with ARGS, signaling an error when conversion fails."
     (unless (executable-find program)
       (user-error "Office preview requires `%s'" program))
     (with-temp-buffer
-      (let ((status (apply #'call-process program nil t nil args)))
+      (let ((status (apply #'thy/office-preview-with-fonts
+                           #'call-process program nil t nil args)))
         (unless (and (integerp status) (zerop status))
           (error "%s conversion failed: %s"
                  program (string-trim (buffer-string)))))))
@@ -303,6 +316,10 @@ SOURCE-BUFFER is the buffer that requested the preview."
              ((and (zerop (process-exit-status process))
                    (file-exists-p generated))
               (rename-file generated output t)
+              (write-region
+               "" nil (file-name-concat (file-name-directory output)
+                                       thy/office-pdf-preview-cache-stamp)
+               nil 'silent)
               (if (and (buffer-live-p source-buffer)
                        (with-current-buffer source-buffer
                          (derived-mode-p 'pdf-view-mode)))
@@ -342,6 +359,8 @@ SOURCE-BUFFER requested the preview.  With FORCE, regenerate the PDF."
     (let* ((directory (thy/office-preview-cache-directory source))
            (output (file-name-concat directory "preview.pdf")))
       (if (and (not force)
+               (file-exists-p
+                (file-name-concat directory thy/office-pdf-preview-cache-stamp))
                (thy/office-preview-fresh-p source (list output)))
           (run-at-time
            0 nil
@@ -385,7 +404,8 @@ SOURCE-BUFFER requested the preview.  With FORCE, regenerate the PDF."
                     (let ((inhibit-read-only t))
                       (erase-buffer)))
                   (let ((process
-                         (make-process
+                         (thy/office-preview-with-fonts
+                          #'make-process
                           :name name
                           :buffer log-buffer
                           :command
@@ -521,6 +541,8 @@ SOURCE-BUFFER requested the preview.  With FORCE, regenerate the PDF."
   (doc-view-cache-directory (no-littering-expand-var-file-name "doc-view/"))
   (doc-view-resolution 200)
   :config
+  (advice-add #'doc-view-odf->pdf-converter-soffice
+              :around #'thy/office-preview-with-fonts)
   (advice-add #'doc-view-goto-page :after #'thy/doc-view-fit-page)
   (add-hook 'window-size-change-functions #'thy/doc-view-fit-frame-windows)
   (with-eval-after-load 'evil
