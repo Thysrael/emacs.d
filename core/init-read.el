@@ -281,7 +281,8 @@
            (preview-buffer (find-file-noselect output)))
       (with-current-buffer preview-buffer
         (when (and existing (derived-mode-p 'pdf-view-mode))
-          (pdf-view-revert-buffer :ignore-auto :noconfirm))
+          ;; Let pdf-roll rebuild its layout through `revert-buffer-function'.
+          (revert-buffer :ignore-auto :noconfirm))
         (setq-local thy/office-preview-source-file source)
         (setq-local thy/office-preview-process nil)
         (setq-local default-directory (file-name-directory source))
@@ -324,7 +325,7 @@ SOURCE-BUFFER is the buffer that requested the preview."
                        (with-current-buffer source-buffer
                          (derived-mode-p 'pdf-view-mode)))
                   (with-current-buffer source-buffer
-                    (pdf-view-revert-buffer :ignore-auto :noconfirm)
+                    (revert-buffer :ignore-auto :noconfirm)
                     (setq-local thy/office-preview-source-file source)
                     (setq-local thy/office-preview-process nil)
                     (setq-local default-directory (file-name-directory source))
