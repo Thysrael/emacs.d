@@ -433,7 +433,9 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
       (if (and outer
                (<= (car outer) origin)
                (<= origin (cadr outer)))
-          (evil-select-paren open close beg end type count inclusive)
+          (if inclusive
+              outer
+            (evil-select-paren open close beg end type count inclusive))
         (funcall fallback count beg end type))))
 
   (defmacro thy/evil-define-pair-text-objects

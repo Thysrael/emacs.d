@@ -240,11 +240,6 @@
     (or (thy/fold--hideshow-empty-line-p base-indent)
         (>= (current-indentation) base-indent)))
 
-  (defun thy/fold--hideshow-g-or-empty-p (base-indent)
-    "Return non-nil for empty lines or indentation greater than BASE-INDENT."
-    (or (thy/fold--hideshow-empty-line-p base-indent)
-        (> (current-indentation) base-indent)))
-
   (defun thy/fold--hideshow-seek (start direction before skip predicate base-indent)
     "Seeks forward (if direction is 1) or backward (if direction is -1) from start, until predicate
 fails. If before is nil, it will return the first line where predicate fails, otherwise it returns
@@ -264,29 +259,16 @@ the last line where predicate holds."
                       (unless before (setq pt (line-beginning-position)))))
         pt)))
 
-  (defun thy/fold-hideshow-indent-range (&optional point)
-    "Return the point at the begin and end of the text block with the same (or
-greater) indentation. If `point' is supplied and non-nil it will return the
-begin and end of the block surrounding point."
-    (save-excursion
-      (when point
-        (goto-char point))
-      (let ((base-indent (current-indentation))
-            (begin (point))
-            (end (point)))
-        (setq begin (thy/fold--hideshow-seek begin -1 t nil #'thy/fold--hideshow-geq-or-empty-p base-indent)
-              begin (thy/fold--hideshow-seek begin 1 nil nil #'thy/fold--hideshow-g-or-empty-p base-indent)
-              end   (thy/fold--hideshow-seek end 1 t nil #'thy/fold--hideshow-geq-or-empty-p base-indent)
-              end   (thy/fold--hideshow-seek end -1 nil nil #'thy/fold--hideshow-empty-line-p base-indent))
-        (list begin end base-indent))))
-
   (defun thy/fold-hideshow-forward-block-by-indent-fn (_arg)
     "Move forward over one indentation-based block for hideshow."
     (let ((start (current-indentation)))
       (forward-line)
       (unless (= start (current-indentation))
-        (let ((range (thy/fold-hideshow-indent-range)))
-          (goto-char (cadr range))
+        (let ((base-indent (current-indentation))
+              (end (point)))
+          (setq end (thy/fold--hideshow-seek end 1 t nil #'thy/fold--hideshow-geq-or-empty-p base-indent)
+                end (thy/fold--hideshow-seek end -1 nil nil #'thy/fold--hideshow-empty-line-p base-indent))
+          (goto-char end)
           (end-of-line)))))
 
   ;; support for special modes
