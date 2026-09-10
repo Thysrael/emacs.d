@@ -284,8 +284,7 @@
     (unless (featurep 'cal-china-x)
       (let ((warning-suppress-types
              (cons '(files missing-lexbind-cookie) warning-suppress-types)))
-        (require 'cal-china-x)
-        (cal-china-x-setup))))
+        (require 'cal-china-x))))
   :hook (calendar-mode . thy/cal-china-x-setup)
   :custom-face
   (cal-china-x-important-holiday-face ((t (:background "#ff757f"))))

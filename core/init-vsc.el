@@ -119,6 +119,7 @@
   (with-eval-after-load 'magit
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
+
 (use-package magit
   :ensure t
   :bind (("C-c v" . magit)
@@ -138,8 +139,8 @@
     "Restore window configuration and kill all Magit buffers."
     (interactive)
     (magit-restore-window-configuration)
-    (let ((buffers (magit-mode-get-buffers)))
-      (when (eq major-mode 'magit-status-mode)
+    (when (eq major-mode 'magit-status-mode)
+      (let ((buffers (magit-mode-get-buffers)))
         (mapc (lambda (buf)
                 (with-current-buffer buf
                   (if (and magit-this-process

@@ -252,7 +252,7 @@
 
   (defun thy/office-preview-file-signature (file)
     "Return the modification time and size of FILE."
-    (when-let* ((attributes (file-attributes file 'string)))
+    (when-let* ((attributes (file-attributes file 'integer)))
       (list (file-attribute-modification-time attributes)
             (file-attribute-size attributes))))
 
