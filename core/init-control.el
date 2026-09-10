@@ -71,13 +71,17 @@
     "Return completion candidates for top-level headings in this Org file."
     (let ((counts (make-hash-table :test #'equal)) entries)
       (org-with-wide-buffer
-       (org-map-entries
-        (lambda ()
-          (when (= (org-outline-level) 1)
-            (let ((title (org-get-heading t t t t)))
-              (puthash title (1+ (gethash title counts 0)) counts)
-              (push (list title (line-number-at-pos) (point-marker)) entries))))
-        nil nil))
+       (let ((previous-position (point-min))
+             (line 1))
+         (org-map-entries
+          (lambda ()
+            (when (= (org-outline-level) 1)
+              (setq line (+ line (thy/line-distance previous-position (point)))
+                    previous-position (point))
+              (let ((title (org-get-heading t t t t)))
+                (puthash title (1+ (gethash title counts 0)) counts)
+                (push (list title line (point-marker)) entries))))
+          nil nil)))
       (mapcar
        (lambda (entry)
          (pcase-let ((`(,title ,line ,marker) entry))

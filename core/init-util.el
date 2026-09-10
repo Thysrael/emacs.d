@@ -3,6 +3,16 @@
 ;; Useful functions and macros shared by multiple modules.
 (require 'cl-lib)
 
+(defun thy/line-distance (beg end)
+  "Return the signed number of line boundaries from BEG to END.
+Both positions must be within the accessible part of the current buffer."
+  (save-excursion
+    (save-restriction
+      ;; Count only this interval, including when either end is mid-line.
+      (narrow-to-region (min beg end) (max beg end))
+      (* (if (> beg end) -1 1)
+         (1- (line-number-at-pos (point-max)))))))
+
 ;; Keep generated files out of the main configuration.
 (use-package no-littering
   :ensure t

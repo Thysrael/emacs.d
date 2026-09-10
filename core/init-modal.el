@@ -91,7 +91,7 @@
   (defun thy/evil-show-operator-line-numbers ()
     "Overlay visible line starts with relative numbers while awaiting a motion."
     (thy/evil-hide-operator-line-numbers)
-    (let* ((current-line (line-number-at-pos))
+    (let* ((origin (point))
            (window (get-buffer-window (current-buffer)))
            (start (if window (window-start window) (point-min)))
            (end (if window
@@ -99,11 +99,11 @@
                   (point-max))))
       (save-excursion
 	    (goto-char start)
-	    (let* ((line (line-number-at-pos (line-beginning-position)))
+	    (let* ((offset (thy/line-distance origin (line-beginning-position)))
                done)
           (beginning-of-line)
           (while (not done)
-            (let ((distance (abs (- line current-line))))
+            (let ((distance (abs offset)))
               (unless (zerop distance)
 		        (let* ((beg (point))
                        (line-end (line-end-position))
@@ -140,7 +140,7 @@
                     (overlay-put overlay 'window window))
                   (overlay-put overlay 'priority 100)
                   (push overlay thy/evil-operator-line-number-overlays))))
-            (setq line (1+ line))
+            (setq offset (1+ offset))
             (setq done (or (>= (line-end-position) end)
                            (not (zerop (forward-line 1))))))))))
 

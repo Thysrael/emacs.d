@@ -42,11 +42,13 @@
                       (lambda (overlay) (overlay-get overlay 'diff-hl-hunk))
                       (overlays-in (point-min) (point-max)))
                      (lambda (left right)
-                       (< (overlay-start left) (overlay-start right))))))
+                       (< (overlay-start left) (overlay-start right)))))
+              (previous-start (point-min))
+              (previous-line 1))
           (dolist (overlay hunks)
             (let* ((start (overlay-start overlay))
                    (end (overlay-end overlay))
-                   (line (line-number-at-pos start))
+                   (line (+ previous-line (thy/line-distance previous-start start)))
                    (type (overlay-get overlay 'diff-hl-hunk-type))
                    (summary
                     (string-trim
@@ -68,6 +70,8 @@
                                 "(empty line)"
                               (truncate-string-to-width
                                summary 100 nil nil "...")))))
+              (setq previous-start start
+                    previous-line line)
               (push (consult--location-candidate
                      candidate (cons buffer start) line line)
                     candidates)))))
