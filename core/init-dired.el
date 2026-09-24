@@ -109,6 +109,16 @@ end run
   ;; Install the global Dired override before the first Dired buffer opens.
   :demand t
   :preface
+  (defun thy/dirvish-graffle-icon-args (args)
+    "Use a file icon for Graffle packages in Dirvish renderer ARGS."
+    (if (and (eq (car (nth 5 args)) 'dir)
+             (string-suffix-p ".graffle" (directory-file-name (nth 3 args)) t))
+        (let ((args (copy-sequence args)))
+          ;; Only the icon renderer sees this type; cached file data is unchanged.
+          (setf (nth 5 args) (cons 'file (cdr (nth 5 args))))
+          args)
+      args))
+
   (defconst thy/dirvish-dired-bindings
     '(("o" . dired-do-open)
       ("a" . thy/dired-create-file-or-directory)
@@ -243,6 +253,8 @@ DETAILS and BATCH are the remaining arguments to `dirvish-yank--execute'."
   :config
   (require 'dirvish-widgets)
   (require 'dirvish-vc)
+  (with-eval-after-load 'dirvish-icons
+    (advice-add #'dirvish-attribute-nerd-icons-rd :filter-args #'thy/dirvish-graffle-icon-args))
   (dirvish-define-mode-line thy/file-owner
     "Group and user of the file at point."
     (when-let* ((group (dirvish--format-file-attr 'group-id))
