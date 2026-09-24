@@ -155,7 +155,7 @@
 
   (defun thy/set-prose-line-spacing ()
     "Use slightly looser line spacing in prose buffers."
-    (setq line-spacing '(0.125 . 0.125)))
+    (setq-local line-spacing '(0.125 . 0.125)))
 
   (defun thy/toggle-markdown-mode ()
     "Toggle between the active Markdown editing and viewing modes."
@@ -206,14 +206,16 @@
                      ("bash" . shell-script-mode)))
     (add-to-list 'markdown-code-lang-modes mapping)))
 
+;; MathJax is optional for markdown-ts-appear; enable it explicitly here.
 (use-package mathjax
   :ensure t
-  :defer t)
+  :custom
+  (markdown-ts-appear-enable-math-preview t))
 
 (use-package markdown-ts-appear
   :vc (markdown-ts-appear
        :url "https://github.com/Thysrael/markdown-ts-appear"
-       :rev :newest)
+       :rev "wrapped-table-cells")
   :hook ((markdown-ts-mode . markdown-ts-appear-mode)
          (markdown-ts-appear-mode . thy/markdown-ts-appear-setup))
   :preface
@@ -228,14 +230,13 @@
       (remove-hook 'evil-insert-state-entry-hook #'markdown-ts-appear-start t)
       (remove-hook 'evil-insert-state-exit-hook #'markdown-ts-appear-stop t)))
   :custom
-  (markdown-ts-appear-enable-math-preview t)
   (markdown-ts-appear-link-icon "")
   (markdown-ts-appear-image-icon "")
   (markdown-ts-appear-wikilink-icon "◆")
   (markdown-ts-appear-code-fence-style 'connected)
   (markdown-ts-appear-render-callouts t)
   (markdown-ts-appear-block-quote-marker "▎")
-  (markdown-ts-appear-table-style 'unicode))
+  (markdown-ts-appear-table-style 'wrapped))
 
 (use-package markdown-ts-mode
   :ensure nil
@@ -255,6 +256,28 @@
    :map markdown-ts-view-mode-map
         ("C-c C-e" . thy/markdown-export-pdf))
   :preface
+  (defun thy/markdown-ts-fontify-heading-eof (node &rest _)
+    "Complete the face of an unterminated final ATX heading for NODE."
+    (let* ((heading-p (equal (treesit-node-type node) "atx_heading"))
+           (marker (if heading-p (treesit-node-child node 0) node))
+           (end (if heading-p (treesit-node-end node)
+                  ;; An unfinished first heading can be parsed as an ERROR.
+                  (when (equal (treesit-node-type (treesit-node-parent node)) "ERROR")
+                    (save-excursion
+                      (goto-char (treesit-node-end marker))
+                      (line-end-position))))))
+      ;; Emacs 32's ATX fontifier assumes the final character is a newline.
+      (when (and end (= end (point-max))
+                 (> end (treesit-node-end marker))
+                 (not (memq (char-before end) '(?\n ?\r))))
+        (let ((beg (if heading-p (1- end) (treesit-node-start marker)))
+              (face (intern (concat "markdown-ts-heading-"
+                                    (substring (treesit-node-type marker) 5 6)))))
+          (unless (and heading-p
+                       (memq face (ensure-list (get-text-property (1- end) 'face))))
+            (font-lock--remove-face-from-text-property beg end 'face face)
+            (font-lock-append-text-property beg end 'face face))))))
+
   (defvar thy/markdown-image-directory-history nil
     "History of directories used for yanked Markdown images.")
 
@@ -426,6 +449,8 @@
   :custom
   (markdown-ts-table-auto-align t)
   :config
+  (dolist (function '(markdown-ts--fontify-atx-heading markdown-ts--fontify-atx-delimiter))
+    (advice-add function :after #'thy/markdown-ts-fontify-heading-eof))
   (advice-add 'markdown-ts-table-align-table :around
               #'thy/markdown-ts-align-wide-table))
 
