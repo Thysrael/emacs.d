@@ -96,8 +96,7 @@
       ("r" "Revert" diff-hl-revert-hunk)
       ("S" "Stage" diff-hl-stage-current-hunk)]])
   :hook
-  ((find-file . diff-hl-mode)
-   (vc-dir-mode . diff-hl-dir-mode)
+  ((after-init . global-diff-hl-mode)
    (focus-in . diff-hl-update-once)
    ((diff-hl-mode diff-hl-dir-mode diff-hl-dired-mode) .
      (lambda ()
