@@ -21,6 +21,40 @@
   (push '("^config$" nerd-icons-codicon "nf-cod-settings" :face nerd-icons-lyellow)
         nerd-icons-regexp-icon-alist))
 
+(use-package menu-bar
+  :ensure nil
+  :if (eq system-type 'darwin)
+  :preface
+  (defvar-keymap thy/menu-bar-mask-map
+    :doc "Menu-only bindings that hide extra top-level menus.")
+
+  (defvar thy/menu-bar-mask-alist `((t . ,thy/menu-bar-mask-map))
+    "High-priority menu bindings, leaving ordinary mode keys untouched.")
+
+  (defun thy/keep-fixed-menu-bar ()
+    "Keep standard top-level menus without altering mode keymaps."
+    ;; Stay ahead of emulation maps such as Evil, but bind only menu events.
+    (unless (eq (car emulation-mode-map-alists) 'thy/menu-bar-mask-alist)
+      (setq emulation-mode-map-alists
+            (cons 'thy/menu-bar-mask-alist
+                  (remq 'thy/menu-bar-mask-alist emulation-mode-map-alists))))
+    (dolist (map (current-active-maps))
+      (unless (eq map thy/menu-bar-mask-map)
+        (when-let* ((menu (lookup-key map [menu-bar]))
+                    ((keymapp menu)))
+          (map-keymap
+           (lambda (key _binding)
+             (when (and (symbolp key)
+                        (not (memq key '(t file edit options buffer tools help-menu))))
+               (let ((sequence (vector 'menu-bar key)))
+                 (unless (eq (lookup-key thy/menu-bar-mask-map sequence) 'undefined)
+                   (define-key thy/menu-bar-mask-map sequence 'undefined)))))
+           menu)))))
+  :hook (menu-bar-update . thy/keep-fixed-menu-bar)
+  :init
+  (when (display-graphic-p)
+    (menu-bar-mode 1)))
+
 (use-package emacs
   :ensure nil
   :preface
