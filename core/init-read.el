@@ -26,6 +26,24 @@
 
 (use-package image-mode
   :ensure nil
+  :preface
+  (defun thy/image-fit-displayed-window (window)
+    "Fit an automatically sized image after it is displayed in WINDOW."
+    (with-selected-window window
+      (when-let* (((derived-mode-p 'image-mode))
+                  ((memq image-transform-resize '(t fit-window)))
+                  (image (image-get-display-property))
+                  (edges (window-inside-pixel-edges window)))
+        ;; The initial image may have been sized before Popper created its window.
+        ;; The native idle resize can be skipped while the echo area has a message.
+        (unless (and (equal (plist-get (cdr image) :max-width) (- (nth 2 edges) (nth 0 edges)))
+                     (equal (plist-get (cdr image) :max-height) (- (nth 3 edges) (nth 1 edges))))
+          (image-toggle-display-image)))))
+
+  (defun thy/setup-image-window-fitting ()
+    "Refit newly displayed image windows without overriding manual zoom."
+    (add-hook 'window-state-change-functions #'thy/image-fit-displayed-window nil t))
+  :hook (image-mode . thy/setup-image-window-fitting)
   :bind
   (:map image-mode-map
          ("=" . image-increase-size)
@@ -65,6 +83,12 @@
 
   (defvar-local thy/pdf-view-pinch-step 0
     "Zoom step applied during the current PDF pinch gesture.")
+
+  (defun thy/pdf-imenu-without-tooltip (function &rest args)
+    "Call PDF Imenu FUNCTION with ARGS without creating a tooltip window."
+    ;; Keep destination scrolling; AeroSpace can tile the native arrow tooltip.
+    (cl-letf (((symbol-function 'pdf-util-tooltip-in-window) #'ignore))
+      (apply function args)))
 
   (defun thy/setup-pdf-view-buffer ()
     "Apply buffer-local touchpad settings for PDF viewing."
@@ -157,6 +181,9 @@
     (define-key pdf-view-mode-map (kbd "g") #'thy/pdf-view-revert))
   (with-eval-after-load 'pdf-isearch
     (define-key pdf-isearch-active-mode-map (kbd "<escape>") #'isearch-exit))
+  (with-eval-after-load 'pdf-outline
+    (when (eq system-type 'darwin)
+      (advice-add #'pdf-outline-imenu-activate-link :around #'thy/pdf-imenu-without-tooltip)))
   :config
   (with-eval-after-load 'evil
     (evil-set-initial-state 'pdf-view-mode 'motion)
@@ -533,7 +560,8 @@ SOURCE-BUFFER requested the preview.  With FORCE, regenerate the PDF."
         (_ (user-error "Unsupported Office preview type")))))
 
   :mode (("\\.\\(?:docx?\\|pptx?\\)\\'" . thy/office-pdf-preview-mode)
-         ("\\.xlsx\\'" . thy/xlsx-preview-mode))
+         ("\\.xlsx\\'" . thy/xlsx-preview-mode)
+         ("\\.[eE][pP][sS]\\'" . doc-view-mode))
   :bind
   (:map doc-view-mode-map
         ("=" . doc-view-enlarge)
