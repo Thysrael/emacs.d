@@ -119,6 +119,23 @@
     (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
     (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
 
+(use-package with-editor
+  :ensure nil
+  :defer t
+  :preface
+  (defun thy/with-editor-usage-message ()
+    "Show delayed editor instructions only while their buffer is live."
+    (let ((buffer (current-buffer)))
+      (run-with-timer
+       0.05 nil
+       (lambda ()
+         (when (buffer-live-p buffer)
+           (with-current-buffer buffer
+             (message (substitute-command-keys with-editor-usage-message))))))))
+  :config
+  ;; Markdown code-block fontification destroys temporary git-rebase buffers.
+  (advice-add 'with-editor-usage-message :override #'thy/with-editor-usage-message))
+
 (use-package magit
   :ensure t
   :bind (("C-c v" . magit)
