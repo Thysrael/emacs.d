@@ -2,3 +2,15 @@ patch:
   switches/@8/reset: 1
   pin_cand_filter/@12: "d\t的 地"
   pin_cand_filter/@18: "l\t了 刘"
+  # Model: https://github.com/amzxyz/RIME-LMDG/releases/tag/LTS
+  # Store wanxiang-lts-zh-hans.gram in var/rime/.
+  # Keep the grammar parameters recommended by rime-frost.
+  grammar:
+    language: wanxiang-lts-zh-hans
+    non_collocation_penalty: -4
+    collocation_max_length: 5
+    collocation_min_length: 2
+    collocation_penalty: -14
+  translator/contextual_suggestions: true
+  translator/max_homophones: 4
+  translator/max_homographs: 2
