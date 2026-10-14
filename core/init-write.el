@@ -295,7 +295,8 @@
        #'string-or-null-p)
 
   (defun thy/markdown-ts-yank-image (mimetype data)
-    "Save image DATA of MIMETYPE and insert a Markdown image link."
+    "Save image DATA of MIMETYPE and insert a Markdown image link.
+Convert TIFF images to PNG for Markdown renderer compatibility."
     (unless buffer-file-name
       (user-error "Save the Markdown buffer before yanking an image"))
     (let* ((base-directory (file-name-directory buffer-file-name))
@@ -307,7 +308,9 @@
                          'thy/markdown-image-directory-history))
            (directory (expand-file-name directory-name base-directory))
            (extension
-            (symbol-name (mailcap-mime-type-to-extension mimetype)))
+            (if (eq mimetype 'image/tiff)
+                "png"
+              (symbol-name (mailcap-mime-type-to-extension mimetype))))
            (basename
             (read-string "Image basename: " nil
                          'thy/markdown-image-basename-history))
@@ -320,16 +323,21 @@
         (user-error "Image basename must be a non-empty file basename"))
       (when (file-exists-p path)
         (user-error "Image already exists: %s" path))
+      (when (eq mimetype 'image/tiff)
+        (require 'image-converter)
+        (let ((image-convert-to-format "png"))
+          (setq data (image-convert data mimetype))))
       (make-directory directory t)
-      (let ((coding-system-for-write 'emacs-internal))
+      (let ((coding-system-for-write 'no-conversion))
         (with-temp-file path
+          (set-buffer-multibyte nil)
           (insert data)))
       (insert "!["
               (string-replace "]" "\\]" (string-replace "\\" "\\\\" basename))
               "]" "("
               (replace-regexp-in-string
-               "[()]" (lambda (match) (concat "\\" match))
-               (url-encode-url relative-path))
+               (rx (or control (any " %?#()<>\"\\[]")))
+               #'url-hexify-string relative-path t t)
               ")")))
 
   (defun thy/markdown-ts-yank-media-setup ()
@@ -337,6 +345,10 @@
     (require 'mailcap)
     (require 'url-util)
     (require 'yank-media)
+    (setq-local yank-media-preferred-types
+                (append yank-media-preferred-types
+                        (unless (memq 'image/tiff yank-media-preferred-types)
+                          '(image/tiff))))
     (yank-media-handler "image/.*" #'thy/markdown-ts-yank-image))
 
   (defun thy/markdown-ts-code-languages ()
