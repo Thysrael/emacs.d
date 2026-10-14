@@ -2,7 +2,22 @@
 
 (use-package rime
   :ensure t
+  ;; Register the bootstrap key before the deferred SIS configuration loads.
+  :bind ("<f18>" . thy/sis-switch)
   :preface
+  (defun thy/rime-contextual-double-quote (events)
+    "Choose a Chinese double quote in EVENTS from point, not Rime's toggle.
+Let `electric-pair-mode' insert a pair or skip an existing closing quote."
+    (if (and (bound-and-true-p electric-pair-mode)
+             (eq rime--current-input-key ?\")
+             (memq (car (last events)) '(?“ ?”)))
+        (append (butlast events)
+                (list (if (and (eq (char-after) ?”)
+                               (not (use-region-p)))
+                          ?”
+                        ?“)))
+      events))
+
   (defun thy/rime-finalize ()
     "Finalize librime before Emacs unloads its dynamic module."
     (when (and (bound-and-true-p rime--lib-loaded)
@@ -39,14 +54,15 @@
   (rime-show-preedit 'inline)
   (rime-share-data-dir
    (expand-file-name "~/projects/dotfiles/rime/rime-frost/"))
-  (rime-user-data-dir (no-littering-expand-var-file-name "rime/")))
+  (rime-user-data-dir (no-littering-expand-var-file-name "rime/"))
+  :config
+  (advice-add 'rime-input-method :filter-return #'thy/rime-contextual-double-quote))
 
 (use-package sis
   :ensure t
   :after rime
   ;; Activate the global input-state modes as soon as Rime first loads.
   :demand t
-  :bind ("<f18>" . thy/sis-switch)
   :hook
   (enable-theme-functions . thy/sis-update-other-cursor-color)
   :preface
