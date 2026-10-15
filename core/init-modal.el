@@ -310,6 +310,7 @@ OVERRIDES contains mode-specific exceptions checked before active keymaps."
 
   :custom
   (evil-respect-visual-line-mode nil)
+  (evil-move-beyond-eol t)
   (evil-symbol-word-search t)
   (evil-undo-system 'undo-redo)
   (evil-want-C-u-scroll t)
