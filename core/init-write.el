@@ -229,6 +229,22 @@
             (markdown-ts-appear-stop)))
       (remove-hook 'evil-insert-state-entry-hook #'markdown-ts-appear-start t)
       (remove-hook 'evil-insert-state-exit-hook #'markdown-ts-appear-stop t)))
+
+  (defun thy/markdown-ts-limit-image-height (source &rest _)
+    "Limit previews for SOURCE to eight character heights without a width cap."
+    (dolist (view (overlay-get source 'markdown-ts-appear-image--views))
+      (let* ((text (overlay-get view 'after-string))
+             (position (text-property-not-all 0 (length text) 'display nil text))
+             (image (get-text-property position 'display text))
+             (height '(8 . ch)))
+        (unless (and (not (plist-member (cdr image) :max-width))
+                     (equal (image-property image :max-height) height))
+          (setq text (copy-sequence text)
+                image (copy-sequence image))
+          (setf (image-property image :max-width) nil
+                (image-property image :max-height) height)
+          (put-text-property position (1+ position) 'display image text)
+          (overlay-put view 'after-string text)))))
   :custom
   (markdown-ts-appear-link-icon "")
   (markdown-ts-appear-image-icon "")
@@ -236,7 +252,17 @@
   (markdown-ts-appear-code-fence-style 'connected)
   (markdown-ts-appear-render-callouts t)
   (markdown-ts-appear-block-quote-marker "▎")
-  (markdown-ts-appear-table-style 'wrapped))
+  (markdown-ts-appear-table-style 'wrapped)
+  :custom-face
+  (markdown-ts-appear-table-header
+   ((t (:inherit (markdown-ts-appear-table default) :weight bold :extend nil))))
+  (markdown-ts-appear-table-cell
+   ((t (:inherit (markdown-ts-appear-table markdown-ts-table) :extend nil))))
+  (markdown-ts-appear-table-zebra
+   ((t (:inherit (hl-line markdown-ts-appear-table) :extend nil))))
+  :config
+  (advice-add 'markdown-ts-appear-image--sync-views :after
+              #'thy/markdown-ts-limit-image-height))
 
 (use-package markdown-ts-mode
   :ensure nil
@@ -244,6 +270,7 @@
          (markdown-ts-mode . thy/markdown-ts-editing-setup)
          (markdown-ts-mode . thy/markdown-ts-yank-media-setup))
   :custom
+  (markdown-ts-inline-images t)
   (markdown-ts-unchecked-checkbox '("󰄱" . "□"))
   (markdown-ts-checked-checkbox '("󰄲" . "■"))
   :bind
