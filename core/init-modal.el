@@ -504,6 +504,7 @@ COUNT, BEG, END, TYPE, and INCLUSIVE follow `evil-select-paren'."
 
   (define-key evil-insert-state-map (kbd "C-n") #'next-line)
   (define-key evil-insert-state-map (kbd "C-p") #'previous-line)
+  (define-key evil-insert-state-map (kbd "C-w") #'thy/copy-region-or-line)
   (define-key evil-insert-state-map (kbd "C-s") #'consult-line)
   (define-key evil-insert-state-map (kbd "C-a") #'mwim-beginning-of-code-or-line)
   (define-key evil-insert-state-map (kbd "C-e") #'mwim-end-of-code-or-line)
