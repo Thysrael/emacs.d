@@ -1,321 +1,290 @@
 ;;; -*- lexical-binding: t -*-
 
-(eval-when-compile (require 'subr-x))
-
-;; show VC tools name for Git
-(defvar +mode-line-show-common-vc-tools-name nil)
-
-;;; Faces
-(defgroup +mode-line nil
-  "Mode-Line faces."
-  :group 'faces)
-
-(defface +mode-line-meta-inactive-unchanged-face
-  '((t (:inherit (font-lock-function-name-face bold))))
-  "The face for meta panel on the mode-line of an inactive window."
-  :group '+mode-line)
-
-(defface +mode-line-meta-inactive-modified-face
-  '((t (:inherit (font-lock-keyword-face bold))))
-  "Face used for meta panel on the mode-line of an active window."
-  :group '+mode-line)
-
-(defface +mode-line-meta-inactive-autosaved-face
-  '((t (:inherit (font-lock-doc-face bold))))
-  "Face used for meta panel on the mode-line of an active window."
-  :group '+mode-line)
-
-(defface +mode-line-mode-name-active-face
-  '((t (:inherit (font-lock-function-name-face))))
-  "The face for buffer name on the mode-line of an active window."
-  :group '+mode-line)
-
-(defface +mode-line-host-name-active-face
-  '((t (:weight bold :slant italic)))
-  "The face for host name on the mode-line of an active window."
-  :group '+mode-line)
-
-;;; Indicators
-(defsubst +mode-line-get-window-name ()
-  "Get window name for current window."
-  (concat " " (window-parameter (selected-window) 'ace-window-path)))
-
-(defsubst +mode-line-get-window-name-face ()
-  "Get face of window name for current window."
-  (let ((modified (buffer-modified-p)))
-    (cond ((eq modified t)
-           '+mode-line-meta-inactive-modified-face)
-          ((eq modified nil)
-           '+mode-line-meta-inactive-unchanged-face)
-          ((eq modified 'autosaved)
-           '+mode-line-meta-inactive-autosaved-face))))
-
-(defsubst +mode-line-macro-indicator ()
-  "Display current Emacs macro being recorded."
-  (cond (defining-kbd-macro "| MacroDef ")
-        (executing-kbd-macro "| MacroExc ")))
-
-(defun +mode-line-count-words (beg end)
-  "Count words between BEG and END, using `emt-split' when available."
-  (or (when (fboundp 'emt-split)
-        (ignore-errors
-          (length (emt-split (buffer-substring-no-properties beg end)))))
-      (count-words beg end)))
-
-(defvar-local +mode-line-region-cache-key nil)
-(defvar-local +mode-line-region-cache-value nil)
-
-(defun +mode-line-region-key (beg end)
-  "Return cache key for region stats between BEG and END."
-  (list beg end (buffer-chars-modified-tick)
-        (and (boundp 'emt--lib-loaded) emt--lib-loaded)))
-
-(defun +mode-line-use-region-indicator ()
-  "Display selected region in current buffer."
-  (when (use-region-p)
-    (let* ((beg (region-beginning))
-           (end (region-end))
-           (key (+mode-line-region-key beg end)))
-      (unless (equal key +mode-line-region-cache-key)
-        (setq +mode-line-region-cache-key key
-              +mode-line-region-cache-value
-              (concat "| L" (number-to-string (count-lines beg end))
-                      " C" (number-to-string (- end beg))
-                      " W" (number-to-string (+mode-line-count-words beg end))
-                      " ")))
-      +mode-line-region-cache-value)))
-
-(defsubst +mode-line-overwrite-readonly-indicator ()
-  "Display whether it is in overwrite mode or read-only buffer."
-  (let ((ro (when buffer-read-only " %%"))
-        (ov (when overwrite-mode " #")))
-    (concat ro ov " ")))
-
-(defun +mode-line-symbol-overlay-indicator ()
-  "Display the number of matches for symbol overlay."
-  (when (and (bound-and-true-p symbol-overlay-keywords-alist)
-             (not (bound-and-true-p symbol-overlay-temp-symbol)))
-    (when-let* ((keyword (symbol-overlay-assoc (symbol-overlay-get-symbol t))))
-      (let* ((symbol (car keyword))
-             (before (symbol-overlay-get-list -1 symbol))
-             (after (symbol-overlay-get-list 1 symbol))
-             (count (length before)))
-        (concat "| " (number-to-string (1+ count))
-                "/" (number-to-string (+ count (length after)))
-                " sym "
-                (and (cadr keyword) "in scope "))))))
-
-;;; Cache remote host name
-(defvar-local +mode-line-remote-host-name nil)
-(defun +mode-line-update-remote-host-name ()
-  "Hostname for remote buffers."
-  (setq +mode-line-remote-host-name
-        (when-let* ((hostname (and default-directory
-                                   (file-remote-p default-directory 'host))))
-          (when (not (string-equal hostname "localhost"))
-            (concat "@" hostname)))))
-
-;;; Cache encoding info
-(defvar-local +mode-line-encoding nil)
-(defun +mode-line-update-encoding (&rest _)
-  "Get encoding and EOL type of current buffer."
-  (setq +mode-line-encoding
-        (unless (and (memq (coding-system-category buffer-file-coding-system)
-                           '(coding-category-undecided coding-category-utf-8))
-                     (eq (coding-system-eol-type buffer-file-coding-system) 0))
-          "%Z")))
-
-
-;;; [vcs-info] cache for vcs
-(defvar-local +mode-line-vcs-info nil)
-(defun +mode-line-update-vcs-info (&rest _)
-  "Cache version-control information for the current buffer."
-  (setq +mode-line-vcs-info
-        (when (and vc-mode buffer-file-name)
-          (let* ((backend (vc-backend buffer-file-name))
-                 (state   (vc-state buffer-file-name backend))
-                 (rev     (if +mode-line-show-common-vc-tools-name
-                              (substring-no-properties vc-mode 1)
-                            (substring-no-properties vc-mode (+ (if (eq backend 'Hg) 2 3) 2))))
-                 (face (cond ((eq state 'up-to-date) 'vc-dir-status-up-to-date)
-                             ((eq state 'ignored) 'vc-dir-status-ignored)
-                             ((memq state '(needs-update needs-merge conflict missing)) 'vc-dir-status-warning)
-                             (t 'vc-dir-status-edited)))
-                 (state-symbol (cond ((eq state 'up-to-date) "√")
-                                     ((eq state 'edited) "*")
-                                     ((eq state 'added) "@")
-                                     ((eq state 'needs-update) "￬")
-                                     ((eq state 'needs-merge) "&")
-                                     ((eq state 'unlocked-changes) "")
-                                     ((eq state 'removed) "×")
-                                     ((eq state 'conflict) "!")
-                                     ((eq state 'missing) "?")
-                                     ((eq state 'ignored) "-")
-                                     ((eq state 'unregistered) "+")
-                                     ((stringp state) (concat "#" state ":"))
-                                     (t " "))))
-            (concat " "
-                    (propertize (concat rev state-symbol)
-                                'face face
-                                'help-echo (get-text-property 1 'help-echo vc-mode)))))))
-
-
-(defun +nerd-icons-icon-for-buffer ()
-  "Return a Nerd Font icon for the current buffer."
-  (interactive)
-  (if (or (eq major-mode 'eaf-mode))
-      ;; WORKAROUND: eaf don't have `buffer-file-name`
-      (nerd-icons-icon-for-file (buffer-name))
-    (nerd-icons-icon-for-buffer)))
-
-(defvar-local +mode-line-icon-cache-key nil)
-(defvar-local +mode-line-icon-cache-value nil)
-
-(defun +mode-line-buffer-icon ()
-  "Return cached nerd icon for the current buffer."
-  (let ((key (list (buffer-name) buffer-file-name major-mode)))
-    (unless (equal key +mode-line-icon-cache-key)
-      (setq +mode-line-icon-cache-key key
-            +mode-line-icon-cache-value (+nerd-icons-icon-for-buffer)))
-    +mode-line-icon-cache-value))
-
-(defun +mode-line-active-indicators ()
-  "Return indicators only shown on the selected window."
-  (concat (+mode-line-macro-indicator)
-          (+mode-line-symbol-overlay-indicator)
-          (+mode-line-use-region-indicator)))
-
-(use-package flymake
-  :ensure nil
-  :defines flymake--state
-  :preface
-  (defun thy/mode-line-flymake-counters ()
-    "Return Flymake counters separated by slashes when Flymake is ready."
-    (when (and (bound-and-true-p flymake-mode)
-               flymake--state
-               (flymake-running-backends))
-      (let (result)
-        (dolist (type '(:error :warning :note))
-          (let ((counter (flymake--mode-line-counter type)))
-            (when counter
-              (when result
-                (setq result (append result '("/"))))
-              ;; Each built-in counter starts with its own spacing element.
-              (setq result (append result (cdr counter))))))
-        (when result
-          (cons " " result))))))
-
-(defun +mode-line-left (active-p meta-face panel-face)
-  "Return left mode-line for ACTIVE-P using META-FACE and PANEL-FACE."
-  (let ((active-indicators (when active-p (+mode-line-active-indicators))))
-    `((:propertize ,(+mode-line-get-window-name) face ,panel-face)
-      (:propertize ,(+mode-line-overwrite-readonly-indicator) face ,panel-face)
-      (,active-p (:propertize ,active-indicators face ,panel-face))
-      " "
-      ,(or (+mode-line-get-project-crumb)
-           `(:propertize "%b" face ,meta-face))
-      " "
-      (:propertize +mode-line-remote-host-name face +mode-line-host-name-active-face))))
-
-(defun +mode-line-right (active-p)
-  "Return right mode-line for ACTIVE-P."
-  (let ((icon (+mode-line-buffer-icon)))
-    `((,active-p ,icon (:propertize ,icon face nil))
-      "  "
-      (:propertize mode-name face ,(when active-p '+mode-line-mode-name-active-face))
-      (,active-p ,+mode-line-vcs-info (:propertize ,+mode-line-vcs-info face nil))
-      (,active-p (:eval (thy/mode-line-flymake-counters)))
-      " "
-      +mode-line-encoding
-      "%l:%p%%"
-      " ")))
-
-(defsubst +mode-line-compute ()
-  "Formatting active-long mode-line."
-  (let* ((meta-face (+mode-line-get-window-name-face))
-         (active-p (mode-line-window-selected-p))
-         (panel-face `(:inherit ,meta-face :inverse-video ,active-p))
-         (lhs (+mode-line-left active-p meta-face panel-face))
-         (rhs (+mode-line-right active-p))
-         (rhs-str (format-mode-line rhs))
-         (rhs-w (string-width rhs-str)))
-    `(,lhs
-      ,(propertize " " 'display `((space :align-to (- (+ right right-fringe right-margin) ,rhs-w))))
-      ,rhs-str)))
-
 (use-package emacs
   :ensure nil
+  :preface
+  (defgroup thy/mode-line nil
+    "Personal mode-line faces."
+    :group 'mode-line)
+
+  (defface thy/mode-line-unchanged
+    '((t (:inherit (font-lock-function-name-face bold))))
+    "Face for an unmodified buffer's status."
+    :group 'thy/mode-line)
+
+  (defface thy/mode-line-modified
+    '((t (:inherit (font-lock-keyword-face bold))))
+    "Face for a modified buffer's status."
+    :group 'thy/mode-line)
+
+  (defface thy/mode-line-major-mode
+    '((t (:inherit font-lock-function-name-face)))
+    "Face for the selected window's major mode."
+    :group 'thy/mode-line)
+
+  (defface thy/mode-line-host
+    '((t (:weight bold :slant italic)))
+    "Face for a remote host name."
+    :group 'thy/mode-line)
+
+  (defvar-local thy/mode-line-region-key nil
+    "Selection bounds and modification tick used for cached statistics.")
+
+  (defvar-local thy/mode-line-region nil
+    "Cached line, character, and word counts for the active region.")
+
+  (defun thy/mode-line-buffer-face ()
+    "Return the status face for the current buffer."
+    (if (buffer-modified-p) 'thy/mode-line-modified 'thy/mode-line-unchanged))
+
+  (defun thy/mode-line-update-region ()
+    "Update selection statistics after a command, outside redisplay."
+    (if (not (use-region-p))
+        (setq thy/mode-line-region-key nil
+              thy/mode-line-region nil)
+      (let* ((beg (region-beginning))
+             (end (region-end))
+             (emt-loaded (bound-and-true-p emt--lib-loaded))
+             (key (list beg end (buffer-chars-modified-tick) emt-loaded)))
+        (unless (equal key thy/mode-line-region-key)
+          (let ((words
+                 (or (when (and emt-loaded (fboundp 'emt-split))
+                       (ignore-errors
+                         (length (emt-split (buffer-substring-no-properties beg end)))))
+                     (count-words beg end))))
+            (setq thy/mode-line-region-key key
+                  thy/mode-line-region
+                  (format "| L%d C%d W%d " (count-lines beg end) (- end beg) words)))))))
+
+  (defun thy/mode-line-symbol-indicator ()
+    "Return the current symbol's match index and total in one overlay pass."
+    (when (and (bound-and-true-p symbol-overlay-keywords-alist)
+               (not (bound-and-true-p symbol-overlay-temp-symbol)))
+      (when-let* ((keyword (symbol-overlay-assoc (symbol-overlay-get-symbol t))))
+        (let ((before 0)
+              (total 0))
+          (dolist (overlay (symbol-overlay-get-list 0 (car keyword)))
+            (setq total (1+ total))
+            (when (< (overlay-end overlay) (point))
+              (setq before (1+ before))))
+          (when (> total 0)
+            (format "| %d/%d sym %s" (1+ before) total
+                    (if (cadr keyword) "in scope " "")))))))
+
+  (defun thy/mode-line-status ()
+    "Return the window label and editing status for the mode line."
+    (let* ((active (mode-line-window-selected-p))
+           (text (concat " " (window-parameter (selected-window) 'ace-window-path)
+                         (when buffer-read-only " %")
+                         (when overwrite-mode " #")
+                         " "
+                         (when active
+                           (concat (cond (defining-kbd-macro "| MacroDef ")
+                                         (executing-kbd-macro "| MacroExc "))
+                                   (thy/mode-line-symbol-indicator)
+                                   (when (use-region-p) thy/mode-line-region))))))
+      (propertize (string-replace "%" "%%" text)
+                  'face `(:inherit ,(thy/mode-line-buffer-face)
+                          :inverse-video ,active))))
+
+  (defvar-local thy/mode-line-host-key nil
+    "Directory used for the cached remote host name.")
+
+  (defvar-local thy/mode-line-host-name nil
+    "Cached remote host name for the current directory.")
+
+  (defun thy/mode-line-remote-host ()
+    "Return a cached host name without contacting the remote machine."
+    (unless (equal default-directory thy/mode-line-host-key)
+      (setq thy/mode-line-host-key default-directory
+            thy/mode-line-host-name
+            (when-let* ((host (file-remote-p default-directory 'host))
+                        ((not (equal host "localhost"))))
+              (propertize (concat " @" (string-replace "%" "%%" host))
+                          'face 'thy/mode-line-host))))
+    thy/mode-line-host-name)
   :hook
-  (find-file . +mode-line-update-remote-host-name)
+  ((post-command . thy/mode-line-update-region)
+   (deactivate-mark . thy/mode-line-update-region))
   :custom
-  (mode-line-format '((:eval (+mode-line-compute))))
+  (mode-line-right-align-edge 'window)
+  (mode-line-format
+   '("%e"
+     (:eval (thy/mode-line-status))
+     " "
+     (:eval (thy/mode-line-project-crumb))
+     (:eval (thy/mode-line-remote-host))
+     mode-line-format-right-align
+     (:eval (thy/mode-line-icon))
+     "  "
+     (:eval (if (mode-line-window-selected-p)
+                '(:propertize mode-name face thy/mode-line-major-mode)
+              'mode-name))
+     (:eval (if (mode-line-window-selected-p)
+                'vc-mode
+              '(:propertize vc-mode face nil)))
+     (:eval (when (mode-line-window-selected-p)
+              (thy/mode-line-flymake-counters)))
+     " "
+     thy/mode-line-encoding
+     "%l:%p "))
   :init
   (setq-default header-line-format nil))
 
+(use-package nerd-icons
+  :ensure t
+  ;; Mode-line providers must load before redisplay evaluates their functions.
+  :demand t
+  :preface
+  (defvar-local thy/mode-line-icon-key nil
+    "Buffer identity used for the cached mode-line icon.")
+
+  (defvar-local thy/mode-line-icon-pair nil
+    "Cached active and inactive mode-line icons.")
+
+  (defun thy/mode-line-icon ()
+    "Return the cached icon for the window being displayed."
+    (let ((key (list (buffer-name) buffer-file-name major-mode)))
+      (unless (equal key thy/mode-line-icon-key)
+        (let ((icon (nerd-icons-icon-for-buffer)))
+          (setq thy/mode-line-icon-key key
+                thy/mode-line-icon-pair (cons icon (propertize icon 'face nil)))))
+      (if (mode-line-window-selected-p)
+          (car thy/mode-line-icon-pair)
+        (cdr thy/mode-line-icon-pair)))))
+
 (use-package mule
   :ensure nil
+  :preface
+  (defvar-local thy/mode-line-encoding nil
+    "Mode-line construct for non-default coding systems and line endings.")
+
+  (defun thy/mode-line-update-encoding (&rest _)
+    "Show encoding unless the buffer uses UTF-8 or undecided with LF."
+    (setq thy/mode-line-encoding
+          (unless (and (memq (coding-system-category buffer-file-coding-system)
+                             '(coding-category-undecided coding-category-utf-8))
+                       (eq (coding-system-eol-type buffer-file-coding-system) 0))
+            ;; A list expands %Z; a string-valued symbol displays it literally.
+            '("%Z "))))
+  :hook
+  ((find-file after-change-major-mode) . thy/mode-line-update-encoding)
   :custom
   (eol-mnemonic-unix "LF")
   (eol-mnemonic-dos "CRLF")
   (eol-mnemonic-mac "CR")
   (eol-mnemonic-undecided "?")
   :init
-  (dolist (hook '(find-file-hook after-change-major-mode-hook))
-    (add-hook hook #'+mode-line-update-encoding))
-  (advice-add #'after-insert-file-set-coding :after #'+mode-line-update-encoding)
-  (advice-add #'set-buffer-file-coding-system :after #'+mode-line-update-encoding))
+  (advice-add #'after-insert-file-set-coding :after #'thy/mode-line-update-encoding)
+  (advice-add #'set-buffer-file-coding-system :after #'thy/mode-line-update-encoding))
 
 (use-package vc-hooks
   :ensure nil
-  :hook (after-save . +mode-line-update-vcs-info)
-  :config
-  (advice-add #'vc-mode-line :after #'+mode-line-update-vcs-info)
-  (advice-add #'vc-refresh-state :after #'+mode-line-update-vcs-info))
+  :custom
+  ;; Reuse VC's cached status, tooltip, and mouse menu.
+  (vc-display-status 'no-backend))
 
-;;; Breadcrumb project/imenu crumbs for the mode-line.
+(use-package vc-git
+  :ensure nil
+  :preface
+  (defun thy/mode-line-git-status (function file)
+    "Format FUNCTION's Git status for FILE with a suffix and VC directory face."
+    (let ((text (funcall function file)))
+      (if (not (eq vc-display-status 'no-backend))
+          text
+        (let* ((state (vc-file-getprop file 'vc-state))
+               (face (pcase state
+                       ('up-to-date 'vc-dir-status-up-to-date)
+                       ('ignored 'vc-dir-status-ignored)
+                       ((or 'needs-update 'needs-merge 'conflict 'missing)
+                        'vc-dir-status-warning)
+                       (_ 'vc-dir-status-edited)))
+               (suffix (pcase state
+                         ('up-to-date "")
+                         ('edited "*")
+                         ('added "+")
+                         ('conflict "!")
+                         ('removed "×")
+                         ('missing "?")
+                         (_ (substring text 0 1)))))
+          (propertize
+           (concat (substring text 1)
+                   (apply #'propertize suffix (text-properties-at 0 text)))
+           'face face)))))
+  :config
+  (require 'vc-dir)
+  ;; Format only when VC refreshes its cache, outside mode-line redisplay.
+  (advice-add #'vc-git-mode-line-string :around #'thy/mode-line-git-status))
+
+(use-package flymake
+  :ensure nil
+  :defines flymake--state
+  :preface
+  (defun thy/mode-line-flymake-counters ()
+    "Return cached Flymake counters separated by slashes when ready."
+    (when (and (bound-and-true-p flymake-mode)
+               flymake--state
+               (flymake-running-backends))
+      (let (result)
+        (dolist (type '(:error :warning :note))
+          (when-let* ((counter (flymake--mode-line-counter type)))
+            (when result (push "/" result))
+            ;; Each built-in counter starts with its own spacing element.
+            (dolist (part (cdr counter)) (push part result))))
+        (when result (cons " " (nreverse result)))))))
+
 (use-package breadcrumb
   :ensure t
+  :demand t
   :preface
-  (defvar-local thy/mode-line-project-crumb-cache nil)
+  (defvar-local thy/mode-line-project-crumb-cache nil
+    "Project crumbs cached separately for each window's width.")
 
-  (defun +mode-line-update-project-crumb (&rest _)
+  (defun thy/mode-line-invalidate-project (&rest _)
     "Invalidate project crumbs in all windows showing the current buffer."
     (setq thy/mode-line-project-crumb-cache nil)
     (force-mode-line-update))
 
-  (defun +mode-line-get-project-crumb ()
-    "Return project crumbs cached for the current buffer and window."
-    (when (fboundp 'breadcrumb-project-crumbs)
-      (unless thy/mode-line-project-crumb-cache
-        (setq thy/mode-line-project-crumb-cache
-              (make-hash-table :test #'eq :weakness 'key))
-        ;; Project discovery can change even when the file name stays the same.
-        (add-hook 'window-buffer-change-functions
-                  #'+mode-line-update-project-crumb nil t))
-      (let* ((window (selected-window))
-             (buffer-file-name
-              (or (bound-and-true-p thy/office-preview-source-file)
-                  buffer-file-name))
-             (key (list (buffer-name) buffer-file-name default-directory
-                        (window-width window)))
-             (cached (gethash window thy/mode-line-project-crumb-cache)))
-        (unless (equal key (car cached))
-          (setq cached (cons key (breadcrumb-project-crumbs)))
-          (puthash window cached thy/mode-line-project-crumb-cache))
-        (cdr cached))))
+  (defun thy/mode-line-project-crumb ()
+    "Return project crumbs bounded by the current window's width."
+    (unless thy/mode-line-project-crumb-cache
+      (setq thy/mode-line-project-crumb-cache
+            (make-hash-table :test #'eq :weakness 'key))
+      (add-hook 'window-buffer-change-functions
+                #'thy/mode-line-invalidate-project nil t))
+    (let* ((window (selected-window))
+           (buffer-file-name (or (bound-and-true-p thy/office-preview-source-file)
+                                 buffer-file-name))
+           (width (max 1 (if (floatp breadcrumb-project-max-length)
+                            (floor (* (window-total-width window)
+                                      breadcrumb-project-max-length))
+                          breadcrumb-project-max-length)))
+           (key (list (buffer-name) buffer-file-name default-directory width))
+           (cached (gethash window thy/mode-line-project-crumb-cache)))
+      (unless (equal key (car cached))
+        (let* ((non-essential t)
+               (text (truncate-string-to-width (breadcrumb-project-crumbs)
+                                               width nil nil t)))
+          ;; File names containing percent signs must not become format codes.
+          (setq cached (cons key (string-replace "%" "%%" text)))
+          (puthash window cached thy/mode-line-project-crumb-cache)))
+      (cdr cached)))
+  :hook
+  ((find-file after-save clone-indirect-buffer Info-selection) . thy/mode-line-invalidate-project)
   :init
-  (dolist (hook '(find-file-hook after-save-hook clone-indirect-buffer-hook
-                                 Info-selection-hook))
-    (add-hook hook #'+mode-line-update-project-crumb))
-  (dolist (fn '(rename-buffer set-visited-file-name))
-    (advice-add fn :after #'+mode-line-update-project-crumb))
+  (dolist (function '(rename-buffer set-visited-file-name))
+    (advice-add function :after #'thy/mode-line-invalidate-project))
   :custom
   (breadcrumb-imenu-crumb-separator " ⋅ ")
   (breadcrumb-project-max-length 0.4)
   :custom-face
-  (breadcrumb-project-base-face ((t (:inherit breadcrumb-project-crumbs-face :bold t :slant italic))))
-  (breadcrumb-project-crumbs-face ((t (:inherit font-lock-function-name-face :slant italic))))
-  (breadcrumb-project-leaf-face ((t (:inherit font-lock-function-name-face :bold t :slant italic))))
-  (breadcrumb-imenu-leaf-face ((t (:inherit font-lock-function-name-face :foreground unspecified))))
+  (breadcrumb-project-base-face
+   ((t (:inherit breadcrumb-project-crumbs-face :bold t :slant italic))))
+  (breadcrumb-project-crumbs-face
+   ((t (:inherit font-lock-function-name-face :slant italic))))
+  (breadcrumb-project-leaf-face
+   ((t (:inherit font-lock-function-name-face :bold t :slant italic))))
+  (breadcrumb-imenu-leaf-face
+   ((t (:inherit font-lock-function-name-face :foreground unspecified))))
   :config
   (setq breadcrumb-idle-time 10))

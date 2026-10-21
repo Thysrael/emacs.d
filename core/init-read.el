@@ -314,8 +314,8 @@
         (setq-local thy/office-preview-process nil)
         (setq-local default-directory (file-name-directory source))
         (add-hook 'kill-buffer-hook #'thy/office-pdf-preview-cancel nil t)
-        (when (fboundp '+mode-line-update-project-crumb)
-          (+mode-line-update-project-crumb))
+        (when (fboundp 'thy/mode-line-invalidate-project)
+          (thy/mode-line-invalidate-project))
         (rename-buffer
          (format "%s [PDF preview]" (file-name-nondirectory source)) t))
       (if (buffer-live-p source-buffer)
@@ -358,8 +358,8 @@ SOURCE-BUFFER is the buffer that requested the preview."
                     (setq-local default-directory (file-name-directory source))
                     (add-hook 'kill-buffer-hook
                               #'thy/office-pdf-preview-cancel nil t)
-                    (when (fboundp '+mode-line-update-project-crumb)
-                      (+mode-line-update-project-crumb)))
+                    (when (fboundp 'thy/mode-line-invalidate-project)
+                      (thy/mode-line-invalidate-project)))
                 (thy/office-pdf-preview-display
                  source output source-buffer))
               (message "Generated PDF preview for %s"

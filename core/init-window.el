@@ -104,7 +104,7 @@
   :custom
   (popper-mode-line
    '(:eval `(:propertize " POP |"
-                         face (:inherit ,(+mode-line-get-window-name-face)
+                         face (:inherit ,(thy/mode-line-buffer-face)
                                         :inverse-video ,(mode-line-window-selected-p)))))
   (popper-window-height
    (lambda (window)
